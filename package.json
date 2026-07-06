@@ -10,11 +10,13 @@
   "scripts": {
     "dev": "bun run scripts/sync-convex-env.ts && turbo run dev",
     "lint": "turbo run lint",
-    "check-types": "turbo run check-types",
+    "check-types": "tsc --noEmit && turbo run check-types",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "test": "bun test scripts/"
   },
   "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@types/bun": "^1.2.19",
     "prettier": "^3.6.2",
     "turbo": "^2.5.5",
     "typescript": "5.8.3"
