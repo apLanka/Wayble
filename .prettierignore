@@ -1,0 +1,5 @@
+node_modules
+.expo
+.turbo
+packages/backend/convex/_generated
+bun.lock
