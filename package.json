@@ -12,11 +12,14 @@
     "lint": "turbo run lint",
     "check-types": "tsc --noEmit && turbo run check-types",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
-    "test": "bun test scripts/"
+    "test": "bun test scripts/",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
     "@types/bun": "^1.2.19",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
     "prettier": "^3.6.2",
     "turbo": "^2.5.5",
     "typescript": "5.8.3"
