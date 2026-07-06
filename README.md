@@ -19,8 +19,15 @@ Requires [Bun](https://bun.sh) and an Android emulator or a device running Expo 
 ```bash
 bun install
 bun run --filter @packages/backend setup   # provisions YOUR OWN Convex deployment
+adb reverse tcp:3210 tcp:3210               # emulator/USB device only — see below
 bun run dev                                 # syncs env, then starts Convex + Expo
 ```
+
+**The setup step is interactive and the choice matters.** It asks whether you want
+a Convex Cloud deployment or a local one. This project was set up with a **local**
+deployment, which is why `adb reverse` is in the steps above. If you pick cloud
+instead you get an `https://….convex.cloud` URL that any device can reach, and you
+can skip `adb reverse` and the whole "Reaching Convex from a device" section.
 
 Open the app and navigate to `/debug`. You should see a server timestamp, and
 tapping **Touch** should increment the counter with no refresh. That live update
@@ -49,9 +56,10 @@ CONVEX_URL_OVERRIDE=http://192.168.1.x:3210
 stops overwriting your address. The file is git-ignored, so everyone can point at
 their own machine.
 
-**The local backend only listens while `bun run --filter @packages/backend dev`
-is running.** If the debug screen hangs on "Connecting to Convex…", check the
-port before suspecting the subscription.
+**The local backend only listens while a Convex dev process is running** — either
+`bun run dev` (which starts it via Turbo) or `bun run --filter @packages/backend dev`
+on its own. If the debug screen hangs on "Connecting to Convex…", check the port
+before suspecting the subscription.
 
 ### How the URL reaches Expo
 
@@ -128,6 +136,5 @@ build step in this repo, so the hook does not run one.
   `convex/schema.ts`, either declare a `health` table validator or delete
   `health.ts` and the `/debug` screen.
 - `.github/CODEOWNERS` uses placeholder handles `@M1`–`@M4` until real GitHub
-  usernames are confirmed. It also lists `/packages/backend/convex/` before
-  `/packages/backend/`; CODEOWNERS is last-match-wins, so swap that order if the
-  two paths ever get different owners.
+  usernames are confirmed. GitHub silently ignores handles that don't exist, so
+  reviewer auto-assignment does nothing until they are replaced.
