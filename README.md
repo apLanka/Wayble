@@ -155,9 +155,7 @@ build step in this repo, so the hook does not run one.
 
 ## Known hand-offs
 
-- `convex/health.ts` creates a `health` table with no schema. When S0-5 adds
-  `convex/schema.ts`, either declare a `health` table validator or delete
-  `health.ts` and the `/debug` screen.
+- S0-5 (`convex/schema.ts`) has declared the `health` table validator (`health: defineTable({ count: v.number() })`) alongside the core entity model (`users`, `places`, `reports`, `verifications`, `flags`), preserving the `/debug` screen and health tests.
 - `.github/CODEOWNERS` uses placeholder handles `@M1`–`@M4` until real GitHub
   usernames are confirmed. GitHub silently ignores handles that don't exist, so
   reviewer auto-assignment does nothing until they are replaced.
