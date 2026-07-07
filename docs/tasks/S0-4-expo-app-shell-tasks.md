@@ -77,21 +77,21 @@ T2 and T4 can be developed in parallel after T1. T3 can start after the current 
 
 **Files:** `apps/mobile/app/(tabs)/*`
 
-- [ ] Add `(tabs)/_layout.tsx` using `NativeTabs`.
-- [ ] Define the Home and Settings routes explicitly with `NativeTabs.Trigger`.
-- [ ] Add visible `NativeTabs.Trigger.Label` values.
-- [ ] Add iOS `sf` icons and Android `md` icons.
-- [ ] Provide selected/unselected icon variants where supported.
-- [ ] Set Android tab labels to remain visible with `labelVisibilityMode="labeled"`.
-- [ ] Keep the tab count at five or fewer.
-- [ ] Add `(tabs)/index/_layout.tsx` with a nested `Stack`.
-- [ ] Add `(tabs)/settings/_layout.tsx` with a nested `Stack`.
-- [ ] Keep tab declarations static; do not dynamically add or remove tabs.
-- [ ] Configure navigation and tab colours from shared tokens.
-- [ ] Preserve the typed Home link to `/debug`.
-- [ ] Do not use `unstable_nativeProps`.
+- [x] Add `(tabs)/_layout.tsx` using `NativeTabs`.
+- [x] Define the Home and Settings routes explicitly with `NativeTabs.Trigger`.
+- [x] Add visible `NativeTabs.Trigger.Label` values.
+- [x] Add iOS `sf` icons and Android `md` icons.
+- [x] Provide selected/unselected icon variants where supported.
+- [x] Set Android tab labels to remain visible with `labelVisibilityMode="labeled"`.
+- [x] Keep the tab count at five or fewer.
+- [x] Add `(tabs)/index/_layout.tsx` with a nested `Stack`.
+- [x] Add `(tabs)/settings/_layout.tsx` with a nested `Stack`.
+- [x] Keep tab declarations static; do not dynamically add or remove tabs.
+- [x] Configure navigation and tab colours from shared tokens.
+- [x] Preserve the typed Home link to `/debug`.
+- [x] Do not use `unstable_nativeProps`.
 
-**Done when:** Home and Settings are native tabs, each supports a nested stack, and `/debug` opens above the complete tab shell.
+**Done when:** Home and Settings are native tabs, each supports a nested stack, and `/debug` opens above the complete tab shell. T3 implementation is complete; device and assistive-technology checks remain part of T9.
 
 ### T4 — Build accessible UI primitives
 
