@@ -1,8 +1,0 @@
-/apps/mobile/                 @M2
-/packages/backend/            @M1
-/packages/backend/convex/     @M1
-/packages/eslint-config/      @M4
-/packages/typescript-config/  @M4
-/scripts/                     @M4
-/.github/                     @M4
-/docs/                        @M4
