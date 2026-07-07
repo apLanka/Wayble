@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Pressable,
+  type ColorValue,
   type PressableProps,
   type PressableStateCallbackType,
   type StyleProp,
@@ -10,14 +11,19 @@ import {
 import { sizing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
+export interface TouchTargetProps extends PressableProps {
+  focusColor?: ColorValue;
+}
+
 export function TouchTarget({
   accessibilityState,
   disabled,
   onBlur,
   onFocus,
+  focusColor,
   style,
   ...props
-}: PressableProps) {
+}: TouchTargetProps) {
   const { appTheme } = useAppTheme();
   const [isFocused, setIsFocused] = useState(false);
   const mergedAccessibilityState =
@@ -36,7 +42,7 @@ export function TouchTarget({
       resolvedStyle,
       state.pressed && { opacity: 0.8 },
       isFocused && {
-        borderColor: appTheme.colors.focus,
+        borderColor: focusColor ?? appTheme.colors.focus,
         borderWidth: 2,
       },
     ];

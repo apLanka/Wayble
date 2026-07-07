@@ -263,14 +263,25 @@ Before merging:
 
 | Mode  | Foreground token        | Background token | Required ratio | Verified ratio |
 | ----- | ----------------------- | ---------------- | -------------: | -------------: |
-| Light | `text`                  | `background`     |          4.5:1 |            TBD |
-| Light | `textMuted`             | `background`     |          4.5:1 |            TBD |
-| Light | `onPrimary`             | `primary`        |          4.5:1 |            TBD |
-| Light | selected tab label/icon | tab background   |          4.5:1 |            TBD |
-| Dark  | `text`                  | `background`     |          4.5:1 |            TBD |
-| Dark  | `textMuted`             | `background`     |          4.5:1 |            TBD |
-| Dark  | `onPrimary`             | `primary`        |          4.5:1 |            TBD |
-| Dark  | selected tab label/icon | tab background   |          4.5:1 |            TBD |
+| Light | `text`                  | `background`     |          4.5:1 |        15.26:1 |
+| Light | `textMuted`             | `background`     |          4.5:1 |         7.89:1 |
+| Light | `onPrimary`             | `primary`        |          4.5:1 |         6.61:1 |
+| Light | selected tab label/icon | tab background   |          4.5:1 |         6.61:1 |
+| Dark  | `text`                  | `background`     |          4.5:1 |        16.82:1 |
+| Dark  | `textMuted`             | `background`     |          4.5:1 |        10.40:1 |
+| Dark  | `onPrimary`             | `primary`        |          4.5:1 |         9.98:1 |
+| Dark  | selected tab label/icon | tab background   |          4.5:1 |        10.42:1 |
+
+Focus and border checks (3:1 required for non-text indicators):
+
+| Mode  | Foreground token | Background token | Verified ratio |
+| ----- | ---------------- | ---------------- | -------------: |
+| Light | `focus`          | `background`     |         5.70:1 |
+| Light | `border`         | `background`     |         5.37:1 |
+| Light | `onPrimary`      | `primary`        |         6.61:1 |
+| Dark  | `focus`          | `background`     |         8.41:1 |
+| Dark  | `border`         | `background`     |         6.17:1 |
+| Dark  | `onPrimary`      | `primary`        |         9.98:1 |
 
 Do not complete the story while any required ratio remains `TBD`.
 

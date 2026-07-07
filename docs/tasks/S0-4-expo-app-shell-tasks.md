@@ -126,62 +126,64 @@ T2 and T4 can be developed in parallel after T1. T3 can start after the current 
 
 **Files:** `apps/mobile/app/(tabs)/index/index.tsx`, `apps/mobile/app/(tabs)/settings/index.tsx`
 
-- [ ] Move the existing home content into the Home tab.
-- [ ] Use `Screen` and `AppText` for layout and text.
-- [ ] Add a clearly named accessible link/button to `/debug`.
-- [ ] Add a lightweight Settings/accessibility placeholder.
-- [ ] Include system-theme and Dynamic Type information without adding persistence.
-- [ ] Ensure controls meet the 44-point target requirement.
-- [ ] Keep the screens lightweight because Native Tabs renders tabs eagerly.
+- [x] Move the existing home content into the Home tab.
+- [x] Use `Screen` and `AppText` for layout and text.
+- [x] Add a clearly named accessible link/button to `/debug`.
+- [x] Add a lightweight Settings/accessibility placeholder.
+- [x] Include system-theme and Dynamic Type information without adding persistence.
+- [x] Ensure controls meet the 44-point target requirement.
+- [x] Keep the screens lightweight because Native Tabs renders tabs eagerly.
 
-**Done when:** The app launches into Home, Settings is reachable, and the shell demonstrates the shared theme and accessibility primitives.
+**Done when:** The app launches into Home, Settings is reachable, and the shell demonstrates the shared theme and accessibility primitives. T5 implementation is complete; device validation remains part of T9.
 
 ### T6 — Refactor the Convex Debug screen
 
 **File:** `apps/mobile/app/debug.tsx`
 
-- [ ] Preserve `api.health.ping` and `api.health.touch` behavior.
-- [ ] Preserve the loading state while Convex connects.
-- [ ] Replace hard-coded layout/text styles with shared primitives and tokens.
-- [ ] Give the Touch action a clear accessible name and role.
-- [ ] Expose loading and disabled states where applicable.
-- [ ] Confirm the route remains a root stack screen outside the tabs.
+- [x] Preserve `api.health.ping` and `api.health.touch` behavior.
+- [x] Preserve the loading state while Convex connects.
+- [x] Replace hard-coded layout/text styles with shared primitives and tokens.
+- [x] Give the Touch action a clear accessible name and role.
+- [x] Expose loading and disabled states where applicable.
+- [x] Confirm the route remains a root stack screen outside the tabs.
 
-**Done when:** `/debug` still shows server time/counter and the Touch action increments the counter without refresh.
+**Done when:** `/debug` still shows server time/counter and the Touch action increments the counter without refresh. T6 implementation is complete; live Convex mutation validation remains part of device testing.
 
 ### T7 — Verify colour contrast and accessibility defaults
 
 **Files:** `apps/mobile/constants/theme.ts`, `docs/plans/S0-4-expo-app-shell.md`
 
-- [ ] Check light and dark `text` on `background` at 4.5:1 or better.
-- [ ] Check light and dark `textMuted` on `background` at 4.5:1 or better.
-- [ ] Check light and dark `onPrimary` on `primary` at 4.5:1 or better.
-- [ ] Check selected tab label/icon against tab background at 4.5:1 or better.
-- [ ] Check focus indicators and non-text boundaries at 3:1 or better where applicable.
-- [ ] Adjust semantic tokens instead of adding screen-specific colour overrides.
-- [ ] Record final ratios in the plan's evidence table.
-- [ ] Verify state is not communicated by colour alone.
+- [x] Check light and dark `text` on `background` at 4.5:1 or better.
+- [x] Check light and dark `textMuted` on `background` at 4.5:1 or better.
+- [x] Check light and dark `onPrimary` on `primary` at 4.5:1 or better.
+- [x] Check selected tab label/icon against tab background at 4.5:1 or better.
+- [x] Check focus indicators and non-text boundaries at 3:1 or better where applicable.
+- [x] Adjust semantic tokens instead of adding screen-specific colour overrides.
+- [x] Record final ratios in the plan's evidence table.
+- [x] Verify state is not communicated by colour alone.
 
-**Done when:** No required contrast entry remains `TBD` and evidence is reviewable in the PR.
+**Done when:** No required contrast entry remains `TBD` and evidence is reviewable in the PR. T7 implementation is complete.
 
 ### T8 — Run automated Expo and repository validation
 
 **Working directory:** repository root unless noted.
 
-- [ ] Run `bun run lint`.
-- [ ] Run `bun run check-types`.
-- [ ] Run `bun --cwd apps/mobile expo export`.
-- [ ] From `apps/mobile`, run `bunx expo-doctor`.
-- [ ] From `apps/mobile`, run `bun expo config --type introspect`.
-- [ ] Confirm typed route generation succeeds with the root-level route tree.
-- [ ] Confirm no native `ios` or `android` directories were introduced.
-- [ ] If dependencies change, run `bun expo install <package>` and repeat Expo Doctor.
+- [x] Run `bun run lint`.
+- [x] Run `bun run check-types`.
+- [x] Run `bun --cwd apps/mobile expo export` with a temporary placeholder `EXPO_PUBLIC_CONVEX_URL`.
+- [ ] From `apps/mobile`, run `bunx expo-doctor` — unavailable because no local `expo-doctor` executable is installed.
+- [x] Run `bun expo config --type introspect` from the mobile package.
+- [x] Confirm typed route generation succeeds with the root-level route tree.
+- [x] Confirm no native `ios` or `android` directories were introduced.
+- [x] No dependency changes were required; `bun expo install` was not needed.
 
 **Done when:** All automated checks pass with the SDK-compatible dependency set.
 
 ### T9 — Perform device and assistive-technology validation
 
 **Targets:** Android emulator/device and iOS simulator/device when available.
+
+**Environment note (2026-08-12):** Automated export and route checks passed. T9 device checks could not be executed in this environment because `adb` is not installed and the iOS CoreSimulator service is unavailable. TalkBack/VoiceOver, device navigation, and physical target-size checks remain pending on a developer device or simulator.
 
 #### Navigation
 
