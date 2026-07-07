@@ -20,7 +20,7 @@ export default function TabsLayout() {
       tintColor={colors.tabIconSelected}
       disableTransparentOnScrollEdge
     >
-      <NativeTabs.Trigger name="index">
+      <NativeTabs.Trigger name="home">
         <NativeTabs.Trigger.Icon
           sf={{ default: "house", selected: "house.fill" }}
           md="home"

@@ -84,7 +84,7 @@ T2 and T4 can be developed in parallel after T1. T3 can start after the current 
 - [x] Provide selected/unselected icon variants where supported.
 - [x] Set Android tab labels to remain visible with `labelVisibilityMode="labeled"`.
 - [x] Keep the tab count at five or fewer.
-- [x] Add `(tabs)/index/_layout.tsx` with a nested `Stack`.
+- [x] Add `(tabs)/home/_layout.tsx` with a nested `Stack`.
 - [x] Add `(tabs)/settings/_layout.tsx` with a nested `Stack`.
 - [x] Keep tab declarations static; do not dynamically add or remove tabs.
 - [x] Configure navigation and tab colours from shared tokens.
@@ -124,7 +124,7 @@ T2 and T4 can be developed in parallel after T1. T3 can start after the current 
 
 ### T5 — Create Home and Settings shell screens
 
-**Files:** `apps/mobile/app/(tabs)/index/index.tsx`, `apps/mobile/app/(tabs)/settings/index.tsx`
+**Files:** `apps/mobile/app/(tabs)/home/index.tsx`, `apps/mobile/app/(tabs)/settings/index.tsx`
 
 - [x] Move the existing home content into the Home tab.
 - [x] Use `Screen` and `AppText` for layout and text.

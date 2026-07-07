@@ -77,7 +77,7 @@ apps/mobile/
 │   ├── _layout.tsx                     # Root providers, theme, StatusBar, Stack
 │   ├── (tabs)/
 │   │   ├── _layout.tsx                 # Expo Router NativeTabs
-│   │   ├── index/
+│   │   ├── home/
 │   │   │   ├── _layout.tsx             # Native Stack for the Home tab
 │   │   │   └── index.tsx               # Home shell screen
 │   │   └── settings/
@@ -338,9 +338,10 @@ Test Android and, when available, iOS:
 | `apps/mobile/app/*`                                         | Add the root stack, native tabs, nested stacks, and screens in place.                   |
 | `apps/mobile/components/providers/*`                        | Preserve the existing Convex provider.                                                  |
 | `apps/mobile/app/_layout.tsx`                               | Add providers, Expo Router theme, adaptive status bar, and root stack.                  |
+| `apps/mobile/app/index.tsx`                                 | Redirect the root `/` entry to the Home tab.                                            |
 | `apps/mobile/app/(tabs)/_layout.tsx`                        | Add SDK 57 `NativeTabs` triggers, labels, and native icons.                             |
-| `apps/mobile/app/(tabs)/index/_layout.tsx`                  | Add the Home tab's nested stack.                                                        |
-| `apps/mobile/app/(tabs)/index/index.tsx`                    | Add themed Home shell and typed Debug link.                                             |
+| `apps/mobile/app/(tabs)/home/_layout.tsx`                   | Add the Home tab's nested stack.                                                        |
+| `apps/mobile/app/(tabs)/home/index.tsx`                     | Add themed Home shell and typed Debug link.                                             |
 | `apps/mobile/app/(tabs)/settings/_layout.tsx`               | Add the Settings tab's nested stack.                                                    |
 | `apps/mobile/app/(tabs)/settings/index.tsx`                 | Add accessibility/settings placeholder.                                                 |
 | `apps/mobile/app/debug.tsx`                                 | Preserve Convex behavior and apply accessible shared UI.                                |
