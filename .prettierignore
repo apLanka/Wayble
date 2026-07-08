@@ -3,6 +3,7 @@ node_modules
 .turbo
 packages/backend/convex/_generated
 bun.lock
+apps/mobile/expo-env.d.ts
 
 # Local-only tooling and working docs (git-ignored; no value in formatting)
 .claude
