@@ -8,9 +8,11 @@
     "scheme": "mobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.wayble.mobile"
     },
     "android": {
+      "package": "com.wayble.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -37,6 +39,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a4cf9404-8387-4c8e-a301-362e3db319b8"
+      }
+    },
+    "owner": "stoxmod"
   }
 }
