@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native";
-// @ts-expect-error — react-native-map-clustering has no bundled TypeScript declarations;
-// types from @types/react-native-map-clustering are not available on npm as of 2026.
-// New Architecture (Fabric) compatibility is unverified for this package.
-import MapView, { Marker } from "react-native-map-clustering";
-import { PROVIDER_GOOGLE } from "react-native-maps";
+// react-native-map-clustering New Architecture (Fabric) compatibility is unverified for this package.
+import MapView from "react-native-map-clustering";
+import { Marker } from "react-native-maps";
 import { MOCK_LOCATIONS } from "../../data/mock-data";
 import type { AccessibleLocation } from "../../data/mock-data";
 import CategoryFilter from "../../components/map/CategoryFilter";
@@ -54,7 +52,6 @@ export default function GoogleMapsScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       <CategoryFilter selected={activeCategory} onSelect={setActiveCategory} />
       <MapView
-        provider={PROVIDER_GOOGLE}
         style={{ flex: 1 }}
         initialRegion={INITIAL_REGION}
         customMapStyle={HIGH_CONTRAST_STYLE}
