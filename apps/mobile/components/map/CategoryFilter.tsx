@@ -28,6 +28,7 @@ export default function CategoryFilter({ selected, onSelect }: Props) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.scrollWrapper}
       contentContainerStyle={styles.container}
     >
       {PILLS.map((pill) => (
@@ -57,6 +58,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     gap: 8,
+  },
+  scrollWrapper: {
+    flexGrow: 0,
+    flexShrink: 0,
   },
   pill: {
     backgroundColor: "#E0E0E0",
