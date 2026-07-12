@@ -39,7 +39,7 @@ export default function TabsLayout() {
           sf={{ default: "map", selected: "map.fill" }}
           md="map"
         />
-        <NativeTabs.Trigger.Label>Google Maps</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Apple Maps</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="mapbox">
         <NativeTabs.Trigger.Icon
