@@ -1,7 +1,14 @@
 import React from "react";
 import { ScrollView, TouchableOpacity, Text, StyleSheet } from "react-native";
 
-export type Category = "all" | "wheelchair" | "elevator" | "bathroom";
+export type Category = "all" | "wheelchair" | "elevator" | "bathroom" | "multi";
+
+export const CATEGORY_COLORS: Record<Exclude<Category, "all">, string> = {
+  wheelchair: "#1565C0",
+  elevator: "#2E7D32",
+  bathroom: "#6A1B9A",
+  multi: "#E65100",
+};
 
 type Props = {
   selected: Category;
@@ -13,6 +20,7 @@ const PILLS: { label: string; value: Category }[] = [
   { label: "♿ Wheelchair", value: "wheelchair" },
   { label: "🛗 Elevator", value: "elevator" },
   { label: "🚻 Bathroom", value: "bathroom" },
+  { label: "⭐ Multi", value: "multi" },
 ];
 
 export default function CategoryFilter({ selected, onSelect }: Props) {

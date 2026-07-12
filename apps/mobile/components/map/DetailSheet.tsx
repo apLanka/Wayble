@@ -2,17 +2,11 @@ import React, { useRef, useCallback, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import type { AccessibleLocation } from "../../data/mock-data";
+import { CATEGORY_COLORS } from "./CategoryFilter";
 
 type Props = {
   location: AccessibleLocation | null;
   onClose: () => void;
-};
-
-const CATEGORY_COLORS: Record<AccessibleLocation["category"], string> = {
-  wheelchair: "#1565C0",
-  elevator: "#2E7D32",
-  bathroom: "#6A1B9A",
-  multi: "#E65100",
 };
 
 const SNAP_POINTS = ["40%"];

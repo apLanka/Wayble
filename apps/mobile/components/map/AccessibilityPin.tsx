@@ -1,24 +1,23 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import type { AccessibleLocation } from "../../data/mock-data";
+import { CATEGORY_COLORS } from "./CategoryFilter";
 
 type Props = {
   category: AccessibleLocation["category"];
   onPress?: () => void;
 };
 
-const PIN_MAP: Record<
-  AccessibleLocation["category"],
-  { emoji: string; color: string }
-> = {
-  wheelchair: { emoji: "♿", color: "#1565C0" },
-  elevator: { emoji: "🛗", color: "#2E7D32" },
-  bathroom: { emoji: "🚻", color: "#6A1B9A" },
-  multi: { emoji: "⭐", color: "#E65100" },
+const PIN_EMOJI: Record<AccessibleLocation["category"], string> = {
+  wheelchair: "♿",
+  elevator: "🛗",
+  bathroom: "🚻",
+  multi: "⭐",
 };
 
 export default function AccessibilityPin({ category, onPress }: Props) {
-  const { emoji, color } = PIN_MAP[category];
+  const emoji = PIN_EMOJI[category];
+  const color = CATEGORY_COLORS[category];
   return (
     <TouchableOpacity
       style={[styles.pin, { backgroundColor: color }]}

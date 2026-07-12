@@ -3,7 +3,9 @@ import { SafeAreaView } from "react-native";
 import Mapbox from "@rnmapbox/maps";
 import { MOCK_LOCATIONS, MAP_CENTER } from "../../data/mock-data";
 import type { AccessibleLocation } from "../../data/mock-data";
-import CategoryFilter from "../../components/map/CategoryFilter";
+import CategoryFilter, {
+  CATEGORY_COLORS,
+} from "../../components/map/CategoryFilter";
 import type { Category } from "../../components/map/CategoryFilter";
 import DetailSheet from "../../components/map/DetailSheet";
 
@@ -35,8 +37,9 @@ export default function MapboxScreen() {
     const feature = e.features?.[0];
     if (!feature || feature.properties?.cluster) return;
     const id = feature.properties?.id as string;
-    const loc = MOCK_LOCATIONS.find((l) => l.id === id) ?? null;
-    setSelected(loc);
+    if (!id) return;
+    const loc = MOCK_LOCATIONS.find((l) => l.id === id);
+    if (loc) setSelected(loc);
   };
 
   return (
@@ -86,12 +89,14 @@ export default function MapboxScreen() {
                 "match",
                 ["get", "category"],
                 "wheelchair",
-                "#1565C0",
+                CATEGORY_COLORS.wheelchair,
                 "elevator",
-                "#2E7D32",
+                CATEGORY_COLORS.elevator,
                 "bathroom",
-                "#6A1B9A",
-                "#E65100",
+                CATEGORY_COLORS.bathroom,
+                "multi",
+                CATEGORY_COLORS.multi,
+                "#E65100", // fallback
               ],
               circleRadius: 10,
               circleStrokeColor: "#fff",
