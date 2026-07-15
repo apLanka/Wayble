@@ -10,9 +10,9 @@
 
 import type * as accessibility from "../accessibility.js";
 import type * as auth from "../auth.js";
-import type * as geoSpike from "../geoSpike.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
+import type * as places from "../places.js";
 import type * as users from "../users.js";
 
 import type {
@@ -24,9 +24,9 @@ import type {
 declare const fullApi: ApiFromModules<{
   accessibility: typeof accessibility;
   auth: typeof auth;
-  geoSpike: typeof geoSpike;
   health: typeof health;
   http: typeof http;
+  places: typeof places;
   users: typeof users;
 }>;
 
