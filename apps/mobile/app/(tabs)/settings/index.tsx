@@ -1,6 +1,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
+import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
@@ -9,12 +10,14 @@ import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { useLocationPermission } from "@/hooks/use-location-permission";
 
 export default function SettingsScreen() {
   const { appTheme } = useAppTheme();
   const { signOut } = useAuthActions();
   const router = useRouter();
   const currentUser = useQuery(api.users.currentUser);
+  const { status } = useLocationPermission();
 
   const handleSignOut = async () => {
     await signOut();
@@ -109,6 +112,43 @@ export default function SettingsScreen() {
           <AppText style={{ color: appTheme.colors.textMuted }}>
             Follows your device appearance setting.
           </AppText>
+        </View>
+
+        {/* Location Card */}
+        <View
+          accessible
+          accessibilityLabel="Location permissions"
+          style={[
+            styles.statusCard,
+            {
+              backgroundColor: appTheme.colors.surface,
+              borderColor: appTheme.colors.border,
+            },
+          ]}
+        >
+          <AppText variant="label">Location</AppText>
+          <AppText>
+            Status:{" "}
+            {status === "granted"
+              ? "Granted"
+              : status === "denied"
+                ? "Denied"
+                : "Undetermined"}
+          </AppText>
+          <TouchTarget
+            accessibilityLabel="Open OS settings for location"
+            accessibilityRole="button"
+            onPress={() => Linking.openSettings()}
+            style={[
+              styles.signOutButton, // Reuse style since it matches layout needs
+              {
+                backgroundColor: appTheme.colors.surface,
+                borderColor: appTheme.colors.border,
+              },
+            ]}
+          >
+            <AppText variant="bodyStrong">Open Settings</AppText>
+          </TouchTarget>
         </View>
       </ScrollView>
     </Screen>

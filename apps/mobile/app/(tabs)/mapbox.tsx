@@ -8,6 +8,8 @@ import CategoryFilter, {
 } from "../../components/map/CategoryFilter";
 import type { Category } from "../../components/map/CategoryFilter";
 import DetailSheet from "../../components/map/DetailSheet";
+import { LocationPermissionBanner } from "../../components/map/LocationPermissionBanner";
+import { useLocationPermission } from "../../hooks/use-location-permission";
 
 Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? "pk.placeholder");
 
@@ -25,6 +27,7 @@ const toGeoJSON = (
 export default function MapboxScreen() {
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [selected, setSelected] = useState<AccessibleLocation | null>(null);
+  const { location, status, requestPermission } = useLocationPermission();
 
   const filtered =
     activeCategory === "all"
@@ -45,6 +48,7 @@ export default function MapboxScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <CategoryFilter selected={activeCategory} onSelect={setActiveCategory} />
+      <LocationPermissionBanner status={status} onRequest={requestPermission} />
       <Mapbox.MapView
         styleURL="mapbox://styles/mapbox/dark-v11"
         // TODO: replace with custom high-contrast Mapbox Studio style for production
@@ -52,9 +56,14 @@ export default function MapboxScreen() {
       >
         <Mapbox.Camera
           zoomLevel={13}
-          centerCoordinate={[MAP_CENTER.lng, MAP_CENTER.lat]}
+          centerCoordinate={
+            location
+              ? [location.coords.longitude, location.coords.latitude]
+              : [MAP_CENTER.lng, MAP_CENTER.lat]
+          }
           animationMode="none"
         />
+        {status === "granted" && <Mapbox.UserLocation />}
         <Mapbox.ShapeSource
           id="accessibilityLocations"
           shape={toGeoJSON(filtered)}
