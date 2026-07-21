@@ -4,7 +4,10 @@ import { v } from "convex/values";
 import { components } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
-import { accessibilityCategoryValidator, placeCategoryValidator } from "./schema";
+import {
+  accessibilityCategoryValidator,
+  placeCategoryValidator,
+} from "./schema";
 
 // Component has no DB triggers — create/update/remove mutations below keep
 // the places table and this index in sync manually, in the same mutation.
@@ -24,7 +27,7 @@ export const nearest = query({
         try {
           const place = await ctx.db.get(hit.key);
           return place && { ...place, distance: hit.distance };
-        } catch () {
+        } catch {
           // Ignore invalid IDs from stale/corrupted index entries
           return null;
         }
