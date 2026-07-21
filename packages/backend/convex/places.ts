@@ -24,7 +24,7 @@ export const nearest = query({
         try {
           const place = await ctx.db.get(hit.key);
           return place && { ...place, distance: hit.distance };
-        } catch (e) {
+        } catch () {
           // Ignore invalid IDs from stale/corrupted index entries
           return null;
         }

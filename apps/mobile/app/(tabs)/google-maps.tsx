@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native";
 // react-native-map-clustering New Architecture (Fabric) compatibility is unverified for this package.
 import MapView from "react-native-map-clustering";
@@ -42,6 +42,16 @@ const INITIAL_REGION = {
 };
 
 export default function GoogleMapsScreen() {
+  const [tracksViewChanges, setTracksViewChanges] = useState(true);
+
+  useEffect(() => {
+    // Only track view changes briefly to render the emoji, then stop to save performance
+    // and prevent Android rendering issues
+    const timer = setTimeout(() => {
+      setTracksViewChanges(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [selected, setSelected] = useState<AccessibleLocation | null>(null);
   const { location, status, requestPermission } = useLocationPermission();
@@ -75,6 +85,7 @@ export default function GoogleMapsScreen() {
         {filtered.map((loc) => (
           <Marker
             key={loc.id}
+            tracksViewChanges={tracksViewChanges}
             coordinate={{ latitude: loc.lat, longitude: loc.lng }}
             onPress={() => setSelected(loc)}
           >
