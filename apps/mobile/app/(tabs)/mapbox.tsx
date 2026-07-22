@@ -68,6 +68,7 @@ export default function MapboxScreen() {
   const nearestPlaces = useQuery(api.places.nearest, {
     point: queryPoint,
     limit: 40,
+    maxDistance: 50000,
   });
 
   // While loading, fall back to local mock data so the map isn't blank.
