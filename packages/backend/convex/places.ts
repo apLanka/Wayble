@@ -16,11 +16,16 @@ export const geo = new GeospatialIndex<Id<"places">, { category: string }>(
 );
 
 export const nearest = query({
-  args: { point, limit: v.optional(v.number()) },
+  args: {
+    point,
+    limit: v.optional(v.number()),
+    maxDistance: v.optional(v.number()),
+  },
   handler: async (ctx, args) => {
     const hits = await geo.nearest(ctx, {
       point: args.point,
       limit: args.limit ?? 10,
+      maxDistance: args.maxDistance,
     });
     const places = await Promise.all(
       hits.map(async (hit) => {
