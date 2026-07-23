@@ -55,9 +55,14 @@ export function CategoryFilter({
               key={cat}
               style={[
                 styles.pill,
-                isActive && {
-                  backgroundColor: CATEGORY_COLORS[cat],
-                  borderColor: CATEGORY_COLORS[cat],
+                isActive ? styles.pillActive : styles.pillInactive,
+                {
+                  backgroundColor: isActive
+                    ? CATEGORY_COLORS[cat]
+                    : `${CATEGORY_COLORS[cat]}15`, // 15% opacity tint for background
+                  borderColor: isActive
+                    ? CATEGORY_COLORS[cat]
+                    : `${CATEGORY_COLORS[cat]}30`, // 30% opacity tint for border
                 },
               ]}
               onPress={() => onSelectCategory(cat)}
@@ -68,8 +73,8 @@ export function CategoryFilter({
               <AppText
                 style={[
                   styles.pillText,
-                  isActive && styles.pillTextActive,
-                  { color: isActive ? "#fff" : CATEGORY_COLORS[cat] },
+                  isActive ? styles.pillTextActive : styles.pillTextInactive,
+                  !isActive && { color: CATEGORY_COLORS[cat] },
                 ]}
               >
                 {CATEGORY_EMOJIS[cat]} {cat}
@@ -94,19 +99,31 @@ const styles = StyleSheet.create({
   pill: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#fff",
+    borderRadius: 24, // softer pill shape
+    borderWidth: 1.5, // slightly bolder border
     minHeight: 40,
     justifyContent: "center",
   },
+  pillActive: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  pillInactive: {
+    elevation: 0,
+  },
   pillText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700", // punchier text
     textTransform: "capitalize",
+    letterSpacing: 0.3,
   },
   pillTextActive: {
     color: "#fff",
+  },
+  pillTextInactive: {
+    opacity: 1, // Let the inline color dictate appearance
   },
 });
