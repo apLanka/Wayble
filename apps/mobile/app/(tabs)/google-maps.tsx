@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { SafeAreaView } from "react-native";
-// react-native-map-clustering New Architecture (Fabric) compatibility is unverified for this package.
-import MapView from "react-native-map-clustering";
-import { Marker } from "react-native-maps";
+import React, { useState, useEffect, useRef } from "react";
+import { SafeAreaView, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import MapViewClustered from "react-native-map-clustering";
 import { MOCK_LOCATIONS } from "../../data/mock-data";
 import type { AccessibleLocation } from "../../data/mock-data";
 import CategoryFilter from "../../components/map/CategoryFilter";
@@ -10,9 +9,9 @@ import DetailSheet from "../../components/map/DetailSheet";
 import AccessibilityPin from "../../components/map/AccessibilityPin";
 import type { Category } from "../../components/map/CategoryFilter";
 import { LocationPermissionBanner } from "../../components/map/LocationPermissionBanner";
+import * as Location from "expo-location";
 import { useLocationPermission } from "../../hooks/use-location-permission";
 import { LocateButton } from "../../components/map/LocateButton";
-import { useRef } from "react";
 
 const HIGH_CONTRAST_STYLE = [
   { elementType: "geometry", stylers: [{ color: "#212121" }] },
@@ -73,7 +72,7 @@ export default function GoogleMapsScreen() {
       const newLoc = await requestPermission();
       if (newLoc) {
         targetLoc = newLoc;
-        currentStatus = "granted";
+        currentStatus = "granted" as Location.PermissionStatus;
       }
     }
 
@@ -113,7 +112,7 @@ export default function GoogleMapsScreen() {
       <CategoryFilter selected={activeCategory} onSelect={setActiveCategory} />
       <LocationPermissionBanner status={status} onRequest={requestPermission} />
       <View style={{ flex: 1 }}>
-        <MapView
+        <MapViewClustered
           ref={mapRef}
           style={{ flex: 1 }}
           initialRegion={
@@ -141,7 +140,7 @@ export default function GoogleMapsScreen() {
               <AccessibilityPin category={loc.category} />
             </Marker>
           ))}
-        </MapView>
+        </MapViewClustered>
         <LocateButton onPress={handleLocateMe} bottomOffset={16} />
       </View>
       <DetailSheet location={selected} onClose={() => setSelected(null)} />
