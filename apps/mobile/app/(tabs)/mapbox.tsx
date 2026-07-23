@@ -10,6 +10,7 @@ import type { Category } from "../../components/map/CategoryFilter";
 import DetailSheet from "../../components/map/DetailSheet";
 import { LocationPermissionBanner } from "../../components/map/LocationPermissionBanner";
 import { useLocationPermission } from "../../hooks/use-location-permission";
+import { LocateButton } from "../../components/map/LocateButton";
 
 Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? "pk.placeholder");
 
@@ -35,7 +36,9 @@ const toGeoJSON = (
 export default function MapboxScreen() {
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [selected, setSelected] = useState<AccessibleLocation | null>(null);
-  const { status, location, requestPermission } = useLocationPermission();
+  const { status, location, requestPermission, refreshLocation } =
+    useLocationPermission();
+  const cameraRef = useRef<Mapbox.Camera>(null);
 
   // Dev seed: populate the (likely empty) places table once from the local
   // mock data. seedMockPlaces is itself a no-op once places already exist.
@@ -106,149 +109,207 @@ export default function MapboxScreen() {
     if (loc) setSelected(loc);
   };
 
+  const [isFollowingUser, setIsFollowingUser] = useState(true);
+
+  const handleLocateMe = async () => {
+    let currentStatus = status;
+    let targetLoc = location;
+
+    if (currentStatus !== "granted") {
+      const newLoc = await requestPermission();
+      if (newLoc) {
+        targetLoc = newLoc;
+        currentStatus = "granted";
+      }
+    }
+
+    if (currentStatus === "granted") {
+      const freshLoc = await refreshLocation();
+      if (freshLoc) {
+        targetLoc = freshLoc;
+      }
+    }
+
+    if (targetLoc) {
+      console.log(
+        "LocateMe moving camera to:",
+        targetLoc.coords.longitude,
+        targetLoc.coords.latitude,
+      );
+
+      // Disable follow mode so we can manually animate to the coords
+      setIsFollowingUser(false);
+
+      // Give React a tick to update the camera props, then fly to the location
+      setTimeout(() => {
+        cameraRef.current?.setCamera({
+          centerCoordinate: [
+            targetLoc.coords.longitude,
+            targetLoc.coords.latitude,
+          ],
+          zoomLevel: 14,
+          animationDuration: 1000,
+        });
+      }, 100);
+    } else {
+      console.log("LocateMe failed: no targetLoc available");
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <CategoryFilter selected={activeCategory} onSelect={setActiveCategory} />
       <LocationPermissionBanner status={status} onRequest={requestPermission} />
-      <Mapbox.MapView
-        styleURL="mapbox://styles/mapbox/dark-v11"
-        // TODO: replace with custom high-contrast Mapbox Studio style for production
-        style={{ flex: 1 }}
-      >
-        <Mapbox.Images>
-          <View
-            key="wheelchair"
-            style={{
-              width: 24,
-              height: 24,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 20 }}>♿</Text>
-          </View>
-          <View
-            key="elevator"
-            style={{
-              width: 24,
-              height: 24,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 20 }}>🛗</Text>
-          </View>
-          <View
-            key="bathroom"
-            style={{
-              width: 24,
-              height: 24,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 20 }}>🚻</Text>
-          </View>
-          <View
-            key="multi"
-            style={{
-              width: 24,
-              height: 24,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 20 }}>⭐</Text>
-          </View>
-          <View
-            key="fallback"
-            style={{
-              width: 24,
-              height: 24,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 20 }}>📍</Text>
-          </View>
-        </Mapbox.Images>
-        <Mapbox.Camera
-          {...(status === "granted"
-            ? {
-                followUserLocation: true,
-                followUserMode: Mapbox.UserTrackingMode.Follow,
-                followZoomLevel: 13,
-              }
-            : {
-                zoomLevel: 13,
-                centerCoordinate: [MAP_CENTER.lng, MAP_CENTER.lat],
-              })}
-          animationMode="flyTo"
-        />
-        {status === "granted" && <Mapbox.UserLocation />}
-        <Mapbox.ShapeSource
-          id="accessibilityLocations"
-          shape={toGeoJSON(filtered, highlightedIds)}
-          cluster
-          clusterMaxZoomLevel={14}
-          clusterRadius={40}
-          onPress={handleShapePress}
+      <View style={{ flex: 1 }}>
+        <Mapbox.MapView
+          styleURL="mapbox://styles/mapbox/dark-v11"
+          // TODO: replace with custom high-contrast Mapbox Studio style for production
+          style={{ flex: 1 }}
+          onRegionWillChange={(e) => {
+            if (e.properties.isUserInteraction) {
+              setIsFollowingUser(false);
+            }
+          }}
         >
-          <Mapbox.CircleLayer
-            id="highlightRing"
-            filter={[
-              "all",
-              ["!", ["has", "point_count"]],
-              ["==", ["get", "highlighted"], true],
-            ]}
-            style={{
-              circleColor: "transparent",
-              circleRadius: 16,
-              circleStrokeColor: "#FFD600",
-              circleStrokeWidth: 3,
-            }}
+          <Mapbox.Images>
+            <View
+              key="wheelchair"
+              style={{
+                width: 24,
+                height: 24,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 20 }}>♿</Text>
+            </View>
+            <View
+              key="elevator"
+              style={{
+                width: 24,
+                height: 24,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 20 }}>🛗</Text>
+            </View>
+            <View
+              key="bathroom"
+              style={{
+                width: 24,
+                height: 24,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 20 }}>🚻</Text>
+            </View>
+            <View
+              key="multi"
+              style={{
+                width: 24,
+                height: 24,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 20 }}>⭐</Text>
+            </View>
+            <View
+              key="fallback"
+              style={{
+                width: 24,
+                height: 24,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 20 }}>📍</Text>
+            </View>
+          </Mapbox.Images>
+          <Mapbox.Camera
+            ref={cameraRef}
+            {...(status === "granted" && isFollowingUser
+              ? {
+                  followUserLocation: true,
+                  followUserMode: Mapbox.UserTrackingMode.Follow,
+                }
+              : status !== "granted"
+                ? {
+                    zoomLevel: 13,
+                    centerCoordinate: [MAP_CENTER.lng, MAP_CENTER.lat],
+                  }
+                : {})}
+            animationMode="flyTo"
+            animationDuration={1000}
           />
-          <Mapbox.CircleLayer
-            id="clusters"
-            filter={["has", "point_count"]}
-            style={{
-              circleColor: "#1565C0",
-              circleRadius: 18,
-              circleOpacity: 0.85,
-            }}
-          />
-          <Mapbox.SymbolLayer
-            id="clusterCount"
-            filter={["has", "point_count"]}
-            style={{
-              textField: "{point_count_abbreviated}",
-              textSize: 13,
-              textColor: "#fff",
-            }}
-          />
-          <Mapbox.SymbolLayer
-            id="singlePoint"
-            filter={["!", ["has", "point_count"]]}
-            style={{
-              iconImage: [
-                "match",
-                ["get", "category"],
-                "wheelchair",
-                "wheelchair",
-                "elevator",
-                "elevator",
-                "bathroom",
-                "bathroom",
-                "multi",
-                "multi",
-                "fallback",
-              ],
-              iconSize: 1.2,
-              iconAllowOverlap: true,
-            }}
-          />
-        </Mapbox.ShapeSource>
-      </Mapbox.MapView>
+          {status === "granted" && <Mapbox.UserLocation />}
+          <Mapbox.ShapeSource
+            id="accessibilityLocations"
+            shape={toGeoJSON(filtered, highlightedIds)}
+            cluster
+            clusterMaxZoomLevel={14}
+            clusterRadius={40}
+            onPress={handleShapePress}
+          >
+            <Mapbox.CircleLayer
+              id="highlightRing"
+              filter={[
+                "all",
+                ["!", ["has", "point_count"]],
+                ["==", ["get", "highlighted"], true],
+              ]}
+              style={{
+                circleColor: "transparent",
+                circleRadius: 16,
+                circleStrokeColor: "#FFD600",
+                circleStrokeWidth: 3,
+              }}
+            />
+            <Mapbox.CircleLayer
+              id="clusters"
+              filter={["has", "point_count"]}
+              style={{
+                circleColor: "#1565C0",
+                circleRadius: 18,
+                circleOpacity: 0.85,
+              }}
+            />
+            <Mapbox.SymbolLayer
+              id="clusterCount"
+              filter={["has", "point_count"]}
+              style={{
+                textField: "{point_count_abbreviated}",
+                textSize: 13,
+                textColor: "#fff",
+              }}
+            />
+            <Mapbox.SymbolLayer
+              id="singlePoint"
+              filter={["!", ["has", "point_count"]]}
+              style={{
+                iconImage: [
+                  "match",
+                  ["get", "category"],
+                  "wheelchair",
+                  "wheelchair",
+                  "elevator",
+                  "elevator",
+                  "bathroom",
+                  "bathroom",
+                  "multi",
+                  "multi",
+                  "fallback",
+                ],
+                iconSize: 1.2,
+                iconAllowOverlap: true,
+              }}
+            />
+          </Mapbox.ShapeSource>
+        </Mapbox.MapView>
+        <LocateButton onPress={handleLocateMe} bottomOffset={16} />
+      </View>
       <DetailSheet location={selected} onClose={() => setSelected(null)} />
     </SafeAreaView>
   );
