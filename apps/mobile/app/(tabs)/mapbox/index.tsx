@@ -70,6 +70,8 @@ export default function MapboxTab() {
   const selectedPlace = locations?.find((l) => l._id === selectedPlaceId);
   const [isFollowingUser, setIsFollowingUser] = useState(true);
 
+  const cameraRef = React.useRef<Mapbox.Camera>(null);
+
   const handleLocateMe = async () => {
     let currentStatus = status;
     let targetLoc = location;
@@ -88,13 +90,26 @@ export default function MapboxTab() {
     }
 
     if (targetLoc) {
-      setIsFollowingUser(true);
+      setIsFollowingUser(false);
+
+      setTimeout(() => {
+        cameraRef.current?.setCamera({
+          centerCoordinate: [
+            targetLoc!.coords.longitude,
+            targetLoc!.coords.latitude,
+          ],
+          zoomLevel: 14,
+          animationDuration: 1000,
+        });
+      }, 50);
     }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUserTrackingModeChange = (e: any) => {
-    if (e.nativeEvent?.payload?.followUserMode === "normal") {
+    if (
+      e.nativeEvent?.payload?.followUserMode === Mapbox.UserTrackingMode.Follow
+    ) {
       setIsFollowingUser(true);
     } else if (e.nativeEvent?.payload?.followUserMode === false) {
       setIsFollowingUser(false);
@@ -104,7 +119,7 @@ export default function MapboxTab() {
   // Prepare GeoJSON for map
   const geojson = {
     type: "FeatureCollection" as const,
-    features: (locations || []).map((loc) => ({
+    features: (filtered || []).map((loc) => ({
       type: "Feature" as const,
       id: loc._id,
       geometry: {
@@ -171,8 +186,17 @@ export default function MapboxTab() {
         </View>
       ) : (
         <View style={styles.mapContainer}>
-          <Mapbox.MapView style={styles.map} logoEnabled={false}>
+          <Mapbox.MapView
+            style={styles.map}
+            logoEnabled={false}
+            onRegionWillChange={(e) => {
+              if (e.properties.isUserInteraction) {
+                setIsFollowingUser(false);
+              }
+            }}
+          >
             <Mapbox.Camera
+              ref={cameraRef}
               zoomLevel={14}
               centerCoordinate={
                 location
@@ -181,9 +205,13 @@ export default function MapboxTab() {
               }
               animationMode="flyTo"
               animationDuration={1000}
-              followUserLocation={isFollowingUser}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              followUserMode={"normal" as any}
+              {...(status === "granted" && isFollowingUser
+                ? {
+                    followUserLocation: true,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    followUserMode: Mapbox.UserTrackingMode.Follow as any,
+                  }
+                : {})}
             />
             {location && (
               <Mapbox.UserLocation
@@ -240,7 +268,7 @@ export default function MapboxTab() {
             </Mapbox.ShapeSource>
           </Mapbox.MapView>
 
-          <LocateButton onPress={handleLocateMe} bottomOffset={16} />
+          <LocateButton onPress={handleLocateMe} bottomOffset={100} />
         </View>
       )}
 
