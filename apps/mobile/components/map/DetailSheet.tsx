@@ -11,7 +11,7 @@ type Props = {
 
 const SNAP_POINTS = ["40%"];
 
-export default function DetailSheet({ location, onClose }: Props) {
+export function DetailSheet({ location, onClose }: Props) {
   const sheetRef = useRef<BottomSheet>(null);
 
   useEffect(() => {
@@ -50,7 +50,12 @@ export default function DetailSheet({ location, onClose }: Props) {
             <View
               style={[
                 styles.badge,
-                { backgroundColor: CATEGORY_COLORS[location.category] },
+                {
+                  backgroundColor:
+                    CATEGORY_COLORS[
+                      location.category as keyof typeof CATEGORY_COLORS
+                    ],
+                },
               ]}
             >
               <Text style={styles.badgeText}>{location.category}</Text>

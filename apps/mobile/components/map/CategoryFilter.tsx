@@ -1,82 +1,112 @@
 import React from "react";
-import { ScrollView, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
+import { AppText } from "@/components/ui/app-text";
+import { TouchTarget } from "@/components/ui/touch-target";
+import { spacing } from "@/constants/theme";
 
-export type Category = "all" | "wheelchair" | "elevator" | "bathroom" | "multi";
+export type Category = "all" | "food" | "retail" | "transit" | "health";
 
-export const CATEGORY_COLORS: Record<Exclude<Category, "all">, string> = {
-  wheelchair: "#1565C0",
-  elevator: "#2E7D32",
-  bathroom: "#6A1B9A",
-  multi: "#E65100",
+export const CATEGORY_COLORS = {
+  all: "#6b7280", // Gray
+  food: "#ef4444", // Red
+  retail: "#3b82f6", // Blue
+  transit: "#10b981", // Green
+  health: "#f59e0b", // Yellow
 };
 
-type Props = {
-  selected: Category;
-  onSelect: (c: Category) => void;
+export const CATEGORY_LABELS = {
+  all: "All places",
+  food: "Food & Drink",
+  retail: "Retail & Shopping",
+  transit: "Transit Stations",
+  health: "Health & Medical",
 };
 
-const PILLS: { label: string; value: Category }[] = [
-  { label: "All", value: "all" },
-  { label: "♿ Wheelchair", value: "wheelchair" },
-  { label: "🛗 Elevator", value: "elevator" },
-  { label: "🚻 Bathroom", value: "bathroom" },
-  { label: "⭐ Multi", value: "multi" },
-];
+const CATEGORY_EMOJIS = {
+  all: "📍",
+  food: "🍽️",
+  retail: "🛍️",
+  transit: "🚇",
+  health: "⚕️",
+};
 
-export default function CategoryFilter({ selected, onSelect }: Props) {
+interface CategoryFilterProps {
+  activeCategory: Category;
+  onSelectCategory: (category: Category) => void;
+}
+
+export function CategoryFilter({
+  activeCategory,
+  onSelectCategory,
+}: CategoryFilterProps) {
+  const categories: Category[] = ["all", "food", "retail", "transit", "health"];
+
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.scrollWrapper}
-      contentContainerStyle={styles.container}
-    >
-      {PILLS.map((pill) => (
-        <TouchableOpacity
-          key={pill.value}
-          style={[styles.pill, selected === pill.value && styles.pillSelected]}
-          onPress={() => onSelect(pill.value)}
-          activeOpacity={0.7}
-        >
-          <Text
-            style={[
-              styles.label,
-              selected === pill.value && styles.labelSelected,
-            ]}
-          >
-            {pill.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
+    <View style={styles.container}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {categories.map((cat) => {
+          const isActive = cat === activeCategory;
+          return (
+            <TouchTarget
+              key={cat}
+              style={[
+                styles.pill,
+                isActive && {
+                  backgroundColor: CATEGORY_COLORS[cat],
+                  borderColor: CATEGORY_COLORS[cat],
+                },
+              ]}
+              onPress={() => onSelectCategory(cat)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isActive }}
+              accessibilityLabel={CATEGORY_LABELS[cat]}
+            >
+              <AppText
+                style={[
+                  styles.pillText,
+                  isActive && styles.pillTextActive,
+                  { color: isActive ? "#fff" : CATEGORY_COLORS[cat] },
+                ]}
+              >
+                {CATEGORY_EMOJIS[cat]} {cat}
+              </AppText>
+            </TouchTarget>
+          );
+        })}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
+    paddingVertical: spacing.sm,
+    backgroundColor: "transparent",
   },
-  scrollWrapper: {
-    flexGrow: 0,
-    flexShrink: 0,
+  scrollContent: {
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
   },
   pill: {
-    backgroundColor: "#E0E0E0",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    backgroundColor: "#fff",
+    minHeight: 40,
+    justifyContent: "center",
   },
-  pillSelected: {
-    backgroundColor: "#37474F",
-  },
-  label: {
+  pillText: {
     fontSize: 14,
-    color: "#333",
+    fontWeight: "600",
+    textTransform: "capitalize",
   },
-  labelSelected: {
+  pillTextActive: {
     color: "#fff",
   },
 });
