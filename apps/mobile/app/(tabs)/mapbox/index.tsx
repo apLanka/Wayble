@@ -101,7 +101,7 @@ export default function MapboxTab() {
             targetLoc!.coords.longitude,
             targetLoc!.coords.latitude,
           ],
-          zoomLevel: 14,
+          zoomLevel: 15.5,
           animationDuration: 1000,
         });
       }, 50);
@@ -205,7 +205,7 @@ export default function MapboxTab() {
           >
             <Mapbox.Camera
               ref={cameraRef}
-              zoomLevel={14}
+              zoomLevel={15.5}
               centerCoordinate={
                 location
                   ? [location.coords.longitude, location.coords.latitude]
