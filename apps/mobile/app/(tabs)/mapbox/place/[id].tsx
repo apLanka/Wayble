@@ -87,33 +87,6 @@ export default function PlaceDetailScreen() {
           >
             <AppText style={styles.sectionTitle} accessibilityRole="header">
               Address
-              {accessibilityCategories.length > 0 && (
-                <View style={styles.accessibilityRow}>
-                  {accessibilityCategories.map((cat: string) => (
-                    <View
-                      key={cat}
-                      style={[
-                        styles.accessibilityTile,
-                        { backgroundColor: appTheme.colors.surface },
-                      ]}
-                    >
-                      <AppText style={styles.accessibilityEmoji}>
-                        {ACCESSIBILITY_EMOJIS[
-                          cat as keyof typeof ACCESSIBILITY_EMOJIS
-                        ] || "✓"}
-                      </AppText>
-                      <AppText
-                        style={[
-                          styles.accessibilityTileText,
-                          { color: appTheme.colors.text },
-                        ]}
-                      >
-                        {cat}
-                      </AppText>
-                    </View>
-                  ))}
-                </View>
-              )}
             </AppText>
             <AppText>{address}</AppText>
           </View>
