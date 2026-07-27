@@ -223,14 +223,31 @@ export default function MapboxTab() {
             />
             {location && (
               <Mapbox.UserLocation
-                visible={true}
-                showsUserHeadingIndicator={true}
+                visible={false} // Hide the default puck
+                showsUserHeadingIndicator={false}
                 androidRenderMode="compass"
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onUpdate={handleUserTrackingModeChange as any}
+              />
+            )}
+
+            {location && (
+              <Mapbox.ShapeSource
+                id="user-location-source"
+                shape={{
+                  type: "Feature",
+                  geometry: {
+                    type: "Point",
+                    coordinates: [
+                      location.coords.longitude,
+                      location.coords.latitude,
+                    ],
+                  },
+                  properties: {},
+                }}
               >
                 <Mapbox.SymbolLayer
-                  id="user-location-layer"
+                  id="user-location-symbol"
                   style={{
                     textField: "🧍",
                     textSize: 32,
@@ -238,7 +255,7 @@ export default function MapboxTab() {
                     textIgnorePlacement: true,
                   }}
                 />
-              </Mapbox.UserLocation>
+              </Mapbox.ShapeSource>
             )}
 
             <Mapbox.ShapeSource
