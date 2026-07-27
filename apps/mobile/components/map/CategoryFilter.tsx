@@ -4,30 +4,30 @@ import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { spacing } from "@/constants/theme";
 
-export type Category = "all" | "food" | "retail" | "transit" | "health";
+export type Category = "all" | "wheelchair" | "elevator" | "bathroom" | "multi";
 
 export const CATEGORY_COLORS = {
   all: "#6b7280", // Gray
-  food: "#ef4444", // Red
-  retail: "#3b82f6", // Blue
-  transit: "#10b981", // Green
-  health: "#f59e0b", // Yellow
+  wheelchair: "#3b82f6", // Blue
+  elevator: "#f59e0b", // Yellow
+  bathroom: "#10b981", // Green
+  multi: "#8b5cf6", // Purple
 };
 
 export const CATEGORY_LABELS = {
   all: "All places",
-  food: "Food & Drink",
-  retail: "Retail & Shopping",
-  transit: "Transit Stations",
-  health: "Health & Medical",
+  wheelchair: "Wheelchair Accessible",
+  elevator: "Elevator",
+  bathroom: "Accessible Bathroom",
+  multi: "Multiple Features",
 };
 
 const CATEGORY_EMOJIS = {
   all: "📍",
-  food: "🍽️",
-  retail: "🛍️",
-  transit: "🚇",
-  health: "⚕️",
+  wheelchair: "♿️",
+  elevator: "🛗",
+  bathroom: "🚻",
+  multi: "🌟",
 };
 
 interface CategoryFilterProps {
@@ -39,7 +39,13 @@ export function CategoryFilter({
   activeCategory,
   onSelectCategory,
 }: CategoryFilterProps) {
-  const categories: Category[] = ["all", "food", "retail", "transit", "health"];
+  const categories: Category[] = [
+    "all",
+    "wheelchair",
+    "elevator",
+    "bathroom",
+    "multi",
+  ];
 
   return (
     <View style={styles.container}>
@@ -77,7 +83,7 @@ export function CategoryFilter({
                   !isActive && { color: CATEGORY_COLORS[cat] },
                 ]}
               >
-                {CATEGORY_EMOJIS[cat]} {cat}
+                {CATEGORY_EMOJIS[cat]} {cat === "all" ? "All places" : cat}
               </AppText>
             </TouchTarget>
           );

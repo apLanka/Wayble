@@ -2,7 +2,6 @@ import React, { useRef, useCallback, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import type { AccessibleLocation } from "../../data/mock-data";
-import { CATEGORY_COLORS } from "./CategoryFilter";
 
 type Props = {
   location: AccessibleLocation | null;
@@ -54,20 +53,10 @@ export function DetailSheet({ location, onClose }: Props) {
                 <Text style={styles.close}>✕</Text>
               </TouchableOpacity>
             </View>
-            <View
-              style={[
-                styles.badge,
-                {
-                  backgroundColor:
-                    CATEGORY_COLORS[
-                      (location.category in CATEGORY_COLORS
-                        ? location.category
-                        : "all") as keyof typeof CATEGORY_COLORS
-                    ],
-                },
-              ]}
-            >
-              <Text style={styles.badgeText}>{location.category}</Text>
+            <View style={[styles.badge, { backgroundColor: "#6b7280" }]}>
+              <Text style={styles.badgeText}>
+                {location.category.replace(/_/g, " ")}
+              </Text>
             </View>
             <Text style={styles.address}>{location.address}</Text>
 
