@@ -4,7 +4,7 @@ import { useLocalSearchParams } from "expo-router";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { useAppTheme } from "@/hooks/use-app-theme";
-import { CATEGORY_COLORS } from "@/components/map/CategoryFilter";
+
 import { formatDistance } from "@/utils/format-distance";
 import { radii, spacing } from "@/constants/theme";
 const ACCESSIBILITY_EMOJIS = {
@@ -49,9 +49,7 @@ export default function PlaceDetailScreen() {
     }
   }
 
-  const categoryColor =
-    CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] ||
-    appTheme.colors.primary;
+  const categoryColor = "#6b7280"; // Default badge color for business categories
   const distanceStr = distance !== undefined ? formatDistance(distance) : "";
 
   return (
@@ -69,7 +67,7 @@ export default function PlaceDetailScreen() {
             <AppText
               style={[styles.category, { color: appTheme.colors.textMuted }]}
             >
-              {category}
+              {category.replace(/_/g, " ")}
             </AppText>
             {distanceStr ? (
               <AppText
