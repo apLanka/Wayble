@@ -232,36 +232,24 @@ export default function MapboxTab() {
             )}
 
             {location && (
-              <Mapbox.ShapeSource
-                id="user-location-source"
-                shape={{
-                  type: "FeatureCollection",
-                  features: [
-                    {
-                      type: "Feature",
-                      id: "user-location",
-                      geometry: {
-                        type: "Point",
-                        coordinates: [
-                          location.coords.longitude,
-                          location.coords.latitude,
-                        ],
-                      },
-                      properties: {},
-                    },
-                  ],
-                }}
+              <Mapbox.MarkerView
+                id="user-location-marker"
+                coordinate={[
+                  location.coords.longitude,
+                  location.coords.latitude,
+                ]}
               >
-                <Mapbox.SymbolLayer
-                  id="user-location-symbol"
+                <View
                   style={{
-                    textField: "🧍",
-                    textSize: 32,
-                    textAllowOverlap: true,
-                    textIgnorePlacement: true,
+                    width: 40,
+                    height: 40,
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
-                />
-              </Mapbox.ShapeSource>
+                >
+                  <AppText style={{ fontSize: 32 }}>🧍</AppText>
+                </View>
+              </Mapbox.MarkerView>
             )}
 
             <Mapbox.ShapeSource
