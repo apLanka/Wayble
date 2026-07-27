@@ -122,9 +122,11 @@ export default function PlaceDetailScreen() {
         <View
           style={[styles.section, { borderTopColor: appTheme.colors.border }]}
         >
-          <AppText style={styles.sectionTitle} accessibilityRole="header">
-            Accessibility Features
-            {accessibilityCategories.length > 0 && (
+          {accessibilityCategories.length > 0 && (
+            <View style={{ marginBottom: 16 }}>
+              <AppText style={styles.sectionTitle} accessibilityRole="header">
+                Accessibility Profile
+              </AppText>
               <View style={styles.accessibilityRow}>
                 {accessibilityCategories.map((cat: string) => (
                   <View
@@ -150,7 +152,11 @@ export default function PlaceDetailScreen() {
                   </View>
                 ))}
               </View>
-            )}
+            </View>
+          )}
+
+          <AppText style={styles.sectionTitle} accessibilityRole="header">
+            Verified Features
           </AppText>
           {features.length > 0 ? (
             <View style={styles.featuresList}>
