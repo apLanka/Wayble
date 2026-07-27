@@ -12,7 +12,9 @@ export type NearbyPlace = {
   location: { latitude: number; longitude: number };
   address?: string;
   features?: string[];
-  accessibilityCategory?: "wheelchair" | "elevator" | "bathroom" | "multi";
+  accessibilityCategories?: (
+    "wheelchair" | "elevator" | "bathroom" | "multi"
+  )[];
   distance?: number;
 };
 
