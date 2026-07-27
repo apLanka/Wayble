@@ -241,13 +241,21 @@ export default function MapboxTab() {
               >
                 <View
                   style={{
-                    width: 40,
-                    height: 40,
+                    width: 60,
+                    height: 60,
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <AppText style={{ fontSize: 32 }}>🧍</AppText>
+                  <AppText
+                    style={{
+                      fontSize: 48,
+                      lineHeight: 60,
+                      textAlign: "center",
+                    }}
+                  >
+                    🧍
+                  </AppText>
                 </View>
               </Mapbox.MarkerView>
             )}
