@@ -59,7 +59,15 @@ export function useNearbyPlaces() {
   const filtered = useMemo(() => {
     if (!locations) return [];
     if (activeCategory === "all") return locations;
-    return locations.filter((loc) => loc.category === activeCategory);
+    return locations.filter(
+      (loc) =>
+        loc.accessibilityCategories &&
+        loc.accessibilityCategories.includes(
+          activeCategory as NonNullable<
+            NearbyPlace["accessibilityCategories"]
+          >[number],
+        ),
+    );
   }, [locations, activeCategory]);
 
   const highlightedIds = useMemo(() => {
