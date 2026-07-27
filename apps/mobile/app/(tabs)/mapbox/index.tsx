@@ -228,7 +228,17 @@ export default function MapboxTab() {
                 androidRenderMode="compass"
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onUpdate={handleUserTrackingModeChange as any}
-              />
+              >
+                <Mapbox.SymbolLayer
+                  id="user-location-layer"
+                  style={{
+                    textField: "🧍",
+                    textSize: 32,
+                    textAllowOverlap: true,
+                    textIgnorePlacement: true,
+                  }}
+                />
+              </Mapbox.UserLocation>
             )}
 
             <Mapbox.ShapeSource
