@@ -59,6 +59,9 @@ export default function MapboxTab() {
           category: place.category,
           address: place.address || "",
           features: place.features ? JSON.stringify(place.features) : "",
+          accessibilityCategories: place.accessibilityCategories
+            ? JSON.stringify(place.accessibilityCategories)
+            : "",
           distance: place.distance?.toString() || "",
         },
       });

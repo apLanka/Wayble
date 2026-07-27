@@ -1,7 +1,14 @@
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 
+import { AddPlaceForm } from "@/components/debug/AddPlaceForm";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
@@ -25,44 +32,55 @@ export default function DebugScreen() {
 
   return (
     <Screen>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardView}
       >
-        <View style={styles.values}>
-          <AppText variant="title" accessibilityRole="header">
-            Connection debug
-          </AppText>
-          <AppText>
-            Server time: {new Date(health.serverTime).toISOString()}
-          </AppText>
-          <AppText>Counter: {health.count}</AppText>
-        </View>
-
-        <TouchTarget
-          accessibilityRole="button"
-          accessibilityLabel="Increment the health counter"
-          accessibilityHint="Sends a mutation to Convex and increments the counter"
-          focusColor={appTheme.colors.onPrimary}
-          onPress={() => void touch()}
-          style={[
-            styles.touchButton,
-            { backgroundColor: appTheme.colors.primary },
-          ]}
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          <AppText
-            variant="bodyStrong"
-            style={{ color: appTheme.colors.onPrimary }}
+          <View style={styles.values}>
+            <AppText variant="title" accessibilityRole="header">
+              Connection debug
+            </AppText>
+            <AppText>
+              Server time: {new Date(health.serverTime).toISOString()}
+            </AppText>
+            <AppText>Counter: {health.count}</AppText>
+          </View>
+
+          <TouchTarget
+            accessibilityRole="button"
+            accessibilityLabel="Increment the health counter"
+            accessibilityHint="Sends a mutation to Convex and increments the counter"
+            focusColor={appTheme.colors.onPrimary}
+            onPress={() => void touch()}
+            style={[
+              styles.touchButton,
+              { backgroundColor: appTheme.colors.primary },
+            ]}
           >
-            Touch
-          </AppText>
-        </TouchTarget>
-      </ScrollView>
+            <AppText
+              variant="bodyStrong"
+              style={{ color: appTheme.colors.onPrimary }}
+            >
+              Touch
+            </AppText>
+          </TouchTarget>
+
+          <AddPlaceForm />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardView: {
+    flex: 1,
+  },
   content: {
     flexGrow: 1,
     gap: spacing.xl,

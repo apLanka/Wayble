@@ -7,6 +7,12 @@ import { useAppTheme } from "@/hooks/use-app-theme";
 import { CATEGORY_COLORS } from "@/components/map/CategoryFilter";
 import { formatDistance } from "@/utils/format-distance";
 import { radii, spacing } from "@/constants/theme";
+const ACCESSIBILITY_EMOJIS = {
+  wheelchair: "♿️",
+  elevator: "🛗",
+  bathroom: "🚻",
+  multi: "🌟",
+};
 
 export default function PlaceDetailScreen() {
   const { appTheme } = useAppTheme();
@@ -28,6 +34,18 @@ export default function PlaceDetailScreen() {
       features = JSON.parse(params.features);
     } catch (e) {
       console.warn("Failed to parse features param", e);
+    }
+  }
+
+  let accessibilityCategories: string[] = [];
+  if (
+    typeof params.accessibilityCategories === "string" &&
+    params.accessibilityCategories !== ""
+  ) {
+    try {
+      accessibilityCategories = JSON.parse(params.accessibilityCategories);
+    } catch (e) {
+      console.warn("Failed to parse accessibilityCategories param", e);
     }
   }
 
@@ -69,6 +87,33 @@ export default function PlaceDetailScreen() {
           >
             <AppText style={styles.sectionTitle} accessibilityRole="header">
               Address
+              {accessibilityCategories.length > 0 && (
+                <View style={styles.accessibilityRow}>
+                  {accessibilityCategories.map((cat: string) => (
+                    <View
+                      key={cat}
+                      style={[
+                        styles.accessibilityTile,
+                        { backgroundColor: appTheme.colors.surface },
+                      ]}
+                    >
+                      <AppText style={styles.accessibilityEmoji}>
+                        {ACCESSIBILITY_EMOJIS[
+                          cat as keyof typeof ACCESSIBILITY_EMOJIS
+                        ] || "✓"}
+                      </AppText>
+                      <AppText
+                        style={[
+                          styles.accessibilityTileText,
+                          { color: appTheme.colors.text },
+                        ]}
+                      >
+                        {cat}
+                      </AppText>
+                    </View>
+                  ))}
+                </View>
+              )}
             </AppText>
             <AppText>{address}</AppText>
           </View>
@@ -79,6 +124,33 @@ export default function PlaceDetailScreen() {
         >
           <AppText style={styles.sectionTitle} accessibilityRole="header">
             Accessibility Features
+            {accessibilityCategories.length > 0 && (
+              <View style={styles.accessibilityRow}>
+                {accessibilityCategories.map((cat: string) => (
+                  <View
+                    key={cat}
+                    style={[
+                      styles.accessibilityTile,
+                      { backgroundColor: appTheme.colors.surface },
+                    ]}
+                  >
+                    <AppText style={styles.accessibilityEmoji}>
+                      {ACCESSIBILITY_EMOJIS[
+                        cat as keyof typeof ACCESSIBILITY_EMOJIS
+                      ] || "✓"}
+                    </AppText>
+                    <AppText
+                      style={[
+                        styles.accessibilityTileText,
+                        { color: appTheme.colors.text },
+                      ]}
+                    >
+                      {cat}
+                    </AppText>
+                  </View>
+                ))}
+              </View>
+            )}
           </AppText>
           {features.length > 0 ? (
             <View style={styles.featuresList}>
@@ -155,6 +227,28 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: spacing.md,
   },
+  accessibilityRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  accessibilityTile: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radii.sm,
+    gap: spacing.xs,
+  },
+  accessibilityEmoji: {
+    fontSize: 16,
+  },
+  accessibilityTileText: {
+    fontSize: 14,
+    textTransform: "capitalize",
+  },
+
   featuresList: {
     gap: spacing.sm,
   },
