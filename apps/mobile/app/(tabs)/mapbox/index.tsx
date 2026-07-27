@@ -235,15 +235,21 @@ export default function MapboxTab() {
               <Mapbox.ShapeSource
                 id="user-location-source"
                 shape={{
-                  type: "Feature",
-                  geometry: {
-                    type: "Point",
-                    coordinates: [
-                      location.coords.longitude,
-                      location.coords.latitude,
-                    ],
-                  },
-                  properties: {},
+                  type: "FeatureCollection",
+                  features: [
+                    {
+                      type: "Feature",
+                      id: "user-location",
+                      geometry: {
+                        type: "Point",
+                        coordinates: [
+                          location.coords.longitude,
+                          location.coords.latitude,
+                        ],
+                      },
+                      properties: {},
+                    },
+                  ],
                 }}
               >
                 <Mapbox.SymbolLayer
