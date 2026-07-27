@@ -9,6 +9,13 @@ type Props = {
   onClose: () => void;
 };
 
+const ACCESSIBILITY_EMOJIS = {
+  wheelchair: "♿️",
+  elevator: "🛗",
+  bathroom: "🚻",
+  multi: "🌟",
+};
+
 const SNAP_POINTS = ["40%"];
 
 export function DetailSheet({ location, onClose }: Props) {
@@ -16,7 +23,7 @@ export function DetailSheet({ location, onClose }: Props) {
 
   useEffect(() => {
     if (location) {
-      sheetRef.current?.snapToIndex(0);
+      setTimeout(() => sheetRef.current?.snapToIndex(0), 50);
     } else {
       sheetRef.current?.close();
     }
@@ -53,7 +60,9 @@ export function DetailSheet({ location, onClose }: Props) {
                 {
                   backgroundColor:
                     CATEGORY_COLORS[
-                      location.category as keyof typeof CATEGORY_COLORS
+                      (location.category in CATEGORY_COLORS
+                        ? location.category
+                        : "all") as keyof typeof CATEGORY_COLORS
                     ],
                 },
               ]}
@@ -61,7 +70,36 @@ export function DetailSheet({ location, onClose }: Props) {
               <Text style={styles.badgeText}>{location.category}</Text>
             </View>
             <Text style={styles.address}>{location.address}</Text>
-            {location.features.map((f) => (
+
+            {/* Accessibility badges */}
+            {(
+              (
+                location as AccessibleLocation & {
+                  accessibilityCategories?: string[];
+                }
+              ).accessibilityCategories ?? []
+            ).length > 0 && (
+              <View style={styles.accessibilityRow}>
+                {(
+                  (
+                    location as AccessibleLocation & {
+                      accessibilityCategories?: string[];
+                    }
+                  ).accessibilityCategories ?? []
+                ).map((cat: string) => (
+                  <View key={cat} style={styles.accessibilityTile}>
+                    <Text style={styles.accessibilityEmoji}>
+                      {ACCESSIBILITY_EMOJIS[
+                        cat as keyof typeof ACCESSIBILITY_EMOJIS
+                      ] || "✓"}
+                    </Text>
+                    <Text style={styles.accessibilityTileText}>{cat}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {(location.features ?? []).map((f) => (
               <Text key={f} style={styles.feature}>
                 ✓ {f}
               </Text>
@@ -111,6 +149,29 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 14,
     marginBottom: 10,
+  },
+  accessibilityRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 12,
+  },
+  accessibilityTile: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f3f4f6",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    gap: 4,
+  },
+  accessibilityEmoji: {
+    fontSize: 16,
+  },
+  accessibilityTileText: {
+    fontSize: 12,
+    color: "#4b5563",
+    textTransform: "capitalize",
   },
   feature: {
     fontSize: 14,
