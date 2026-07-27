@@ -23,7 +23,7 @@ export function DetailSheet({ location, onClose }: Props) {
 
   useEffect(() => {
     if (location) {
-      setTimeout(() => sheetRef.current?.snapToIndex(0), 50);
+      sheetRef.current?.snapToIndex(0);
     } else {
       sheetRef.current?.close();
     }
@@ -39,7 +39,7 @@ export function DetailSheet({ location, onClose }: Props) {
   return (
     <BottomSheet
       ref={sheetRef}
-      index={-1}
+      index={location ? 0 : -1}
       snapPoints={SNAP_POINTS}
       enableDynamicSizing={false}
       enablePanDownToClose
