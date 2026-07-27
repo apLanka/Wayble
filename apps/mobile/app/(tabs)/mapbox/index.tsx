@@ -133,6 +133,11 @@ export default function MapboxTab() {
         id: loc._id,
         category: loc.category,
         isHighlighted: highlightedIds.has(loc._id),
+        hasWheelchair:
+          loc.accessibilityCategories?.includes("wheelchair") ?? false,
+        hasElevator: loc.accessibilityCategories?.includes("elevator") ?? false,
+        hasBathroom: loc.accessibilityCategories?.includes("bathroom") ?? false,
+        hasMulti: loc.accessibilityCategories?.includes("multi") ?? false,
       },
     })),
   };
@@ -246,17 +251,16 @@ export default function MapboxTab() {
                     4,
                   ],
                   circleColor: [
-                    "match",
-                    ["get", "category"],
-                    "food",
-                    "#ef4444",
-                    "retail",
-                    "#3b82f6",
-                    "transit",
-                    "#10b981",
-                    "health",
-                    "#f59e0b",
-                    /* default */ "#6b7280",
+                    "case",
+                    ["==", ["get", "hasWheelchair"], true],
+                    "#3b82f6", // wheelchair (Blue)
+                    ["==", ["get", "hasElevator"], true],
+                    "#f59e0b", // elevator (Yellow)
+                    ["==", ["get", "hasBathroom"], true],
+                    "#10b981", // bathroom (Green)
+                    ["==", ["get", "hasMulti"], true],
+                    "#8b5cf6", // multi (Purple)
+                    /* default */ "#6b7280", // all/other (Gray)
                   ],
                   circleStrokeWidth: 2,
                   circleStrokeColor: "#ffffff",
