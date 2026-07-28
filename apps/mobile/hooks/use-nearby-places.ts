@@ -19,7 +19,8 @@ export type NearbyPlace = {
 };
 
 export function useNearbyPlaces() {
-  const [activeCategory, setActiveCategory] = useState<Category>("all");
+  const [activeCategories, setActiveCategories] = useState<Category[]>(["all"]);
+  const [searchQuery, setSearchQuery] = useState("");
   const { location, status, isLoading, requestPermission, refreshLocation } =
     useLocationPermission();
 
@@ -31,9 +32,11 @@ export function useNearbyPlaces() {
       }
     : undefined;
 
-  const rawLocations = useQuery(
+  const isSearchActive = searchQuery.trim().length > 0;
+
+  const rawNearest = useQuery(
     api.places.nearest,
-    point
+    point && !isSearchActive
       ? {
           point,
           limit: 40,
@@ -42,33 +45,45 @@ export function useNearbyPlaces() {
       : "skip",
   );
 
+  const rawSearch = useQuery(
+    api.places.search,
+    isSearchActive
+      ? {
+          query: searchQuery,
+          limit: 40,
+        }
+      : "skip",
+  );
+
   // Cast locations to our expected shape which includes distance
-  const locations = rawLocations as NearbyPlace[] | undefined;
+  const locations = (isSearchActive ? rawSearch : rawNearest) as
+    NearbyPlace[] | undefined;
 
   // Development/Demo fallback: if we have locations but map feels empty, log a hint
   useEffect(() => {
-    if (locations && locations.length === 0 && point) {
+    if (locations && locations.length === 0 && point && !isSearchActive) {
       console.log(
         "💡 No locations found nearby. You might want to seed the database around your current location.",
       );
       console.log(`Current coords: ${point.latitude}, ${point.longitude}`);
     }
-  }, [locations, point]);
+  }, [locations, point, isSearchActive]);
 
   // 3. Derived state: filtering
   const filtered = useMemo(() => {
     if (!locations) return [];
-    if (activeCategory === "all") return locations;
+    if (activeCategories.includes("all") || activeCategories.length === 0)
+      return locations;
     return locations.filter(
       (loc) =>
         loc.accessibilityCategories &&
-        loc.accessibilityCategories.includes(
-          activeCategory as NonNullable<
-            NearbyPlace["accessibilityCategories"]
-          >[number],
+        activeCategories.some((c) =>
+          loc.accessibilityCategories!.includes(
+            c as NonNullable<NearbyPlace["accessibilityCategories"]>[number],
+          ),
         ),
     );
-  }, [locations, activeCategory]);
+  }, [locations, activeCategories]);
 
   const highlightedIds = useMemo(() => {
     return new Set(filtered.map((l) => l._id));
@@ -83,7 +98,9 @@ export function useNearbyPlaces() {
     locations,
     filtered,
     highlightedIds,
-    activeCategory,
-    setActiveCategory,
+    activeCategories,
+    setActiveCategories,
+    searchQuery,
+    setSearchQuery,
   };
 }
