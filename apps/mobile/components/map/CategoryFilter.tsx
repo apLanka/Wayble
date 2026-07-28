@@ -31,13 +31,13 @@ const CATEGORY_EMOJIS = {
 };
 
 interface CategoryFilterProps {
-  activeCategory: Category;
-  onSelectCategory: (category: Category) => void;
+  activeCategories: Category[];
+  onToggleCategory: (category: Category) => void;
 }
 
 export function CategoryFilter({
-  activeCategory,
-  onSelectCategory,
+  activeCategories,
+  onToggleCategory,
 }: CategoryFilterProps) {
   const categories: Category[] = [
     "all",
@@ -55,7 +55,7 @@ export function CategoryFilter({
         contentContainerStyle={styles.scrollContent}
       >
         {categories.map((cat) => {
-          const isActive = cat === activeCategory;
+          const isActive = activeCategories.includes(cat);
           return (
             <TouchTarget
               key={cat}
@@ -71,7 +71,7 @@ export function CategoryFilter({
                     : `${CATEGORY_COLORS[cat]}30`, // 30% opacity tint for border
                 },
               ]}
-              onPress={() => onSelectCategory(cat)}
+              onPress={() => onToggleCategory(cat)}
               accessibilityRole="button"
               accessibilityState={{ selected: isActive }}
               accessibilityLabel={CATEGORY_LABELS[cat]}
