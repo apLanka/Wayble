@@ -106,7 +106,7 @@ export default defineSchema({
       v.array(accessibilityCategoryValidator),
     ),
     features: v.optional(v.array(v.string())),
-  }),
+  }).searchIndex("search_name", { searchField: "name" }),
 
   reports: defineTable({
     placeId: v.id("places"),
