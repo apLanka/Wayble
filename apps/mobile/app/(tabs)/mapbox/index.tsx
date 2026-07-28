@@ -10,6 +10,7 @@ import { DetailSheet } from "@/components/map/DetailSheet";
 import { CategoryFilter } from "@/components/map/CategoryFilter";
 import { PlaceListItem } from "@/components/map/PlaceListItem";
 import { ViewModeToggle } from "@/components/map/ViewModeToggle";
+import { SearchBar } from "@/components/map/SearchBar";
 import { AppText } from "@/components/ui/app-text";
 
 import { useNearbyPlaces, NearbyPlace } from "@/hooks/use-nearby-places";
@@ -38,8 +39,10 @@ export default function MapboxTab() {
     locations,
     filtered,
     highlightedIds,
-    activeCategory,
-    setActiveCategory,
+    activeCategories,
+    setActiveCategories,
+    searchQuery,
+    setSearchQuery,
   } = useNearbyPlaces();
 
   // Selected place for bottom sheet in map mode
@@ -144,10 +147,22 @@ export default function MapboxTab() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
+      <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
       <CategoryFilter
-        activeCategory={activeCategory}
-        onSelectCategory={(c) => {
-          setActiveCategory(c);
+        activeCategories={activeCategories}
+        onToggleCategory={(cat) => {
+          setActiveCategories((prev) => {
+            if (cat === "all") return ["all"];
+
+            const newCats = prev.filter((c) => c !== "all");
+
+            if (newCats.includes(cat)) {
+              const updated = newCats.filter((c) => c !== cat);
+              return updated.length === 0 ? ["all"] : updated;
+            } else {
+              return [...newCats, cat];
+            }
+          });
           setSelectedPlaceId(null);
         }}
       />
