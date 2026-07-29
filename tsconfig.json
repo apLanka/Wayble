@@ -1,11 +1,7 @@
 {
   "extends": "@repo/typescript-config/base.json",
   "compilerOptions": {
-    "types": [
-      "bun"
-    ]
+    "types": ["bun"]
   },
-  "include": [
-    "scripts/**/*.ts"
-  ]
+  "include": ["scripts/**/*.ts"]
 }

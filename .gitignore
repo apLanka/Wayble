@@ -26,6 +26,7 @@ coverage
 
 # Local-only tooling and working docs
 .claude/
+.superpowers/
 docs/superpowers/
 
 # Editors
