@@ -1,37 +1,87 @@
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+
+import { AppText } from "@/components/ui/app-text";
+import { Screen } from "@/components/ui/screen";
+import { TouchTarget } from "@/components/ui/touch-target";
+import { spacing } from "@/constants/theme";
+import { useAppTheme } from "@/hooks/use-app-theme";
 
 export default function DebugScreen() {
   const health = useQuery(api.health.ping);
   const touch = useMutation(api.health.touch);
+  const { appTheme } = useAppTheme();
 
   if (health === undefined) {
     return (
-      <View style={styles.container}>
-        <Text>Connecting to Convex…</Text>
-      </View>
+      <Screen>
+        <View style={styles.loading}>
+          <AppText accessibilityRole="alert">Connecting to Convex…</AppText>
+        </View>
+      </Screen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text>Server time: {new Date(health.serverTime).toISOString()}</Text>
-      <Text>Counter: {health.count}</Text>
-      <Button
-        title="Touch"
-        onPress={() => void touch()}
-        accessibilityLabel="Increment the health counter"
-      />
-    </View>
+    <Screen>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.values}>
+          <AppText variant="title" accessibilityRole="header">
+            Connection debug
+          </AppText>
+          <AppText>
+            Server time: {new Date(health.serverTime).toISOString()}
+          </AppText>
+          <AppText>Counter: {health.count}</AppText>
+        </View>
+
+        <TouchTarget
+          accessibilityRole="button"
+          accessibilityLabel="Increment the health counter"
+          accessibilityHint="Sends a mutation to Convex and increments the counter"
+          focusColor={appTheme.colors.onPrimary}
+          onPress={() => void touch()}
+          style={[
+            styles.touchButton,
+            { backgroundColor: appTheme.colors.primary },
+          ]}
+        >
+          <AppText
+            variant="bodyStrong"
+            style={{ color: appTheme.colors.onPrimary }}
+          >
+            Touch
+          </AppText>
+        </TouchTarget>
+      </ScrollView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
+  content: {
+    flexGrow: 1,
+    gap: spacing.xl,
     justifyContent: "center",
-    gap: 12,
+    paddingVertical: spacing.xl,
+  },
+  loading: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+  },
+  touchButton: {
+    alignItems: "center",
+    borderRadius: spacing.sm,
+    justifyContent: "center",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  values: {
+    gap: spacing.sm,
   },
 });
