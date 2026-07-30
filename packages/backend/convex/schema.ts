@@ -1,8 +1,122 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import {
+  ACCESSIBILITY_TAXONOMY_VERSION,
+  accessibilityAttributeValidator,
+} from "./accessibility";
+
+const userRoleValidator = v.union(
+  v.literal("member"),
+  v.literal("moderator"),
+  v.literal("admin"),
+);
+
+const placeCategoryValidator = v.union(
+  v.literal("education"),
+  v.literal("food_and_drink"),
+  v.literal("government"),
+  v.literal("healthcare"),
+  v.literal("lodging"),
+  v.literal("outdoor"),
+  v.literal("retail"),
+  v.literal("transport"),
+  v.literal("workplace"),
+  v.literal("other"),
+);
+
+const reportStatusValidator = v.union(
+  v.literal("active"),
+  v.literal("superseded"),
+  v.literal("removed"),
+);
+
+const verificationVerdictValidator = v.union(
+  v.literal("confirm"),
+  v.literal("dispute"),
+);
+
+const flagReasonValidator = v.union(
+  v.literal("inaccurate"),
+  v.literal("spam"),
+  v.literal("abusive"),
+  v.literal("privacy"),
+  v.literal("duplicate"),
+  v.literal("other"),
+);
+
+const flagStatusValidator = v.union(
+  v.literal("open"),
+  v.literal("resolved"),
+  v.literal("dismissed"),
+);
+
+const locationValidator = v.object({
+  latitude: v.number(),
+  longitude: v.number(),
+});
+
+const evidenceValidator = v.object({
+  storageId: v.id("_storage"),
+  caption: v.optional(v.string()),
+});
 
 export default defineSchema({
   health: defineTable({
     count: v.number(),
   }),
+
+  users: defineTable({
+    authSubject: v.string(),
+    displayName: v.string(),
+    avatarUrl: v.optional(v.string()),
+    role: userRoleValidator,
+    updatedAt: v.number(),
+  }).index("by_auth_subject", ["authSubject"]),
+
+  places: defineTable({
+    name: v.string(),
+    category: placeCategoryValidator,
+    address: v.string(),
+    location: locationValidator,
+    createdBy: v.id("users"),
+    updatedAt: v.number(),
+  }),
+
+  reports: defineTable({
+    placeId: v.id("places"),
+    authorId: v.id("users"),
+    taxonomyVersion: v.literal(ACCESSIBILITY_TAXONOMY_VERSION),
+    attributes: v.array(accessibilityAttributeValidator),
+    summary: v.optional(v.string()),
+    evidence: v.array(evidenceValidator),
+    observedAt: v.number(),
+    status: reportStatusValidator,
+    updatedAt: v.number(),
+  })
+    .index("by_place", ["placeId"])
+    .index("by_author", ["authorId"]),
+
+  verifications: defineTable({
+    reportId: v.id("reports"),
+    authorId: v.id("users"),
+    verdict: verificationVerdictValidator,
+    note: v.optional(v.string()),
+    updatedAt: v.number(),
+  })
+    .index("by_report", ["reportId"])
+    .index("by_author", ["authorId"])
+    .index("by_report_and_author", ["reportId", "authorId"]),
+
+  flags: defineTable({
+    reportId: v.id("reports"),
+    authorId: v.id("users"),
+    reason: flagReasonValidator,
+    details: v.optional(v.string()),
+    status: flagStatusValidator,
+    resolvedBy: v.optional(v.id("users")),
+    resolvedAt: v.optional(v.number()),
+    updatedAt: v.number(),
+  })
+    .index("by_report", ["reportId"])
+    .index("by_author", ["authorId"]),
 });
