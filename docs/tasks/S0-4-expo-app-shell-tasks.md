@@ -99,28 +99,28 @@ T2 and T4 can be developed in parallel after T1. T3 can start after the current 
 
 #### `AppText`
 
-- [ ] Support semantic variants: `body`, `bodyStrong`, `label`, `title`, and `display`.
-- [ ] Keep `allowFontScaling` enabled.
-- [ ] Do not set a global `maxFontSizeMultiplier`.
-- [ ] Use tokenized line heights and allow text to wrap and grow.
-- [ ] Forward `TextProps` and accessibility props.
+- [x] Support semantic variants: `body`, `bodyStrong`, `label`, `title`, and `display`.
+- [x] Keep `allowFontScaling` enabled.
+- [x] Do not set a global `maxFontSizeMultiplier`.
+- [x] Use tokenized line heights and allow text to wrap and grow.
+- [x] Forward `TextProps` and accessibility props.
 
 #### `Screen`
 
-- [ ] Apply the active semantic background and tokenized padding.
-- [ ] Handle safe-area edges not already managed by the navigator.
-- [ ] Avoid duplicate bottom insets with Native Tabs.
-- [ ] Support content growth and scrolling without fixed-height essential content.
+- [x] Apply the active semantic background and tokenized padding.
+- [x] Handle safe-area edges not already managed by the navigator.
+- [x] Avoid duplicate bottom insets with Native Tabs.
+- [x] Support content growth and scrolling without fixed-height essential content.
 
 #### `TouchTarget`
 
-- [ ] Wrap `Pressable` and enforce `minWidth` and `minHeight` of 44 points.
-- [ ] Forward accessibility role, label, hint, state, and press props.
-- [ ] Provide visible pressed and focus states in both themes.
-- [ ] Expose disabled state through `accessibilityState`.
-- [ ] Use `hitSlop` only when adjacent targets cannot overlap.
+- [x] Wrap `Pressable` and enforce `minWidth` and `minHeight` of 44 points.
+- [x] Forward accessibility role, label, hint, state, and press props.
+- [x] Provide visible pressed and focus states in both themes.
+- [x] Expose disabled state through `accessibilityState`.
+- [x] Use `hitSlop` only when adjacent targets cannot overlap.
 
-**Done when:** New shell controls use primitives instead of repeating raw styles or accessibility defaults.
+**Done when:** New shell controls use primitives instead of repeating raw styles or accessibility defaults. T4 implementation is complete; screen adoption remains part of T5/T6.
 
 ### T5 — Create Home and Settings shell screens
 
