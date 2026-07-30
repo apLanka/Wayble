@@ -5,24 +5,33 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
+  FlatList,
+  Keyboard,
 } from "react-native";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { spacing, radii } from "@/constants/theme";
 import { AppText } from "@/components/ui/app-text";
+import type { NearbyPlace } from "@/hooks/use-nearby-places";
 
 interface SearchBarProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
+  results?: NearbyPlace[];
+  onSelectResult?: (place: NearbyPlace) => void;
 }
 
 export function SearchBar({
   value,
   onChangeText,
   placeholder = "Search places...",
+  results,
+  onSelectResult,
 }: SearchBarProps) {
   const { appTheme } = useAppTheme();
   const inputRef = useRef<TextInput>(null);
+
+  const showDropdown = value.length > 0 && results && results.length > 0;
 
   return (
     <View style={styles.outerContainer}>
@@ -62,6 +71,65 @@ export function SearchBar({
           </TouchableOpacity>
         )}
       </View>
+
+      {showDropdown && (
+        <View
+          style={[
+            styles.dropdown,
+            {
+              backgroundColor: appTheme.colors.surface,
+              borderColor: appTheme.colors.border,
+            },
+          ]}
+        >
+          <FlatList
+            data={results}
+            keyExtractor={(item) => item._id}
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.dropdownItem,
+                  { borderBottomColor: appTheme.colors.border },
+                ]}
+                onPress={() => {
+                  onSelectResult?.(item);
+                  Keyboard.dismiss();
+                }}
+              >
+                <View style={styles.itemHeader}>
+                  <AppText
+                    style={[styles.itemName, { color: appTheme.colors.text }]}
+                  >
+                    {item.name}
+                  </AppText>
+                  {item.distance !== undefined && (
+                    <AppText
+                      style={[
+                        styles.itemDistance,
+                        { color: appTheme.colors.textMuted },
+                      ]}
+                    >
+                      {(item.distance / 1000).toFixed(1)} km
+                    </AppText>
+                  )}
+                </View>
+                {item.accessibilityCategories &&
+                  item.accessibilityCategories.length > 0 && (
+                    <AppText
+                      style={[
+                        styles.itemFeatures,
+                        { color: appTheme.colors.primary },
+                      ]}
+                    >
+                      {item.accessibilityCategories.join(" • ")}
+                    </AppText>
+                  )}
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      )}
     </View>
   );
 }
@@ -71,7 +139,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
-    zIndex: 10,
+    zIndex: 1000,
+    elevation: 10,
   },
   container: {
     flexDirection: "row",
@@ -104,5 +173,41 @@ const styles = StyleSheet.create({
   clearIcon: {
     fontSize: 16,
     color: "#9ca3af",
+  },
+  dropdown: {
+    position: "absolute",
+    top: 60, // just below the search bar
+    left: spacing.md,
+    right: spacing.md,
+    maxHeight: 250,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 6,
+    overflow: "hidden",
+  },
+  dropdownItem: {
+    padding: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  itemHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  itemName: {
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  itemDistance: {
+    fontSize: 14,
+  },
+  itemFeatures: {
+    fontSize: 12,
+    textTransform: "capitalize",
   },
 });
