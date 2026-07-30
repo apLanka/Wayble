@@ -11,12 +11,15 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@auth/core": "^0.41.3",
+    "@convex-dev/auth": "^0.0.95",
     "convex": "^1.27.5"
   },
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
+    "@types/node": "^26.2.0",
     "convex-test": "^0.0.55",
     "eslint": "^9.31.0",
     "tsx": "^4.23.12",
