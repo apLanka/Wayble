@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, FlatList, Animated } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
@@ -75,8 +75,58 @@ export default function MapboxTab() {
 
   const selectedPlace = locations?.find((l) => l._id === selectedPlaceId);
   const [isFollowingUser, setIsFollowingUser] = useState(true);
+  const [routeCoordinates, setRouteCoordinates] = useState<number[][] | null>(
+    null,
+  );
 
   const cameraRef = React.useRef<Mapbox.Camera>(null);
+
+  // Heartbeat animation value
+  const heartbeatAnim = React.useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (selectedPlaceId) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(heartbeatAnim, {
+            toValue: 1.3,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.timing(heartbeatAnim, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+        ]),
+      ).start();
+    } else {
+      heartbeatAnim.stopAnimation();
+      heartbeatAnim.setValue(1);
+    }
+  }, [selectedPlaceId]);
+
+  const fetchRoute = async (destination: NearbyPlace) => {
+    if (!location || !MAPBOX_TOKEN) return;
+
+    try {
+      const startLng = location.coords.longitude;
+      const startLat = location.coords.latitude;
+      const endLng = destination.location.longitude;
+      const endLat = destination.location.latitude;
+
+      const response = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/walking/${startLng},${startLat};${endLng},${endLat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`,
+      );
+      const data = await response.json();
+
+      if (data.routes && data.routes.length > 0) {
+        setRouteCoordinates(data.routes[0].geometry.coordinates);
+      }
+    } catch (error) {
+      console.error("Failed to fetch route", error);
+    }
+  };
 
   const handleLocateMe = async () => {
     let currentStatus = status;
@@ -123,6 +173,22 @@ export default function MapboxTab() {
   };
 
   // Prepare GeoJSON for map
+  const routeGeojson = routeCoordinates
+    ? {
+        type: "FeatureCollection" as const,
+        features: [
+          {
+            type: "Feature" as const,
+            geometry: {
+              type: "LineString" as const,
+              coordinates: routeCoordinates,
+            },
+            properties: {},
+          },
+        ],
+      }
+    : null;
+
   const geojson = {
     type: "FeatureCollection" as const,
     features: (filtered || []).map((loc) => ({
@@ -147,7 +213,32 @@ export default function MapboxTab() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+      <SearchBar
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        results={
+          searchQuery.trim().length > 0
+            ? (locations as NearbyPlace[])
+            : undefined
+        }
+        onSelectResult={(place) => {
+          setSearchQuery("");
+          setSelectedPlaceId(place._id);
+          setManualListMode(false); // Switch to map mode
+          setRouteCoordinates(null); // Clear previous route
+
+          setTimeout(() => {
+            cameraRef.current?.setCamera({
+              centerCoordinate: [
+                place.location.longitude,
+                place.location.latitude,
+              ],
+              zoomLevel: 16,
+              animationDuration: 1000,
+            });
+          }, 100);
+        }}
+      />
       <CategoryFilter
         activeCategories={activeCategories}
         onToggleCategory={(cat) => {
@@ -290,6 +381,8 @@ export default function MapboxTab() {
                 style={{
                   circleRadius: [
                     "case",
+                    ["==", ["get", "id"], selectedPlaceId || ""],
+                    0, // Hide the standard circle for the selected place
                     ["==", ["get", "isHighlighted"], true],
                     14,
                     10,
@@ -317,6 +410,53 @@ export default function MapboxTab() {
                 }}
               />
             </Mapbox.ShapeSource>
+
+            {selectedPlace && (
+              <Mapbox.MarkerView
+                id="selected-place-marker"
+                coordinate={[
+                  selectedPlace.location.longitude,
+                  selectedPlace.location.latitude,
+                ]}
+              >
+                <Animated.View
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: "rgba(239, 68, 68, 0.4)", // Red glow
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transform: [{ scale: heartbeatAnim }],
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: 8,
+                      backgroundColor: "#ef4444", // Solid red center
+                      borderWidth: 2,
+                      borderColor: "white",
+                    }}
+                  />
+                </Animated.View>
+              </Mapbox.MarkerView>
+            )}
+
+            {routeGeojson && (
+              <Mapbox.ShapeSource id="route-source" shape={routeGeojson}>
+                <Mapbox.LineLayer
+                  id="route-layer"
+                  style={{
+                    lineColor: "#3b82f6",
+                    lineWidth: 5,
+                    lineCap: "round",
+                    lineJoin: "round",
+                  }}
+                />
+              </Mapbox.ShapeSource>
+            )}
           </Mapbox.MapView>
 
           <LocateButton onPress={handleLocateMe} bottomOffset={100} />
@@ -326,7 +466,11 @@ export default function MapboxTab() {
       {selectedPlace && !isListMode && (
         <DetailSheet
           location={selectedPlace as any} // eslint-disable-line @typescript-eslint/no-explicit-any
-          onClose={() => setSelectedPlaceId(null)}
+          onClose={() => {
+            setSelectedPlaceId(null);
+            setRouteCoordinates(null);
+          }}
+          onShowDirection={() => fetchRoute(selectedPlace)}
         />
       )}
     </SafeAreaView>
