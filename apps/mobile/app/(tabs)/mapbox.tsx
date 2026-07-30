@@ -1,6 +1,9 @@
 import React, { useState } from "react";
-import { SafeAreaView } from "react-native";
-import Mapbox from "@rnmapbox/maps";
+import { View, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { AppText } from "@/components/ui/app-text";
+import { spacing } from "@/constants/theme";
+import { useAppTheme } from "@/hooks/use-app-theme";
 import { MOCK_LOCATIONS, MAP_CENTER } from "../../data/mock-data";
 import type { AccessibleLocation } from "../../data/mock-data";
 import CategoryFilter, {
@@ -9,7 +12,24 @@ import CategoryFilter, {
 import type { Category } from "../../components/map/CategoryFilter";
 import DetailSheet from "../../components/map/DetailSheet";
 
-Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? "pk.placeholder");
+// Safely attempt to load @rnmapbox/maps because native code is not bundled in Expo Go
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let Mapbox: any = null;
+let isMapboxNativeAvailable = false;
+
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const mapboxModule = require("@rnmapbox/maps");
+  Mapbox = mapboxModule?.default ?? mapboxModule;
+  if (Mapbox && typeof Mapbox.setAccessToken === "function") {
+    Mapbox.setAccessToken(
+      process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? "pk.placeholder",
+    );
+    isMapboxNativeAvailable = true;
+  }
+} catch {
+  isMapboxNativeAvailable = false;
+}
 
 const toGeoJSON = (
   locations: AccessibleLocation[],
@@ -23,6 +43,7 @@ const toGeoJSON = (
 });
 
 export default function MapboxScreen() {
+  const { appTheme } = useAppTheme();
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [selected, setSelected] = useState<AccessibleLocation | null>(null);
 
@@ -31,7 +52,45 @@ export default function MapboxScreen() {
       ? MOCK_LOCATIONS
       : MOCK_LOCATIONS.filter((l) => l.category === activeCategory);
 
-  // ponytail: typed as any — @rnmapbox/maps doesn't re-export OnPressEvent from package root; upgrade when they do
+  // If Mapbox native binary is not linked (e.g. running in Expo Go or Web), show fallback UI
+  if (!isMapboxNativeAvailable || !Mapbox) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.container,
+          { backgroundColor: appTheme.colors.background },
+        ]}
+      >
+        <View style={styles.fallbackContainer}>
+          <AppText style={styles.fallbackIcon}>🗺️</AppText>
+          <AppText
+            variant="title"
+            style={{ color: appTheme.colors.text, textAlign: "center" }}
+          >
+            Mapbox Requires Development Build
+          </AppText>
+          <AppText
+            style={[
+              styles.fallbackDescription,
+              { color: appTheme.colors.textMuted },
+            ]}
+          >
+            <AppText variant="bodyStrong">@rnmapbox/maps</AppText> contains
+            custom native code that is not supported inside standard Expo Go.
+          </AppText>
+          <AppText
+            style={[styles.fallbackHint, { color: appTheme.colors.textMuted }]}
+          >
+            👉 Please use the{" "}
+            <AppText variant="bodyStrong">"Apple Maps"</AppText> tab in the
+            bottom bar to view the interactive map in Expo Go, or build a custom
+            development build using EAS.
+          </AppText>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleShapePress = (e: any) => {
     const feature = e.features?.[0];
@@ -47,7 +106,6 @@ export default function MapboxScreen() {
       <CategoryFilter selected={activeCategory} onSelect={setActiveCategory} />
       <Mapbox.MapView
         styleURL="mapbox://styles/mapbox/dark-v11"
-        // TODO: replace with custom high-contrast Mapbox Studio style for production
         style={{ flex: 1 }}
       >
         <Mapbox.Camera
@@ -96,7 +154,7 @@ export default function MapboxScreen() {
                 CATEGORY_COLORS.bathroom,
                 "multi",
                 CATEGORY_COLORS.multi,
-                "#E65100", // fallback
+                "#E65100",
               ],
               circleRadius: 10,
               circleStrokeColor: "#fff",
@@ -109,3 +167,31 @@ export default function MapboxScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: spacing.lg,
+    justifyContent: "center",
+  },
+  fallbackContainer: {
+    alignItems: "center",
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
+  },
+  fallbackIcon: {
+    fontSize: 48,
+    lineHeight: 56,
+  },
+  fallbackDescription: {
+    textAlign: "center",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  fallbackHint: {
+    textAlign: "center",
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: spacing.sm,
+  },
+});
