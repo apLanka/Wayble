@@ -14,37 +14,72 @@ scripts/                    Repo tooling (not a workspace)
 
 ## Setup
 
-Requires [Bun](https://bun.sh) and an Android emulator or a device running Expo Go.
+Requires [Bun](https://bun.sh), a Convex account, and an Android emulator or a
+device running Expo Go.
 
 ```bash
 bun install
-bun run --filter @packages/backend setup   # provisions YOUR OWN Convex deployment
-adb reverse tcp:3210 tcp:3210               # emulator/USB device only — see below
+bun run --filter @packages/backend setup   # provisions YOUR OWN Convex dev deployment
 bun run dev                                 # syncs env, then starts Convex + Expo
 ```
 
-**The setup step is interactive and the choice matters.** It asks whether you want
-a Convex Cloud deployment or a local one. This project was set up with a **local**
-deployment, which is why `adb reverse` is in the steps above. If you pick cloud
-instead you get an `https://….convex.cloud` URL that any device can reach, and you
-can skip `adb reverse` and the whole "Reaching Convex from a device" section.
+**The setup step is interactive — choose a Convex Cloud deployment.** It offers a
+cloud deployment or an anonymous local one. We use **cloud**: it gives you an
+`https://….convex.cloud` URL that any emulator, phone, or teammate's device can
+reach with no tunnelling, and it gives us a Convex dashboard to screenshot as
+deployment evidence for the report. If you pick local instead, see
+"Using a local Convex deployment" below for the extra setup you will need.
 
 Open the app and navigate to `/debug`. You should see a server timestamp, and
 tapping **Touch** should increment the counter with no refresh. That live update
 is the thing worth checking — it is the platform assumption the community
 verification features depend on.
 
-## Reaching Convex from a device
+### How the URL reaches Expo
 
-We use a **local** Convex deployment, so `CONVEX_URL` is `http://127.0.0.1:3210`.
-That address is correct on your Mac and wrong on every phone — `127.0.0.1` on a
-device means the device itself.
+`bun run dev` runs `scripts/sync-convex-env.ts`, which copies `CONVEX_URL` from
+`packages/backend/.env.local` into `apps/mobile/.env.local` as
+`EXPO_PUBLIC_CONVEX_URL`. The Convex CLI cannot write that value across package
+boundaries, which is why the script exists. If it ever fails, write the file
+yourself:
 
-| Target                   | What to do                                                    |
-| ------------------------ | ------------------------------------------------------------- |
-| Android emulator         | `adb reverse tcp:3210 tcp:3210`, then no env change is needed |
-| USB-tethered device      | `adb reverse tcp:3210 tcp:3210`, same as above                |
-| Device on the same Wi-Fi | set `CONVEX_URL_OVERRIDE` (below)                             |
+```
+EXPO_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
+```
+
+## Running on an emulator
+
+Convex is reachable over the public internet, so **only the Metro dev server needs
+help** — the emulator cannot route to your Mac's LAN address, which is what Expo
+advertises by default.
+
+```bash
+adb reverse tcp:8081 tcp:8081
+bunx expo start --localhost
+```
+
+Without `--localhost`, Expo hands the emulator something like
+`exp://192.168.1.14:8081`. The symptom is the app hanging on a spinner, and
+`adb logcat` showing `Couldn't connect to "ws://192.168.1.x:8081"`.
+
+A real device on the same Wi-Fi needs neither flag — the LAN address works.
+
+**Expo Go's version must match the project's SDK.** This project is on SDK 57, so
+an emulator carrying Expo Go 54 fails with "Project is incompatible with this
+version of Expo Go". Uninstall it (`adb uninstall host.exp.exponent`) and let
+`bunx expo start --android` install the matching build.
+
+## Using a local Convex deployment
+
+Only if you chose local at setup. `CONVEX_URL` is then `http://127.0.0.1:3210` —
+correct on your Mac, wrong on every device, since `127.0.0.1` on a phone means the
+phone itself.
+
+| Target                   | What to do                        |
+| ------------------------ | --------------------------------- |
+| Android emulator         | `adb reverse tcp:3210 tcp:3210`   |
+| USB-tethered device      | `adb reverse tcp:3210 tcp:3210`   |
+| Device on the same Wi-Fi | set `CONVEX_URL_OVERRIDE` (below) |
 
 For a Wi-Fi device, add one line to `packages/backend/.env.local`:
 
@@ -52,32 +87,20 @@ For a Wi-Fi device, add one line to `packages/backend/.env.local`:
 CONVEX_URL_OVERRIDE=http://192.168.1.x:3210
 ```
 
-`scripts/sync-convex-env.ts` prefers that over `CONVEX_URL`, so `bun run dev`
-stops overwriting your address. The file is git-ignored, so everyone can point at
-their own machine.
+`scripts/sync-convex-env.ts` prefers that over `CONVEX_URL`, so `bun run dev` stops
+overwriting your address. The file is git-ignored, so everyone can point at their
+own machine.
 
-**The local backend only listens while a Convex dev process is running** — either
-`bun run dev` (which starts it via Turbo) or `bun run --filter @packages/backend dev`
-on its own. If the debug screen hangs on "Connecting to Convex…", check the port
-before suspecting the subscription.
-
-### How the URL reaches Expo
-
-`bun run dev` runs `scripts/sync-convex-env.ts`, which copies `CONVEX_URL` (or
-`CONVEX_URL_OVERRIDE`) from `packages/backend/.env.local` into
-`apps/mobile/.env.local` as `EXPO_PUBLIC_CONVEX_URL`. The Convex CLI cannot write
-that value across package boundaries, which is why the script exists. If it ever
-fails, write the file yourself:
-
-```
-EXPO_PUBLIC_CONVEX_URL=http://127.0.0.1:3210
-```
+A local backend only listens while a Convex dev process is running. If the debug
+screen hangs on "Connecting to Convex…", check the port before suspecting the
+subscription.
 
 ## Deployments
 
-Each developer runs the setup step once and gets their own deployment, so we never
-contend over one backend. `master` maps to the production deployment, deployed by
-`bunx convex deploy` **from CI only** — do not run `convex deploy` from your laptop.
+Each developer runs the setup step once and gets their **own** cloud dev
+deployment, so we never contend over one backend. `master` maps to the single
+production deployment, deployed by `bunx convex deploy` **from CI only** — do not
+run `convex deploy` from your laptop.
 
 ## Branching
 
