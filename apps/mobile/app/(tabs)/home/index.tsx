@@ -31,10 +31,10 @@ export default function HomeScreen() {
             accessibilityLabel="Open debug screen"
             accessibilityHint="Opens the Convex connection health check"
             focusColor={appTheme.colors.onPrimary}
-            style={[
-              styles.debugButton,
-              { backgroundColor: appTheme.colors.primary },
-            ]}
+            style={{
+              ...styles.debugButton,
+              backgroundColor: appTheme.colors.primary,
+            }}
           >
             <AppText
               variant="bodyStrong"
