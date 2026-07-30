@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { SafeAreaView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 // react-native-map-clustering New Architecture (Fabric) compatibility is unverified for this package.
 import MapView from "react-native-map-clustering";
 import { Marker } from "react-native-maps";
