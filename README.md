@@ -119,15 +119,30 @@ Every change reaches `develop` through a reviewed PR. Branch protection was
 enabled **after** the initial scaffold landed — protecting an empty repository
 deadlocks the first PR, since there is nothing for a reviewer to review.
 
+### Seeding Public Spaces (US-06)
+
+To populate the Convex database with ~150 real public spaces in Greater Colombo & Malabe (including hospitals, transit hubs, universities, parks, and malls) and index them in the geospatial engine:
+
+```bash
+bun run seed              # Idempotently inserts ~150 places and builds the geo index
+```
+
+To re-fetch fresh OpenStreetMap POIs via the Overpass API:
+```bash
+bun run seed:osm          # Fetches latest POIs from OSM Overpass into seed dataset
+```
+
 ## Commands
 
-| Command               | Effect                                              |
-| --------------------- | --------------------------------------------------- |
-| `bun run dev`         | Sync env, then run Convex and Expo together         |
-| `bun run lint`        | ESLint across all workspaces                        |
-| `bun run check-types` | `tsc --noEmit` for `scripts/`, then both workspaces |
-| `bun run test`        | Unit tests for `scripts/`                           |
-| `bun run format`      | Prettier write                                      |
+| Command               | Effect                                                     |
+| --------------------- | ---------------------------------------------------------- |
+| `bun run dev`         | Sync env, then run Convex and Expo together                |
+| `bun run seed`        | Idempotently seed ~150 real public spaces into Convex & geo|
+| `bun run seed:osm`    | Fetch latest OSM Overpass POIs for Greater Colombo         |
+| `bun run lint`        | ESLint across all workspaces                               |
+| `bun run check-types` | `tsc --noEmit` for `scripts/`, then both workspaces        |
+| `bun run test`        | Unit tests for `scripts/`                                  |
+| `bun run format`      | Prettier write                                             |
 
 A Husky pre-commit hook runs `lint-staged` → `lint` → `check-types`. There is no
 build step in this repo, so the hook does not run one.
