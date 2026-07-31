@@ -14,6 +14,8 @@ import type * as geoSpike from "../geoSpike.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
 import type * as places from "../places.js";
+import type * as seed from "../seed.js";
+import type * as seed_placesSeedData from "../seed/placesSeedData.js";
 import type * as users from "../users.js";
 
 import type {
@@ -29,6 +31,8 @@ declare const fullApi: ApiFromModules<{
   health: typeof health;
   http: typeof http;
   places: typeof places;
+  seed: typeof seed;
+  "seed/placesSeedData": typeof seed_placesSeedData;
   users: typeof users;
 }>;
 
