@@ -8,7 +8,9 @@
     "setup": "convex dev --until-success",
     "lint": "eslint .",
     "check-types": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest",
+    "seed": "convex run seed:seedPlaces",
+    "seed:reset": "convex run seed:seedPlaces '{\"clearExisting\": true}'"
   },
   "dependencies": {
     "@auth/core": "^0.41.3",

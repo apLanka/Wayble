@@ -14,6 +14,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,md,json,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,md,json,yml,yaml}\"",
     "test": "bun test scripts/",
+    "seed": "bun run --filter @packages/backend seed",
+    "seed:osm": "bun run scripts/fetch-osm-places.ts",
     "prepare": "husky"
   },
   "devDependencies": {
