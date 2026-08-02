@@ -5,26 +5,20 @@ import placesJson from "./places.json";
  * Defines the required structure of each place in the seed dataset.
  */
 export type SeedPlace = {
-  // Display name of the public place.
   name: string;
-
   // Category used to classify and filter the place.
   category:
-    | "education"
-    | "food_and_drink"
-    | "government"
-    | "healthcare"
-    | "lodging"
-    | "outdoor"
-    | "retail"
-    | "transport"
-    | "workplace"
-    | "other";
-
-  // Physical address of the place.
+  | "education"
+  | "food_and_drink"
+  | "government"
+  | "healthcare"
+  | "lodging"
+  | "outdoor"
+  | "retail"
+  | "transport"
+  | "workplace"
+  | "other";
   address: string;
-
-  // Geographic coordinates used to display the place on the map.
   location: {
     latitude: number;
     longitude: number;
