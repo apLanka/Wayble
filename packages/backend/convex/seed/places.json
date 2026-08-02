@@ -1,0 +1,1397 @@
+[
+  {
+    "name": "Secretariat Halt",
+    "category": "transport",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.931446,
+      "longitude": 79.84602
+    }
+  },
+  {
+    "name": "Asiri Surgical Hospital",
+    "category": "healthcare",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.894549,
+      "longitude": 79.879717
+    }
+  },
+  {
+    "name": "Joseph Fraser Memorial Hospital",
+    "category": "healthcare",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.895205,
+      "longitude": 79.865219
+    }
+  },
+  {
+    "name": "Cinnamon Lakeside Hotel",
+    "category": "lodging",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.929123,
+      "longitude": 79.849379
+    }
+  },
+  {
+    "name": "Sri Jayawardenapura teaching hospital",
+    "category": "healthcare",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.868334,
+      "longitude": 79.926152
+    }
+  },
+  {
+    "name": "Cargills Food City",
+    "category": "retail",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.920231,
+      "longitude": 79.855823
+    }
+  },
+  {
+    "name": "Commercial Bank of Ceylon",
+    "category": "workplace",
+    "address": "14, Sunethradevi Road, Kohuwala",
+    "location": {
+      "latitude": 6.866303,
+      "longitude": 79.884961
+    }
+  },
+  {
+    "name": "Cafe Lavinia",
+    "category": "food_and_drink",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.894328,
+      "longitude": 79.857228
+    }
+  },
+  {
+    "name": "Kingston College International",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.87985,
+      "longitude": 79.862441
+    }
+  },
+  {
+    "name": "Gateway College Colombo",
+    "category": "education",
+    "address": "Royal Garden, Sri Jayawardenepura Kotte",
+    "location": {
+      "latitude": 6.903073,
+      "longitude": 79.899681
+    }
+  },
+  {
+    "name": "P & A",
+    "category": "retail",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.882478,
+      "longitude": 79.861482
+    }
+  },
+  {
+    "name": "Muslim Ladies College",
+    "category": "education",
+    "address": "R. A. De Mel Mawatha, Bambalapitiya",
+    "location": {
+      "latitude": 6.881668,
+      "longitude": 79.861429
+    }
+  },
+  {
+    "name": "Haus Chandra Hotel",
+    "category": "lodging",
+    "address": "Dehiwala / Mount Lavinia, Western Province",
+    "location": {
+      "latitude": 6.842271,
+      "longitude": 79.86309
+    }
+  },
+  {
+    "name": "Cinnamon Gardens Police",
+    "category": "government",
+    "address": "Premasiri Khemadasa Mawatha (Guilford Crescent), Colombo 07",
+    "location": {
+      "latitude": 6.907311,
+      "longitude": 79.863873
+    }
+  },
+  {
+    "name": "Ananda Vidyalaya,  Kottawa",
+    "category": "education",
+    "address": "Old Kottawa Road, Nugegoda",
+    "location": {
+      "latitude": 6.844234,
+      "longitude": 79.958168
+    }
+  },
+  {
+    "name": "Dharmapala Vidyalaya Kottawa North",
+    "category": "education",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.865524,
+      "longitude": 79.958487
+    }
+  },
+  {
+    "name": "Keells Super",
+    "category": "retail",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.921457,
+      "longitude": 79.855989
+    }
+  },
+  {
+    "name": "NTB Head Office",
+    "category": "workplace",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.92065,
+      "longitude": 79.856859
+    }
+  },
+  {
+    "name": "Pelawatte",
+    "category": "transport",
+    "address": "Sri Jayawardenepura Kotte, Western Province",
+    "location": {
+      "latitude": 6.890507,
+      "longitude": 79.928893
+    }
+  },
+  {
+    "name": "Laugfs",
+    "category": "retail",
+    "address": "Sri Jayawardenepura Kotte, Western Province",
+    "location": {
+      "latitude": 6.891172,
+      "longitude": 79.927924
+    }
+  },
+  {
+    "name": "Vidya Wardana",
+    "category": "education",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.88808,
+      "longitude": 79.929977
+    }
+  },
+  {
+    "name": "Police Station Thalangama - Koswatte",
+    "category": "government",
+    "address": "Kalapaluwawa Road, Koswatte",
+    "location": {
+      "latitude": 6.9109,
+      "longitude": 79.929348
+    }
+  },
+  {
+    "name": "Divisional Hospital Thalangama",
+    "category": "healthcare",
+    "address": "Sri Jayawardenepura Kotte, Western Province",
+    "location": {
+      "latitude": 6.906233,
+      "longitude": 79.92852
+    }
+  },
+  {
+    "name": "Economic Shops & Groceries",
+    "category": "retail",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.893864,
+      "longitude": 79.88255
+    }
+  },
+  {
+    "name": "Pannipitiya Nursing Home",
+    "category": "healthcare",
+    "address": "Pannipitiya-Malambe Road, Pannipitiya",
+    "location": {
+      "latitude": 6.846822,
+      "longitude": 79.952262
+    }
+  },
+  {
+    "name": "Seylan Bank",
+    "category": "workplace",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.887298,
+      "longitude": 79.883922
+    }
+  },
+  {
+    "name": "President's College",
+    "category": "education",
+    "address": "Mahamegawatte Road, Maharagama",
+    "location": {
+      "latitude": 6.844379,
+      "longitude": 79.929622
+    }
+  },
+  {
+    "name": "Vidyakara Balika Vidyalaya",
+    "category": "education",
+    "address": "Maharagama-Dehiwala Road, Maharagama",
+    "location": {
+      "latitude": 6.845125,
+      "longitude": 79.926006
+    }
+  },
+  {
+    "name": "Ananda College",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.924336,
+      "longitude": 79.86855
+    }
+  },
+  {
+    "name": "Weluwana Vidyalaya",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.926872,
+      "longitude": 79.879824
+    }
+  },
+  {
+    "name": "Seewali Vidyalaya",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.923538,
+      "longitude": 79.880597
+    }
+  },
+  {
+    "name": "KFC",
+    "category": "food_and_drink",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.920328,
+      "longitude": 79.857695
+    }
+  },
+  {
+    "name": "Bank of Ceylon",
+    "category": "workplace",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.920532,
+      "longitude": 79.857463
+    }
+  },
+  {
+    "name": "Ramada Colombo",
+    "category": "lodging",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.921166,
+      "longitude": 79.847648
+    }
+  },
+  {
+    "name": "Seylan Townhall",
+    "category": "workplace",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.916784,
+      "longitude": 79.864595
+    }
+  },
+  {
+    "name": "Sampath Bank",
+    "category": "workplace",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.916414,
+      "longitude": 79.875784
+    }
+  },
+  {
+    "name": "HNB",
+    "category": "workplace",
+    "address": "Sri Jayawardenepura Kotte, Western Province",
+    "location": {
+      "latitude": 6.909951,
+      "longitude": 79.895813
+    }
+  },
+  {
+    "name": "Western Hospital",
+    "category": "healthcare",
+    "address": "Cotta Road, colombo 08",
+    "location": {
+      "latitude": 6.911705,
+      "longitude": 79.885636
+    }
+  },
+  {
+    "name": "Senkada",
+    "category": "food_and_drink",
+    "address": "Sri Jayawardenepura Kotte, Western Province",
+    "location": {
+      "latitude": 6.894002,
+      "longitude": 79.917485
+    }
+  },
+  {
+    "name": "Hatton National Bank",
+    "category": "workplace",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.87566,
+      "longitude": 79.936083
+    }
+  },
+  {
+    "name": "Nugegoda Supermarket",
+    "category": "retail",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.872915,
+      "longitude": 79.891453
+    }
+  },
+  {
+    "name": "Police Station",
+    "category": "government",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.867135,
+      "longitude": 79.884429
+    }
+  },
+  {
+    "name": "Meat Locker",
+    "category": "food_and_drink",
+    "address": "Stanley Thilakarathne Mawatha, Nugegoda",
+    "location": {
+      "latitude": 6.875665,
+      "longitude": 79.892367
+    }
+  },
+  {
+    "name": "King Joy",
+    "category": "food_and_drink",
+    "address": "Sri Jayawardenepura Kotte, Western Province",
+    "location": {
+      "latitude": 6.905122,
+      "longitude": 79.9052
+    }
+  },
+  {
+    "name": "Great Wall",
+    "category": "food_and_drink",
+    "address": "Sri Jayawardenepura Kotte, Western Province",
+    "location": {
+      "latitude": 6.891176,
+      "longitude": 79.928383
+    }
+  },
+  {
+    "name": "Welikada Police Station",
+    "category": "government",
+    "address": "Sri Jayawardenapura Mawatha, Rajagiriya WP",
+    "location": {
+      "latitude": 6.908887,
+      "longitude": 79.895284
+    }
+  },
+  {
+    "name": "Borella Police Station",
+    "category": "government",
+    "address": "Kotta Road, Borella",
+    "location": {
+      "latitude": 6.915285,
+      "longitude": 79.878292
+    }
+  },
+  {
+    "name": "Borella",
+    "category": "transport",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.915381,
+      "longitude": 79.877805
+    }
+  },
+  {
+    "name": "Xialton Chinese resturant",
+    "category": "food_and_drink",
+    "address": "126, Sri Sambuddhathva Jayanthi Mawatha, Thimbirigasyaya",
+    "location": {
+      "latitude": 6.892549,
+      "longitude": 79.861982
+    }
+  },
+  {
+    "name": "HSBC",
+    "category": "workplace",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.896272,
+      "longitude": 79.856966
+    }
+  },
+  {
+    "name": "Dematagoda",
+    "category": "transport",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.937547,
+      "longitude": 79.879015
+    }
+  },
+  {
+    "name": "CDB",
+    "category": "workplace",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.932092,
+      "longitude": 79.860981
+    }
+  },
+  {
+    "name": "Gunasinghepura Bus Stop",
+    "category": "transport",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.937128,
+      "longitude": 79.855621
+    }
+  },
+  {
+    "name": "Fort Bus Stop",
+    "category": "transport",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.934033,
+      "longitude": 79.850296
+    }
+  },
+  {
+    "name": "People's Bank",
+    "category": "workplace",
+    "address": "Chittampalam Gardiner Mawatha, Colombo",
+    "location": {
+      "latitude": 6.930148,
+      "longitude": 79.847768
+    }
+  },
+  {
+    "name": "Post Office Punchi Borerella",
+    "category": "government",
+    "address": "Gnanartha Pradeepa Mawatha, Punchi Borella",
+    "location": {
+      "latitude": 6.921353,
+      "longitude": 79.87092
+    }
+  },
+  {
+    "name": "Sampath Borella",
+    "category": "workplace",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.913908,
+      "longitude": 79.878604
+    }
+  },
+  {
+    "name": "NTB",
+    "category": "workplace",
+    "address": "Sri Jayawardenepura Kotte, Western Province",
+    "location": {
+      "latitude": 6.896829,
+      "longitude": 79.920606
+    }
+  },
+  {
+    "name": "ODEL",
+    "category": "retail",
+    "address": "Alexandra Place, Colombo 07",
+    "location": {
+      "latitude": 6.91679,
+      "longitude": 79.865357
+    }
+  },
+  {
+    "name": "Colombo General Hospital",
+    "category": "healthcare",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.917244,
+      "longitude": 79.867195
+    }
+  },
+  {
+    "name": "Sathosa Athurugiriya",
+    "category": "retail",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.877579,
+      "longitude": 79.989011
+    }
+  },
+  {
+    "name": "Buwanekaba Vidyalaya",
+    "category": "education",
+    "address": "High Level Road, Maharagama",
+    "location": {
+      "latitude": 6.848843,
+      "longitude": 79.924939
+    }
+  },
+  {
+    "name": "Manel",
+    "category": "food_and_drink",
+    "address": "High Level Road, Wattegedara Junction",
+    "location": {
+      "latitude": 6.85068,
+      "longitude": 79.921678
+    }
+  },
+  {
+    "name": "Nawinna Medicare Hospital",
+    "category": "healthcare",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.85465,
+      "longitude": 79.914341
+    }
+  },
+  {
+    "name": "Udahamulla Depot",
+    "category": "transport",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.865112,
+      "longitude": 79.911971
+    }
+  },
+  {
+    "name": "Barista",
+    "category": "food_and_drink",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.911743,
+      "longitude": 79.867367
+    }
+  },
+  {
+    "name": "Ladies College",
+    "category": "education",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.907875,
+      "longitude": 79.857921
+    }
+  },
+  {
+    "name": "Cafe on the 5th",
+    "category": "food_and_drink",
+    "address": "5th Lane, Colombo 7",
+    "location": {
+      "latitude": 6.905338,
+      "longitude": 79.857103
+    }
+  },
+  {
+    "name": "Mahanama College",
+    "category": "education",
+    "address": "R.A. De Mel Mawatha, Colombo 03",
+    "location": {
+      "latitude": 6.905454,
+      "longitude": 79.853831
+    }
+  },
+  {
+    "name": "Liberty Plaza",
+    "category": "retail",
+    "address": "Srimath Anagarika Dharmapala Mawatha, Colombo 03",
+    "location": {
+      "latitude": 6.911858,
+      "longitude": 79.851194
+    }
+  },
+  {
+    "name": "Pizza Hut",
+    "category": "food_and_drink",
+    "address": "7, Station Road, Bambalapitiya",
+    "location": {
+      "latitude": 6.893578,
+      "longitude": 79.854738
+    }
+  },
+  {
+    "name": "Crescat Boulevard",
+    "category": "retail",
+    "address": "Galle Road, Colombo 03",
+    "location": {
+      "latitude": 6.917003,
+      "longitude": 79.848217
+    }
+  },
+  {
+    "name": "PABC",
+    "category": "workplace",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.878169,
+      "longitude": 79.87621
+    }
+  },
+  {
+    "name": "Gihans",
+    "category": "food_and_drink",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.864907,
+      "longitude": 79.896774
+    }
+  },
+  {
+    "name": "Salaka",
+    "category": "food_and_drink",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.917713,
+      "longitude": 79.863246
+    }
+  },
+  {
+    "name": "Peoples Bank",
+    "category": "workplace",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.916495,
+      "longitude": 79.86323
+    }
+  },
+  {
+    "name": "Osu Sala",
+    "category": "healthcare",
+    "address": "Union Place, Colombo 07",
+    "location": {
+      "latitude": 6.917206,
+      "longitude": 79.863598
+    }
+  },
+  {
+    "name": "Perera & Sons",
+    "category": "food_and_drink",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.86862,
+      "longitude": 79.886959
+    }
+  },
+  {
+    "name": "BOC",
+    "category": "workplace",
+    "address": "New Kandy Road, Malabe",
+    "location": {
+      "latitude": 6.904224,
+      "longitude": 79.95535
+    }
+  },
+  {
+    "name": "Sri Rahula Balika Maha Vidyalaya",
+    "category": "education",
+    "address": "Malabe, Western Province",
+    "location": {
+      "latitude": 6.903637,
+      "longitude": 79.956132
+    }
+  },
+  {
+    "name": "Vallibel Finance",
+    "category": "workplace",
+    "address": "Sri Jayawardenepura Kotte, Western Province",
+    "location": {
+      "latitude": 6.891956,
+      "longitude": 79.928981
+    }
+  },
+  {
+    "name": "Bollegala Maha Vidyalayaa",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.944396,
+      "longitude": 79.948151
+    }
+  },
+  {
+    "name": "Mulleriyawa Hospital",
+    "category": "healthcare",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.924771,
+      "longitude": 79.942918
+    }
+  },
+  {
+    "name": "Salmal Uyana",
+    "category": "transport",
+    "address": "Malabe, Western Province",
+    "location": {
+      "latitude": 6.922667,
+      "longitude": 79.951875
+    }
+  },
+  {
+    "name": "AAT",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.896641,
+      "longitude": 79.876902
+    }
+  },
+  {
+    "name": "Narahenpita",
+    "category": "transport",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.891591,
+      "longitude": 79.877098
+    }
+  },
+  {
+    "name": "Nations Trust Bank",
+    "category": "workplace",
+    "address": "267A, Nawala road, Nawala",
+    "location": {
+      "latitude": 6.885655,
+      "longitude": 79.887023
+    }
+  },
+  {
+    "name": "Siddhalepa",
+    "category": "healthcare",
+    "address": "Dehiwala / Mount Lavinia, Western Province",
+    "location": {
+      "latitude": 6.831185,
+      "longitude": 79.877322
+    }
+  },
+  {
+    "name": "Keells Super, Mount Lavinia.",
+    "category": "retail",
+    "address": "Dehiwala / Mount Lavinia, Western Province",
+    "location": {
+      "latitude": 6.831863,
+      "longitude": 79.867327
+    }
+  },
+  {
+    "name": "Mount Lavinia",
+    "category": "transport",
+    "address": "Dehiwala / Mount Lavinia, Western Province",
+    "location": {
+      "latitude": 6.833538,
+      "longitude": 79.86725
+    }
+  },
+  {
+    "name": "Berjaya Mount Royal Beach Hotel",
+    "category": "lodging",
+    "address": "Dehiwala / Mount Lavinia, Western Province",
+    "location": {
+      "latitude": 6.838679,
+      "longitude": 79.863535
+    }
+  },
+  {
+    "name": "Presbyterian Girls School",
+    "category": "education",
+    "address": "Dehiwala / Mount Lavinia, Western Province",
+    "location": {
+      "latitude": 6.850498,
+      "longitude": 79.863384
+    }
+  },
+  {
+    "name": "Family Super",
+    "category": "retail",
+    "address": "Dehiwala / Mount Lavinia, Western Province",
+    "location": {
+      "latitude": 6.841872,
+      "longitude": 79.867123
+    }
+  },
+  {
+    "name": "St. Mary's College",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.86001,
+      "longitude": 79.865798
+    }
+  },
+  {
+    "name": "American College",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.862791,
+      "longitude": 79.864667
+    }
+  },
+  {
+    "name": "Shanmugas",
+    "category": "food_and_drink",
+    "address": "53, Ramakrishna Road, Wellawatte",
+    "location": {
+      "latitude": 6.86486,
+      "longitude": 79.860321
+    }
+  },
+  {
+    "name": "Sirimavo Bandaranayake Vidyalaya",
+    "category": "education",
+    "address": "Keppetipola Mawatha, Colombo 07",
+    "location": {
+      "latitude": 6.895012,
+      "longitude": 79.863653
+    }
+  },
+  {
+    "name": "NSB",
+    "category": "workplace",
+    "address": "350, Galle Road, Colombo 04",
+    "location": {
+      "latitude": 6.87994,
+      "longitude": 79.859544
+    }
+  },
+  {
+    "name": "Post Office Talawatugoda",
+    "category": "government",
+    "address": "Talawatugoda Road, Talawatugoda",
+    "location": {
+      "latitude": 6.875073,
+      "longitude": 79.935357
+    }
+  },
+  {
+    "name": "Cargills",
+    "category": "retail",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.883478,
+      "longitude": 79.901776
+    }
+  },
+  {
+    "name": "Mirihana Police Station",
+    "category": "government",
+    "address": "Old Kottawa Road, Nugegoda",
+    "location": {
+      "latitude": 6.874348,
+      "longitude": 79.902023
+    }
+  },
+  {
+    "name": "Cargills Pepiliyana",
+    "category": "retail",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.859009,
+      "longitude": 79.890287
+    }
+  },
+  {
+    "name": "Vidyaraja Maha Vidyalaya",
+    "category": "education",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.881365,
+      "longitude": 79.959747
+    }
+  },
+  {
+    "name": "Vidura",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.895058,
+      "longitude": 79.887688
+    }
+  },
+  {
+    "name": "Harcourts",
+    "category": "healthcare",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.911132,
+      "longitude": 79.884532
+    }
+  },
+  {
+    "name": "Siddhartha Vidyalaya",
+    "category": "education",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.867638,
+      "longitude": 79.916025
+    }
+  },
+  {
+    "name": "Crystal Super Market",
+    "category": "retail",
+    "address": "Dehiwala / Mount Lavinia, Western Province",
+    "location": {
+      "latitude": 6.859997,
+      "longitude": 79.864222
+    }
+  },
+  {
+    "name": "FAB",
+    "category": "food_and_drink",
+    "address": "High Level Road, Nugegoda WP",
+    "location": {
+      "latitude": 6.870602,
+      "longitude": 79.887117
+    }
+  },
+  {
+    "name": "Ananda Balika Vidyalaya",
+    "category": "education",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.885119,
+      "longitude": 79.897265
+    }
+  },
+  {
+    "name": "Kinjou",
+    "category": "food_and_drink",
+    "address": "Amarasekera Road, Havelock Town",
+    "location": {
+      "latitude": 6.885192,
+      "longitude": 79.866541
+    }
+  },
+  {
+    "name": "Buddhagosha College",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.865499,
+      "longitude": 79.871553
+    }
+  },
+  {
+    "name": "S W R D Bandaranayake School",
+    "category": "education",
+    "address": "Kotta Road, Colombo 9",
+    "location": {
+      "latitude": 6.911889,
+      "longitude": 79.886945
+    }
+  },
+  {
+    "name": "British School",
+    "category": "education",
+    "address": "63, Elvitigala Mawatha, Colombo 07",
+    "location": {
+      "latitude": 6.906145,
+      "longitude": 79.877519
+    }
+  },
+  {
+    "name": "Girls High School",
+    "category": "education",
+    "address": "Dehiwala / Mount Lavinia, Western Province",
+    "location": {
+      "latitude": 6.834606,
+      "longitude": 79.864985
+    }
+  },
+  {
+    "name": "DFCC Vardhana Bank",
+    "category": "workplace",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.914329,
+      "longitude": 79.856885
+    }
+  },
+  {
+    "name": "C.W.W Kannangara Vidyalaya",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.919001,
+      "longitude": 79.877254
+    }
+  },
+  {
+    "name": "Rathnawali Balika Maha Vidyalaya",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.918351,
+      "longitude": 79.874475
+    }
+  },
+  {
+    "name": "Aquinas College",
+    "category": "education",
+    "address": "P De S Kularatne Mawatha, Borella",
+    "location": {
+      "latitude": 6.917211,
+      "longitude": 79.87488
+    }
+  },
+  {
+    "name": "All Saints College",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.920503,
+      "longitude": 79.87529
+    }
+  },
+  {
+    "name": "Zahira College",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.927702,
+      "longitude": 79.86483
+    }
+  },
+  {
+    "name": "Nalanda College",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.923442,
+      "longitude": 79.873681
+    }
+  },
+  {
+    "name": "N I B M",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.906436,
+      "longitude": 79.870785
+    }
+  },
+  {
+    "name": "Sulaiman",
+    "category": "healthcare",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.942059,
+      "longitude": 79.865806
+    }
+  },
+  {
+    "name": "St. Josephs College",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.948152,
+      "longitude": 79.874796
+    }
+  },
+  {
+    "name": "Lavinia Breeze",
+    "category": "food_and_drink",
+    "address": "Dehiwala / Mount Lavinia, Western Province",
+    "location": {
+      "latitude": 6.841332,
+      "longitude": 79.86322
+    }
+  },
+  {
+    "name": "National Art Gallery",
+    "category": "outdoor",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.91141,
+      "longitude": 79.861969
+    }
+  },
+  {
+    "name": "British Council",
+    "category": "education",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.89975,
+      "longitude": 79.856454
+    }
+  },
+  {
+    "name": "St.Thomas Preparatory School",
+    "category": "education",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.916803,
+      "longitude": 79.847597
+    }
+  },
+  {
+    "name": "Sea View Hotel",
+    "category": "lodging",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.909742,
+      "longitude": 79.851574
+    }
+  },
+  {
+    "name": "Pillawoos",
+    "category": "food_and_drink",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.90194,
+      "longitude": 79.852982
+    }
+  },
+  {
+    "name": "ICFAI",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.870386,
+      "longitude": 79.878386
+    }
+  },
+  {
+    "name": "Colombo South International College",
+    "category": "education",
+    "address": "43, S De S Jayasinghe Mawatha, Kalubowila, Dehiwela",
+    "location": {
+      "latitude": 6.866423,
+      "longitude": 79.880296
+    }
+  },
+  {
+    "name": "Keells",
+    "category": "retail",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.871387,
+      "longitude": 79.88506
+    }
+  },
+  {
+    "name": "St. Paul's college",
+    "category": "education",
+    "address": "Galle Road, Bambalapitiya",
+    "location": {
+      "latitude": 6.88587,
+      "longitude": 79.858125
+    }
+  },
+  {
+    "name": "Laughs Super Market",
+    "category": "retail",
+    "address": "351, Galle Road, Wellawatte - Colombo 06",
+    "location": {
+      "latitude": 6.871522,
+      "longitude": 79.862156
+    }
+  },
+  {
+    "name": "St. Lawrance Girls School",
+    "category": "education",
+    "address": "213, Galle Road, Wellawatte - Colombo 06",
+    "location": {
+      "latitude": 6.874794,
+      "longitude": 79.861419
+    }
+  },
+  {
+    "name": "C I M A",
+    "category": "education",
+    "address": "Elvitigala Mawatha, Colombo",
+    "location": {
+      "latitude": 6.898406,
+      "longitude": 79.87688
+    }
+  },
+  {
+    "name": "Wycherley International School",
+    "category": "education",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.900592,
+      "longitude": 79.867238
+    }
+  },
+  {
+    "name": "Mango Tree Indian",
+    "category": "food_and_drink",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.912706,
+      "longitude": 79.855558
+    }
+  },
+  {
+    "name": "Union Bank",
+    "category": "workplace",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.912049,
+      "longitude": 79.854878
+    }
+  },
+  {
+    "name": "St Mary's Girl School",
+    "category": "education",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.913717,
+      "longitude": 79.85331
+    }
+  },
+  {
+    "name": "St. Micheals College",
+    "category": "education",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.913611,
+      "longitude": 79.852795
+    }
+  },
+  {
+    "name": "NDB",
+    "category": "workplace",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.913476,
+      "longitude": 79.857195
+    }
+  },
+  {
+    "name": "NTB Nawam Mawatha",
+    "category": "workplace",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.919238,
+      "longitude": 79.850763
+    }
+  },
+  {
+    "name": "NDB Nawam Mawatha",
+    "category": "workplace",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.918732,
+      "longitude": 79.851082
+    }
+  },
+  {
+    "name": "Seylan Kalubowila",
+    "category": "workplace",
+    "address": "Colombo, Western Province",
+    "location": {
+      "latitude": 6.866293,
+      "longitude": 79.878319
+    }
+  },
+  {
+    "name": "168 Seafood Palace",
+    "category": "food_and_drink",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.908999,
+      "longitude": 79.850934
+    }
+  },
+  {
+    "name": "NDB Galle Face",
+    "category": "workplace",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.920032,
+      "longitude": 79.848383
+    }
+  },
+  {
+    "name": "Food City",
+    "category": "workplace",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.872646,
+      "longitude": 79.890079
+    }
+  },
+  {
+    "name": "Royal Institute Nugegoda",
+    "category": "education",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.872306,
+      "longitude": 79.893517
+    }
+  },
+  {
+    "name": "Peoples Bank Pitakotte",
+    "category": "workplace",
+    "address": "Nugegoda, Western Province",
+    "location": {
+      "latitude": 6.883898,
+      "longitude": 79.901397
+    }
+  },
+  {
+    "name": "Sri Jayawardanepura Girl School",
+    "category": "education",
+    "address": "Sri Jayawardenepura Kotte, Western Province",
+    "location": {
+      "latitude": 6.892036,
+      "longitude": 79.900427
+    }
+  },
+  {
+    "name": "Standard Chartered",
+    "category": "workplace",
+    "address": "Union Place, Colombo 10",
+    "location": {
+      "latitude": 6.917741,
+      "longitude": 79.863777
+    }
+  },
+  {
+    "name": "Maradana Technical College",
+    "category": "education",
+    "address": "Colombo City Center, Western Province",
+    "location": {
+      "latitude": 6.932183,
+      "longitude": 79.859464
+    }
+  },
+  {
+    "name": "Dharmashoka Primary School",
+    "category": "education",
+    "address": "High Level Road, Maharagama",
+    "location": {
+      "latitude": 6.845007,
+      "longitude": 79.935252
+    }
+  }
+]
