@@ -1,7 +1,7 @@
 import React from "react";
 import { ScrollView, TouchableOpacity, Text, StyleSheet } from "react-native";
 
-type Category = "all" | "wheelchair" | "elevator" | "bathroom";
+export type Category = "all" | "wheelchair" | "elevator" | "bathroom";
 
 type Props = {
   selected: Category;
