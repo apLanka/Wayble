@@ -40,6 +40,7 @@ export default function DetailSheet({ location, onClose }: Props) {
       ref={sheetRef}
       index={-1}
       snapPoints={SNAP_POINTS}
+      enableDynamicSizing={false}
       enablePanDownToClose
       onChange={handleSheetChange}
     >

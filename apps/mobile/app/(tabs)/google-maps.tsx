@@ -4,13 +4,13 @@ import { SafeAreaView } from "react-native";
 // types from @types/react-native-map-clustering are not available on npm as of 2026.
 // New Architecture (Fabric) compatibility is unverified for this package.
 import MapView, { Marker } from "react-native-map-clustering";
+import { PROVIDER_GOOGLE } from "react-native-maps";
 import { MOCK_LOCATIONS } from "../../data/mock-data";
 import type { AccessibleLocation } from "../../data/mock-data";
 import CategoryFilter from "../../components/map/CategoryFilter";
 import DetailSheet from "../../components/map/DetailSheet";
 import AccessibilityPin from "../../components/map/AccessibilityPin";
-
-type Category = "all" | "wheelchair" | "elevator" | "bathroom";
+import type { Category } from "../../components/map/CategoryFilter";
 
 const HIGH_CONTRAST_STYLE = [
   { elementType: "geometry", stylers: [{ color: "#212121" }] },
@@ -54,6 +54,7 @@ export default function GoogleMapsScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       <CategoryFilter selected={activeCategory} onSelect={setActiveCategory} />
       <MapView
+        provider={PROVIDER_GOOGLE}
         style={{ flex: 1 }}
         initialRegion={INITIAL_REGION}
         customMapStyle={HIGH_CONTRAST_STYLE}
