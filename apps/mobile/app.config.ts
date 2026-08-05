@@ -6,13 +6,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: config.slug ?? "mobile",
   plugins: [
     ...(config.plugins ?? []),
-    [
-      "@rnmapbox/maps",
-      {
-        RNMapboxMapsDownloadToken:
-          process.env.RNMAPBOX_DOWNLOAD_TOKEN ?? "sk.placeholder",
-      },
-    ],
+    // Download token is no longer passed via plugin config — set the
+    // RNMAPBOX_MAPS_DOWNLOAD_TOKEN env var before running expo/eas build
+    // instead (the old RNMapboxMapsDownloadToken plugin prop is deprecated).
+    "@rnmapbox/maps",
   ],
   ios: {
     ...config.ios,
