@@ -10,17 +10,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // RNMAPBOX_MAPS_DOWNLOAD_TOKEN env var before running expo/eas build
     // instead (the old RNMapboxMapsDownloadToken plugin prop is deprecated).
     "@rnmapbox/maps",
-    [
-      "react-native-maps",
-      {
-        iosGoogleMapsApiKey:
-          process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_IOS ??
-          "placeholder-ios-key",
-        androidGoogleMapsApiKey:
-          process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_ANDROID ??
-          "placeholder-android-key",
-      },
-    ],
   ],
   extra: {
     ...config.extra,
