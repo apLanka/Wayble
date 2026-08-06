@@ -3,6 +3,7 @@ import { View, StyleSheet } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import {
+  ATTRIBUTE_ICON_EMOJI,
   ATTRIBUTE_METADATA,
   VALUE_LABELS,
   VALUE_SEMANTIC_COLORS,
@@ -38,7 +39,7 @@ export function AttributeRow({ attributeKey, value, note }: Props) {
       accessibilityLabel={`${meta.label}: ${valueLabel}${note ? `. Note: ${note}` : ""}`}
     >
       <View style={styles.row}>
-        {/* Icon placeholder — uses text emoji as SF Symbols require native module */}
+        {/* Emoji icon — always paired with the text label below */}
         <View
           style={[
             styles.iconContainer,
@@ -46,7 +47,7 @@ export function AttributeRow({ attributeKey, value, note }: Props) {
           ]}
         >
           <AppText style={styles.iconText}>
-            {getIconEmoji(attributeKey)}
+            {ATTRIBUTE_ICON_EMOJI[attributeKey]}
           </AppText>
         </View>
 
@@ -80,35 +81,6 @@ export function AttributeRow({ attributeKey, value, note }: Props) {
       ) : null}
     </View>
   );
-}
-
-/**
- * Maps attribute keys to representative emoji for cross-platform icon rendering.
- * This avoids depending on expo-symbols native module availability at build time.
- */
-function getIconEmoji(key: AccessibilityAttributeKey): string {
-  const emojiMap: Partial<Record<AccessibilityAttributeKey, string>> = {
-    "mobility.step_free_entrance": "♿",
-    "mobility.wide_entrance": "🚪",
-    "mobility.step_free_interior": "↔️",
-    "mobility.elevator": "🛗",
-    "mobility.accessible_restroom": "🚻",
-    "mobility.accessible_parking": "🅿️",
-    "mobility.wheelchair_seating": "💺",
-    "vision.braille_signage": "⠿",
-    "vision.tactile_guidance": "✋",
-    "vision.high_contrast_signage": "👁️",
-    "vision.visual_hazard_marking": "⚠️",
-    "hearing.hearing_loop": "👂",
-    "hearing.visual_alarms": "🔔",
-    "communication.accessible_service_option": "💬",
-    "sensory.clear_signage": "🪧",
-    "sensory.quiet_space": "🔇",
-    "sensory.low_stimulation_option": "🔅",
-    "assistance.service_animals": "🐕",
-    "assistance.staff_support": "👥",
-  };
-  return emojiMap[key] ?? "●";
 }
 
 const styles = StyleSheet.create({
