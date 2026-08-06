@@ -10,6 +10,7 @@
 
 import type * as accessibility from "../accessibility.js";
 import type * as auth from "../auth.js";
+import type * as geoSpike from "../geoSpike.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
 import type * as users from "../users.js";
@@ -23,6 +24,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   accessibility: typeof accessibility;
   auth: typeof auth;
+  geoSpike: typeof geoSpike;
   health: typeof health;
   http: typeof http;
   users: typeof users;
@@ -54,4 +56,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  geospatial: import("@convex-dev/geospatial/_generated/component.js").ComponentApi<"geospatial">;
+};
