@@ -5,9 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@packages/backend/convex/_generated/api";
 import { MOCK_LOCATIONS, MAP_CENTER } from "../../data/mock-data";
 import type { AccessibleLocation } from "../../data/mock-data";
-import CategoryFilter, {
-  CATEGORY_COLORS,
-} from "../../components/map/CategoryFilter";
+import CategoryFilter from "../../components/map/CategoryFilter";
 import type { Category } from "../../components/map/CategoryFilter";
 import DetailSheet from "../../components/map/DetailSheet";
 import { LocationPermissionBanner } from "../../components/map/LocationPermissionBanner";
@@ -61,7 +59,10 @@ export default function MapboxScreen() {
 
   const queryPoint =
     status === "granted" && location
-      ? { latitude: location.coords.latitude, longitude: location.coords.longitude }
+      ? {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        }
       : { latitude: MAP_CENTER.lat, longitude: MAP_CENTER.lng };
 
   const nearestPlaces = useQuery(api.places.nearest, {
@@ -114,19 +115,59 @@ export default function MapboxScreen() {
         style={{ flex: 1 }}
       >
         <Mapbox.Images>
-          <View key="wheelchair" style={{ width: 24, height: 24, justifyContent: "center", alignItems: "center" }}>
+          <View
+            key="wheelchair"
+            style={{
+              width: 24,
+              height: 24,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <Text style={{ fontSize: 20 }}>♿</Text>
           </View>
-          <View key="elevator" style={{ width: 24, height: 24, justifyContent: "center", alignItems: "center" }}>
+          <View
+            key="elevator"
+            style={{
+              width: 24,
+              height: 24,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <Text style={{ fontSize: 20 }}>🛗</Text>
           </View>
-          <View key="bathroom" style={{ width: 24, height: 24, justifyContent: "center", alignItems: "center" }}>
+          <View
+            key="bathroom"
+            style={{
+              width: 24,
+              height: 24,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <Text style={{ fontSize: 20 }}>🚻</Text>
           </View>
-          <View key="multi" style={{ width: 24, height: 24, justifyContent: "center", alignItems: "center" }}>
+          <View
+            key="multi"
+            style={{
+              width: 24,
+              height: 24,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <Text style={{ fontSize: 20 }}>⭐</Text>
           </View>
-          <View key="fallback" style={{ width: 24, height: 24, justifyContent: "center", alignItems: "center" }}>
+          <View
+            key="fallback"
+            style={{
+              width: 24,
+              height: 24,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <Text style={{ fontSize: 20 }}>📍</Text>
           </View>
         </Mapbox.Images>
@@ -154,7 +195,11 @@ export default function MapboxScreen() {
         >
           <Mapbox.CircleLayer
             id="highlightRing"
-            filter={["all", ["!", ["has", "point_count"]], ["==", ["get", "highlighted"], true]]}
+            filter={[
+              "all",
+              ["!", ["has", "point_count"]],
+              ["==", ["get", "highlighted"], true],
+            ]}
             style={{
               circleColor: "transparent",
               circleRadius: 16,
