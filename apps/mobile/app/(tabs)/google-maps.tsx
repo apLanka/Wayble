@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native";
 // react-native-map-clustering New Architecture (Fabric) compatibility is unverified for this package.
 import MapView from "react-native-map-clustering";
 import { Marker } from "react-native-maps";
+import TrackedMarker from "../../components/TrackedMarker";
 import { MOCK_LOCATIONS } from "../../data/mock-data";
 import type { AccessibleLocation } from "../../data/mock-data";
 import CategoryFilter from "../../components/map/CategoryFilter";
@@ -73,13 +74,13 @@ export default function GoogleMapsScreen() {
         radius={40}
       >
         {filtered.map((loc) => (
-          <Marker
+          <TrackedMarker
             key={loc.id}
             coordinate={{ latitude: loc.lat, longitude: loc.lng }}
             onPress={() => setSelected(loc)}
           >
             <AccessibilityPin category={loc.category} />
-          </Marker>
+          </TrackedMarker>
         ))}
       </MapView>
       <DetailSheet location={selected} onClose={() => setSelected(null)} />
