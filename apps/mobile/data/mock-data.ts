@@ -367,7 +367,11 @@ export const MOCK_LOCATIONS: AccessibleLocation[] = [
     name: "Independence Square",
     category: "wheelchair",
     address: "Independence Ave, Colombo 07",
-    features: ["Paved pathways", "Step-free access", "Accessible parking nearby"],
+    features: [
+      "Paved pathways",
+      "Step-free access",
+      "Accessible parking nearby",
+    ],
   },
   {
     id: "loc-033",
@@ -417,11 +421,7 @@ export const MOCK_LOCATIONS: AccessibleLocation[] = [
     name: "Viharamahadevi Park",
     category: "wheelchair",
     address: "Ananda Coomaraswamy Mawatha, Colombo 07",
-    features: [
-      "Paved accessible path",
-      "Step-free gate",
-      "Accessible seating",
-    ],
+    features: ["Paved accessible path", "Step-free gate", "Accessible seating"],
   },
   {
     id: "loc-037",
