@@ -9,6 +9,7 @@ import CategoryFilter from "../../components/map/CategoryFilter";
 import type { Category } from "../../components/map/CategoryFilter";
 import DetailSheet from "../../components/map/DetailSheet";
 import { LocationPermissionBanner } from "../../components/map/LocationPermissionBanner";
+import * as Location from "expo-location";
 import { useLocationPermission } from "../../hooks/use-location-permission";
 import { LocateButton } from "../../components/map/LocateButton";
 
@@ -119,7 +120,7 @@ export default function MapboxScreen() {
       const newLoc = await requestPermission();
       if (newLoc) {
         targetLoc = newLoc;
-        currentStatus = "granted";
+        currentStatus = "granted" as Location.PermissionStatus;
       }
     }
 
@@ -150,6 +151,9 @@ export default function MapboxScreen() {
           zoomLevel: 14,
           animationDuration: 1000,
         });
+
+        // Re-enable follow mode after animation finishes
+        setTimeout(() => setIsFollowingUser(true), 1200);
       }, 100);
     } else {
       console.log("LocateMe failed: no targetLoc available");
