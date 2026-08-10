@@ -11,6 +11,8 @@ import AccessibilityPin from "../../components/map/AccessibilityPin";
 import type { Category } from "../../components/map/CategoryFilter";
 import { LocationPermissionBanner } from "../../components/map/LocationPermissionBanner";
 import { useLocationPermission } from "../../hooks/use-location-permission";
+import { LocateButton } from "../../components/map/LocateButton";
+import { useRef } from "react";
 
 const HIGH_CONTRAST_STYLE = [
   { elementType: "geometry", stylers: [{ color: "#212121" }] },
@@ -43,6 +45,7 @@ const INITIAL_REGION = {
 
 export default function GoogleMapsScreen() {
   const [tracksViewChanges, setTracksViewChanges] = useState(true);
+  const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
     // Only track view changes briefly to render the emoji, then stop to save performance
@@ -54,45 +57,93 @@ export default function GoogleMapsScreen() {
   }, []);
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [selected, setSelected] = useState<AccessibleLocation | null>(null);
-  const { location, status, requestPermission } = useLocationPermission();
+  const { location, status, requestPermission, refreshLocation } =
+    useLocationPermission();
 
   const filtered =
     activeCategory === "all"
       ? MOCK_LOCATIONS
       : MOCK_LOCATIONS.filter((l) => l.category === activeCategory);
 
+  const handleLocateMe = async () => {
+    let currentStatus = status;
+    let targetLoc = location;
+
+    if (currentStatus !== "granted") {
+      const newLoc = await requestPermission();
+      if (newLoc) {
+        targetLoc = newLoc;
+        currentStatus = "granted";
+      }
+    }
+
+    if (currentStatus === "granted") {
+      const freshLoc = await refreshLocation();
+      if (freshLoc) {
+        targetLoc = freshLoc;
+      }
+    }
+
+    if (targetLoc) {
+      console.log(
+        "LocateMe moving Google map to:",
+        targetLoc.coords.latitude,
+        targetLoc.coords.longitude,
+      );
+
+      // Delay slightly in case render cycle blocks animation
+      setTimeout(() => {
+        mapRef.current?.animateToRegion(
+          {
+            latitude: targetLoc.coords.latitude,
+            longitude: targetLoc.coords.longitude,
+            latitudeDelta: 0.04,
+            longitudeDelta: 0.04,
+          },
+          1000,
+        );
+      }, 100);
+    } else {
+      console.log("LocateMe failed: no targetLoc available");
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <CategoryFilter selected={activeCategory} onSelect={setActiveCategory} />
       <LocationPermissionBanner status={status} onRequest={requestPermission} />
-      <MapView
-        style={{ flex: 1 }}
-        initialRegion={
-          location
-            ? {
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
-                latitudeDelta: 0.04,
-                longitudeDelta: 0.04,
-              }
-            : INITIAL_REGION
-        }
-        showsUserLocation={status === "granted"}
-        customMapStyle={HIGH_CONTRAST_STYLE}
-        clusterColor="#1565C0"
-        radius={40}
-      >
-        {filtered.map((loc) => (
-          <Marker
-            key={loc.id}
-            tracksViewChanges={tracksViewChanges}
-            coordinate={{ latitude: loc.lat, longitude: loc.lng }}
-            onPress={() => setSelected(loc)}
-          >
-            <AccessibilityPin category={loc.category} />
-          </Marker>
-        ))}
-      </MapView>
+      <View style={{ flex: 1 }}>
+        <MapView
+          ref={mapRef}
+          style={{ flex: 1 }}
+          initialRegion={
+            location
+              ? {
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                  latitudeDelta: 0.04,
+                  longitudeDelta: 0.04,
+                }
+              : INITIAL_REGION
+          }
+          showsUserLocation={status === "granted"}
+          customMapStyle={HIGH_CONTRAST_STYLE}
+          clusterColor="#1565C0"
+          radius={40}
+        >
+          {filtered.map((loc) => (
+            <Marker
+              key={loc.id}
+              tracksViewChanges={tracksViewChanges}
+              coordinate={{ latitude: loc.lat, longitude: loc.lng }}
+              onPress={() => setSelected(loc)}
+            >
+              <AccessibilityPin category={loc.category} />
+            </Marker>
+          ))}
+        </MapView>
+        <LocateButton onPress={handleLocateMe} bottomOffset={16} />
+      </View>
       <DetailSheet location={selected} onClose={() => setSelected(null)} />
     </SafeAreaView>
   );
