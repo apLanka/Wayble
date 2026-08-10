@@ -12,8 +12,13 @@ import type * as accessibility from "../accessibility.js";
 import type * as auth from "../auth.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
+import type * as notificationCopy from "../notificationCopy.js";
+import type * as notificationPolicy from "../notificationPolicy.js";
+import type * as notifications from "../notifications.js";
 import type * as places from "../places.js";
+import type * as pushTokens from "../pushTokens.js";
 import type * as users from "../users.js";
+import type * as verificationNeed from "../verificationNeed.js";
 
 import type {
   ApiFromModules,
@@ -26,8 +31,13 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   health: typeof health;
   http: typeof http;
+  notificationCopy: typeof notificationCopy;
+  notificationPolicy: typeof notificationPolicy;
+  notifications: typeof notifications;
   places: typeof places;
+  pushTokens: typeof pushTokens;
   users: typeof users;
+  verificationNeed: typeof verificationNeed;
 }>;
 
 /**
