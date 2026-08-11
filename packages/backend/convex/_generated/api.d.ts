@@ -10,6 +10,7 @@
 
 import type * as accessibility from "../accessibility.js";
 import type * as auth from "../auth.js";
+import type * as crons from "../crons.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
 import type * as notificationCopy from "../notificationCopy.js";
@@ -29,6 +30,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   accessibility: typeof accessibility;
   auth: typeof auth;
+  crons: typeof crons;
   health: typeof health;
   http: typeof http;
   notificationCopy: typeof notificationCopy;
