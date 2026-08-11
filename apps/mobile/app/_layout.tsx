@@ -1,11 +1,24 @@
+import * as Notifications from "expo-notifications";
 import { Stack, ThemeProvider } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import ConvexClientProvider from "@/components/providers/ConvexClientProvider";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { useNotificationRouter } from "@/hooks/use-notification-router";
+
+// Show a verification request even if it lands while the app is open.
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function RootLayout() {
+  useNotificationRouter();
   const { appTheme, navigationTheme, isDark } = useAppTheme();
 
   return (
