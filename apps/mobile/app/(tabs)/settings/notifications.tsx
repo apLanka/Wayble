@@ -170,8 +170,8 @@ export default function NotificationSettingsScreen() {
           <AppText variant="label">What we store</AppText>
           <AppText style={{ color: colors.textMuted }}>
             While this is on, Wayble records your approximate location when you
-            open the app — rounded to about 110 metres, never your exact
-            position, and never in the background. Turn this off and we stop.
+            open the app rounded to about 110 metres, never your exact position,
+            and never in the background. Turn this off and we stop.
           </AppText>
         </View>
       </ScrollView>
