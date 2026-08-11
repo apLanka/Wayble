@@ -8,6 +8,7 @@ export default function SettingsStackLayout() {
         name="accessibility-needs"
         options={{ title: "Accessibility Needs" }}
       />
+      <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
     </Stack>
   );
 }
