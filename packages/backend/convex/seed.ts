@@ -1,7 +1,8 @@
 import { GeospatialIndex } from "@convex-dev/geospatial";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
-import { mutation } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+import { mutation, type MutationCtx } from "./_generated/server";
 import { SEED_PLACES } from "./seed/placesSeedData";
 import { ACCESSIBILITY_TAXONOMY_VERSION } from "./accessibility";
 
@@ -147,8 +148,11 @@ export const backfillGeoIndex = mutation({
 /**
  * Helper to seed sample accessibility reports for iconic demo venues.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function seedDemoReports(ctx: any, authorId: any, timestamp: number) {
+async function seedDemoReports(
+  ctx: MutationCtx,
+  authorId: Id<"users">,
+  timestamp: number,
+) {
   const demoVenues = [
     {
       namePattern: /SLIIT|Hospital|Mall|Park|Station|Cargills/i,
@@ -185,7 +189,7 @@ async function seedDemoReports(ctx: any, authorId: any, timestamp: number) {
         // Check if report already exists
         const existingReport = await ctx.db
           .query("reports")
-          .withIndex("by_place", (q: any) => q.eq("placeId", place._id))
+          .withIndex("by_place", (q) => q.eq("placeId", place._id))
           .first();
 
         if (!existingReport) {
