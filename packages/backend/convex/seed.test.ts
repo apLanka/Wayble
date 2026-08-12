@@ -38,3 +38,18 @@ test("seedPlaces seeds places from dataset and creates seed user", async () => {
   expect(seedUser).toBeDefined();
   expect(seedUser?.displayName).toBe("Wayble Seeder");
 });
+
+test("seedPlaces is idempotent on subsequent runs", async () => {
+  const t = createTest();
+
+  // Run 1
+  const run1 = await t.mutation(api.seed.seedPlaces, {});
+  expect(run1.inserted).toBeGreaterThanOrEqual(100);
+
+  // Run 2 without clearing existing places
+  const run2 = await t.mutation(api.seed.seedPlaces, {});
+
+  expect(run2.inserted).toBe(0);
+  expect(run2.skipped).toBe(run1.inserted);
+  expect(run2.currentTotalInDb).toBe(run1.inserted);
+});
