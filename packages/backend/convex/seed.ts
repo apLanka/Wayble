@@ -5,9 +5,10 @@ import { mutation } from "./_generated/server";
 import { SEED_PLACES } from "./seed/placesSeedData";
 import { ACCESSIBILITY_TAXONOMY_VERSION } from "./accessibility";
 
-export const geo = new GeospatialIndex<string, { category: string; name: string }>(
-  components.geospatial,
-);
+export const geo = new GeospatialIndex<
+  string,
+  { category: string; name: string }
+>(components.geospatial);
 
 /**
  * Seeds the database with real public spaces in Greater Colombo & Malabe.
@@ -152,12 +153,24 @@ async function seedDemoReports(ctx: any, authorId: any, timestamp: number) {
     {
       namePattern: /SLIIT|Hospital|Mall|Park|Station|Cargills/i,
       attributes: [
-        { key: "mobility.step_free_entrance" as const, value: "yes" as const, note: "Level entrance with ramp" },
+        {
+          key: "mobility.step_free_entrance" as const,
+          value: "yes" as const,
+          note: "Level entrance with ramp",
+        },
         { key: "mobility.wide_entrance" as const, value: "yes" as const },
-        { key: "mobility.accessible_parking" as const, value: "yes" as const, note: "Designated spots near main lobby" },
+        {
+          key: "mobility.accessible_parking" as const,
+          value: "yes" as const,
+          note: "Designated spots near main lobby",
+        },
         { key: "mobility.accessible_restroom" as const, value: "yes" as const },
         { key: "mobility.elevator" as const, value: "yes" as const },
-        { key: "vision.braille_signage" as const, value: "partial" as const, note: "Braille in elevators only" },
+        {
+          key: "vision.braille_signage" as const,
+          value: "partial" as const,
+          note: "Braille in elevators only",
+        },
         { key: "vision.tactile_guidance" as const, value: "yes" as const },
         { key: "assistance.service_animals" as const, value: "yes" as const },
       ],
@@ -189,9 +202,6 @@ async function seedDemoReports(ctx: any, authorId: any, timestamp: number) {
           });
         }
       }
-
-
-
     }
   }
 }
