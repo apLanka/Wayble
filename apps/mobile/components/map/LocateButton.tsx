@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   button: {
     position: "absolute",
     right: 16,
-    zIndex: 999, // Ensure it's on top and clickable
+    zIndex: 10, // Ensure it's on top and clickable
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
