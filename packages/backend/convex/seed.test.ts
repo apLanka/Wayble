@@ -53,3 +53,18 @@ test("seedPlaces is idempotent on subsequent runs", async () => {
   expect(run2.skipped).toBe(run1.inserted);
   expect(run2.currentTotalInDb).toBe(run1.inserted);
 });
+
+test("seedPlaces with clearExisting resets and re-inserts places", async () => {
+  const t = createTest();
+
+  // Run 1
+  await t.mutation(api.seed.seedPlaces, {});
+
+  // Run 2 with clearExisting enabled
+  const run2 = await t.mutation(api.seed.seedPlaces, {
+    clearExisting: true,
+  });
+
+  expect(run2.inserted).toBeGreaterThanOrEqual(100);
+  expect(run2.skipped).toBe(0);
+});
