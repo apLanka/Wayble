@@ -1,9 +1,9 @@
 import {
   SymbolView,
   type AndroidSymbol,
+  type SFSymbol,
   type SymbolViewProps,
 } from "expo-symbols";
-import type { SFSymbol } from "sf-symbols-typescript";
 
 export type PlatformSymbol = {
   ios: SFSymbol;
