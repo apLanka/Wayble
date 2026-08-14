@@ -1,3 +1,4 @@
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
@@ -5,7 +6,7 @@ import {
   accessibilityAttributeValidator,
 } from "./accessibility";
 
-const userRoleValidator = v.union(
+export const userRoleValidator = v.union(
   v.literal("member"),
   v.literal("moderator"),
   v.literal("admin"),
@@ -61,17 +62,28 @@ const evidenceValidator = v.object({
 });
 
 export default defineSchema({
+  ...authTables,
+
   health: defineTable({
     count: v.number(),
   }),
 
   users: defineTable({
-    authSubject: v.string(),
-    displayName: v.string(),
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+
+    displayName: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
-    role: userRoleValidator,
-    updatedAt: v.number(),
-  }).index("by_auth_subject", ["authSubject"]),
+    role: v.optional(userRoleValidator),
+    updatedAt: v.optional(v.number()),
+  })
+    .index("email", ["email"])
+    .index("phone", ["phone"]),
 
   places: defineTable({
     name: v.string(),
