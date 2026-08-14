@@ -12,6 +12,7 @@
     "lint": "turbo run lint",
     "check-types": "tsc --noEmit && turbo run check-types",
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,md,json,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,md,json,yml,yaml}\"",
     "test": "bun test scripts/",
     "prepare": "husky"
   },
