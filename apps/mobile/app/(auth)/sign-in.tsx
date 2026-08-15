@@ -14,6 +14,7 @@ import {
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -40,15 +41,15 @@ export default function SignInScreen() {
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
-      setEmailError("Email address is required.");
+      setEmailError(STRINGS.errors.auth.emailRequired);
       isValid = false;
     } else if (!EMAIL_REGEX.test(trimmedEmail)) {
-      setEmailError("Please enter a valid email address.");
+      setEmailError(STRINGS.errors.auth.emailInvalid);
       isValid = false;
     }
 
     if (!password) {
-      setPasswordError("Password is required.");
+      setPasswordError(STRINGS.errors.auth.passwordRequired);
       isValid = false;
     }
 
@@ -79,13 +80,9 @@ export default function SignInScreen() {
         message.toLowerCase().includes("secret") ||
         message.toLowerCase().includes("credential")
       ) {
-        setServerError(
-          "Invalid email or password. Please check your credentials.",
-        );
+        setServerError(STRINGS.errors.auth.invalidCredentials);
       } else {
-        setServerError(
-          message || "An unexpected error occurred. Please try again.",
-        );
+        setServerError(message || STRINGS.errors.auth.signInUnexpected);
       }
     } finally {
       setIsLoading(false);
@@ -105,13 +102,13 @@ export default function SignInScreen() {
           {/* Header */}
           <View style={styles.header}>
             <AppText variant="display" style={{ color: colors.primary }}>
-              Wayble
+              {STRINGS.common.appName}
             </AppText>
             <AppText
               variant="body"
               style={[styles.subtitle, { color: colors.textMuted }]}
             >
-              Sign in to contribute and verify accessibility information.
+              {STRINGS.auth.signIn.subtitle}
             </AppText>
           </View>
 
@@ -142,16 +139,16 @@ export default function SignInScreen() {
                 style={[styles.label, { color: colors.text }]}
                 nativeID="email-label"
               >
-                Email
+                {STRINGS.auth.fieldLabels.email}
               </AppText>
               <TextInput
-                accessibilityLabel="Email"
+                accessibilityLabel={STRINGS.auth.fieldLabels.email}
                 accessibilityLabelledBy="email-label"
                 autoCapitalize="none"
                 autoComplete="email"
                 autoCorrect={false}
                 keyboardType="email-address"
-                placeholder="name@example.com"
+                placeholder={STRINGS.auth.signIn.emailPlaceholder}
                 placeholderTextColor={colors.textMuted}
                 style={[
                   styles.input,
@@ -185,16 +182,16 @@ export default function SignInScreen() {
                 style={[styles.label, { color: colors.text }]}
                 nativeID="password-label"
               >
-                Password
+                {STRINGS.auth.fieldLabels.password}
               </AppText>
               <TextInput
-                accessibilityLabel="Password"
+                accessibilityLabel={STRINGS.auth.fieldLabels.password}
                 accessibilityLabelledBy="password-label"
                 autoCapitalize="none"
                 autoComplete="current-password"
                 autoCorrect={false}
                 secureTextEntry
-                placeholder="Enter your password"
+                placeholder={STRINGS.auth.signIn.passwordPlaceholder}
                 placeholderTextColor={colors.textMuted}
                 style={[
                   styles.input,
@@ -223,7 +220,7 @@ export default function SignInScreen() {
 
             {/* Submit Button */}
             <TouchTarget
-              accessibilityLabel="Sign in"
+              accessibilityLabel={STRINGS.common.signInLower}
               accessibilityRole="button"
               disabled={isLoading}
               onPress={handleSignIn}
@@ -242,7 +239,7 @@ export default function SignInScreen() {
                   variant="bodyStrong"
                   style={{ color: colors.onPrimary }}
                 >
-                  Sign In
+                  {STRINGS.common.signIn}
                 </AppText>
               )}
             </TouchTarget>
@@ -251,11 +248,11 @@ export default function SignInScreen() {
           {/* Sign Up Link */}
           <View style={styles.footer}>
             <AppText variant="body" style={{ color: colors.textMuted }}>
-              Don't have an account?{" "}
+              {STRINGS.auth.signIn.noAccount}
             </AppText>
             <Link href="/sign-up" asChild>
               <TouchTarget
-                accessibilityLabel="Go to sign up screen"
+                accessibilityLabel={STRINGS.auth.signIn.toSignUpLabel}
                 accessibilityRole="link"
                 style={styles.linkTouchTarget}
               >
@@ -266,7 +263,7 @@ export default function SignInScreen() {
                     textDecorationLine: "underline",
                   }}
                 >
-                  Create account
+                  {STRINGS.common.createAccount}
                 </AppText>
               </TouchTarget>
             </Link>

@@ -9,6 +9,7 @@ import { MAX_SUMMARY_LENGTH } from "@packages/backend/convex/reportLimits";
  * test in this file fails rather than the user silently seeing raw jargon.
  */
 
+import { STRINGS } from "@/constants/strings";
 export type ReportErrorKind =
   | "duplicate"
   | "unauthenticated"
@@ -38,14 +39,14 @@ export function classifyReportError(error: unknown): ReportErrorKind {
 export function reportErrorMessage(kind: ReportErrorKind): string {
   switch (kind) {
     case "duplicate":
-      return "You already reported on this place today. You can add another report tomorrow.";
+      return STRINGS.errors.report.duplicate;
     case "unauthenticated":
-      return "Sign in to submit a report.";
+      return STRINGS.errors.report.unauthenticated;
     case "summaryTooLong":
-      return `Keep your summary to ${MAX_SUMMARY_LENGTH} characters or fewer.`;
+      return STRINGS.errors.report.summaryTooLong(MAX_SUMMARY_LENGTH);
     case "observationTime":
-      return "Your device clock looks wrong. Turn on automatic date and time, then try again.";
+      return STRINGS.errors.report.observationTime;
     case "generic":
-      return "We couldn't submit your report. Please try again.";
+      return STRINGS.errors.report.generic;
   }
 }

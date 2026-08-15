@@ -4,6 +4,7 @@ import { AttributeRow } from "@/components/place/AttributeRow";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { radii, spacing } from "@/constants/theme";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { ReportDraft } from "./report-draft";
 import { selectedAttributes } from "./report-draft";
@@ -28,7 +29,7 @@ export function ConfirmStep({ draft, isSubmitting, onSubmit }: Props) {
   return (
     <View style={styles.container}>
       <AppText variant="title" accessibilityRole="header">
-        Check your report
+        {STRINGS.report.confirm.title}
       </AppText>
       <AppText style={{ color: colors.textMuted }}>
         {draft.category} · {attributes.length} attribute
@@ -54,12 +55,14 @@ export function ConfirmStep({ draft, isSubmitting, onSubmit }: Props) {
       {draft.summary.trim().length > 0 ? (
         <View style={styles.summaryBlock}>
           <AppText variant="label" style={{ color: colors.textMuted }}>
-            Your note
+            {STRINGS.report.confirm.noteTitle}
           </AppText>
           <AppText
             style={{ color: colors.text }}
             accessibilityRole="text"
-            accessibilityLabel={`Your note: ${draft.summary}`}
+            accessibilityLabel={STRINGS.report.confirm.summaryLabel(
+              draft.summary,
+            )}
           >
             {draft.summary}
           </AppText>
@@ -68,8 +71,8 @@ export function ConfirmStep({ draft, isSubmitting, onSubmit }: Props) {
 
       <TouchTarget
         accessibilityRole="button"
-        accessibilityLabel="Submit report"
-        accessibilityHint="Saves your accessibility report for this place."
+        accessibilityLabel={STRINGS.report.confirm.submit}
+        accessibilityHint={STRINGS.report.confirm.submitHint}
         accessibilityState={{ disabled: isSubmitting, busy: isSubmitting }}
         disabled={isSubmitting}
         onPress={onSubmit}

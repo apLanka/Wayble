@@ -5,6 +5,7 @@ import { TouchTarget } from "@/components/ui/touch-target";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { CATEGORY_COLORS } from "./CategoryFilter";
 import { formatDistance } from "@/utils/format-distance";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 
 interface PlaceListItemProps {
@@ -28,7 +29,11 @@ export function PlaceListItem({
   const distanceStr = distance !== undefined ? formatDistance(distance) : "";
 
   // Combine into a single label so screen readers read it continuously.
-  const a11yLabel = `${name}, ${category}${distanceStr ? `, ${distanceStr} away` : ""}`;
+  const a11yLabel = STRINGS.map.placeRowLabel(
+    name,
+    category,
+    distanceStr || null,
+  );
 
   return (
     <TouchTarget

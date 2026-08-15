@@ -2,6 +2,7 @@ import { StyleSheet, TextInput, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { radii, spacing } from "@/constants/theme";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { MAX_SUMMARY_LENGTH } from "@packages/backend/convex/reportLimits";
 import type { DraftAction, ReportDraft } from "./report-draft";
@@ -31,10 +32,10 @@ export function NotesStep({ draft, dispatch }: Props) {
   return (
     <View style={styles.container}>
       <AppText variant="title" accessibilityRole="header">
-        Anything to add?
+        {STRINGS.report.notes.title}
       </AppText>
       <AppText style={{ color: colors.textMuted }}>
-        One optional sentence about the whole visit. You can skip this.
+        {STRINGS.report.notes.body}
       </AppText>
 
       <View style={styles.fieldBlock}>
@@ -43,20 +44,22 @@ export function NotesStep({ draft, dispatch }: Props) {
           nativeID="summary-label"
           style={{ color: colors.textMuted }}
         >
-          Your summary (optional)
+          {STRINGS.report.notes.titleLabel}
         </AppText>
         <TextInput
           value={draft.summary}
           onChangeText={(text) =>
             dispatch({ type: "setSummary", summary: text })
           }
-          placeholder="For example: the side entrance is the only step-free way in."
+          placeholder={STRINGS.report.notes.placeholder}
           placeholderTextColor={colors.textMuted}
           maxLength={MAX_SUMMARY_LENGTH}
           multiline
-          accessibilityLabel="Your summary"
+          accessibilityLabel={STRINGS.report.notes.summaryLabel}
           accessibilityLabelledBy="summary-label"
-          accessibilityHint={`Optional. Up to ${MAX_SUMMARY_LENGTH} characters.`}
+          accessibilityHint={STRINGS.report.notes.summaryHint(
+            MAX_SUMMARY_LENGTH,
+          )}
           style={[
             styles.input,
             {
@@ -77,7 +80,7 @@ export function NotesStep({ draft, dispatch }: Props) {
           variant="label"
           style={[styles.counter, { color: colors.textMuted }]}
         >
-          {remaining} of {MAX_SUMMARY_LENGTH} characters left
+          {STRINGS.report.notes.charactersLeft(remaining, MAX_SUMMARY_LENGTH)}
         </AppText>
       </View>
     </View>

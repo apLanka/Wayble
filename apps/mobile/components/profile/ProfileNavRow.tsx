@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -23,7 +24,7 @@ export function ProfileNavRow({
   return (
     <TouchTarget
       accessibilityRole="button"
-      accessibilityLabel={`${title}. ${subtitle}`}
+      accessibilityLabel={STRINGS.profile.navRowLabel(title, subtitle)}
       accessibilityHint={accessibilityHint}
       onPress={onPress}
       style={[
@@ -44,7 +45,7 @@ export function ProfileNavRow({
         variant="bodyStrong"
         style={{ color: appTheme.colors.textMuted }}
       >
-        ›
+        {STRINGS.common.chevron}
       </AppText>
     </TouchTarget>
   );
