@@ -1,13 +1,18 @@
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation } from "convex/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 
+import {
+  LocationPicker,
+  type PickedLocation,
+} from "@/components/place/LocationPicker";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { useLocationPermission } from "@/hooks/use-location-permission";
+import { reverseGeocode } from "@/utils/reverse-geocode";
 
 // Matches placeCategoryValidator in packages/backend/convex/schema.ts.
 const CATEGORIES = [
@@ -35,9 +40,14 @@ const ACCESSIBILITY_CATEGORIES = [
 ] as const;
 type AccessibilityCategory = (typeof ACCESSIBILITY_CATEGORIES)[number];
 
-// Debug-only tool: drop a place onto the map to sanity-check the query/marker
-// pipeline, without needing the full report/verification flow.
-export function AddPlaceForm() {
+interface AddPlaceFormProps {
+  /** Called after the place is created. Omit to stay on the form with a toast. */
+  onAdded?: () => void;
+}
+
+// Creates a place via `places.create`. Used by the add-place screen and the
+// debug screen.
+export function AddPlaceForm({ onAdded }: AddPlaceFormProps) {
   const { appTheme } = useAppTheme();
   const { colors } = appTheme;
   const { location } = useLocationPermission();
@@ -49,15 +59,34 @@ export function AddPlaceForm() {
   const [accessibilityCategories, setAccessibilityCategories] = useState<
     AccessibilityCategory[]
   >([]);
-  const [latitude, setLatitude] = useState(
-    location ? String(location.coords.latitude) : "",
-  );
-  const [longitude, setLongitude] = useState(
-    location ? String(location.coords.longitude) : "",
-  );
+  const [picked, setPicked] = useState<PickedLocation | null>(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState("");
+
+  // Autofill name/address from the picked point, but never overwrite what the
+  // user typed themselves.
+  const nameEdited = useRef(false);
+  const addressEdited = useRef(false);
+  useEffect(() => {
+    if (!picked) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      void reverseGeocode(
+        picked.latitude,
+        picked.longitude,
+        controller.signal,
+      ).then((result) => {
+        if (!result || controller.signal.aborted) return;
+        if (!nameEdited.current) setName(result.name ?? "");
+        if (!addressEdited.current) setAddress(result.address ?? "");
+      });
+    }, 500);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [picked]);
 
   useEffect(() => {
     if (!toast) return;
@@ -72,12 +101,8 @@ export function AddPlaceForm() {
   };
 
   const handleSubmit = async () => {
-    const lat = Number(latitude);
-    const lng = Number(longitude);
     if (!name.trim()) return setError("Name is required.");
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-      return setError("Latitude and longitude must be numbers.");
-    }
+    if (!picked) return setError("Pick a location on the map.");
     setError("");
     setIsSubmitting(true);
     try {
@@ -85,15 +110,18 @@ export function AddPlaceForm() {
         name: name.trim(),
         category,
         address: address.trim(),
-        location: { latitude: lat, longitude: lng },
+        location: picked,
         accessibilityCategories: accessibilityCategories.length
           ? accessibilityCategories
           : undefined,
       });
       setName("");
       setAddress("");
+      nameEdited.current = false;
+      addressEdited.current = false;
       setAccessibilityCategories([]);
       setToast("Place added.");
+      onAdded?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add place.");
     } finally {
@@ -122,7 +150,10 @@ export function AddPlaceForm() {
         placeholderTextColor={colors.textMuted}
         style={inputStyle}
         value={name}
-        onChangeText={setName}
+        onChangeText={(text) => {
+          nameEdited.current = text.length > 0;
+          setName(text);
+        }}
       />
       <TextInput
         accessibilityLabel="Address"
@@ -130,28 +161,26 @@ export function AddPlaceForm() {
         placeholderTextColor={colors.textMuted}
         style={inputStyle}
         value={address}
-        onChangeText={setAddress}
+        onChangeText={(text) => {
+          addressEdited.current = text.length > 0;
+          setAddress(text);
+        }}
       />
-      <View style={styles.row}>
-        <TextInput
-          accessibilityLabel="Latitude"
-          placeholder="Latitude"
-          placeholderTextColor={colors.textMuted}
-          keyboardType="numeric"
-          style={[inputStyle, styles.rowInput]}
-          value={latitude}
-          onChangeText={setLatitude}
-        />
-        <TextInput
-          accessibilityLabel="Longitude"
-          placeholder="Longitude"
-          placeholderTextColor={colors.textMuted}
-          keyboardType="numeric"
-          style={[inputStyle, styles.rowInput]}
-          value={longitude}
-          onChangeText={setLongitude}
-        />
-      </View>
+      <AppText variant="label" style={{ color: colors.textMuted }}>
+        Location
+      </AppText>
+      <LocationPicker
+        value={picked}
+        onChange={setPicked}
+        userLocation={
+          location
+            ? {
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+              }
+            : null
+        }
+      />
 
       <View style={styles.categories}>
         {CATEGORIES.map((cat) => {
@@ -262,13 +291,6 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     paddingHorizontal: spacing.md,
     fontSize: 16,
-  },
-  row: {
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  rowInput: {
-    flex: 1,
   },
   categories: {
     flexDirection: "row",

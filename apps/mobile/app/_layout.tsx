@@ -55,6 +55,10 @@ export default function RootLayout() {
               options={{ title: "Place Details" }}
             />
             <Stack.Screen
+              name="add-place"
+              options={{ title: "Add a place", headerBackTitle: "Back" }}
+            />
+            <Stack.Screen
               name="report/[placeId]"
               options={{ title: "Report accessibility" }}
             />
