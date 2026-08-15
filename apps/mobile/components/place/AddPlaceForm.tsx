@@ -7,6 +7,7 @@ import {
   LocationPicker,
   type PickedLocation,
 } from "@/components/place/LocationPicker";
+import { STRINGS } from "@/constants/strings";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { radii, spacing } from "@/constants/theme";
@@ -101,8 +102,8 @@ export function AddPlaceForm({ onAdded }: AddPlaceFormProps) {
   };
 
   const handleSubmit = async () => {
-    if (!name.trim()) return setError("Name is required.");
-    if (!picked) return setError("Pick a location on the map.");
+    if (!name.trim()) return setError(STRINGS.addPlace.nameRequired);
+    if (!picked) return setError(STRINGS.addPlace.locationRequired);
     setError("");
     setIsSubmitting(true);
     try {
@@ -120,10 +121,10 @@ export function AddPlaceForm({ onAdded }: AddPlaceFormProps) {
       nameEdited.current = false;
       addressEdited.current = false;
       setAccessibilityCategories([]);
-      setToast("Place added.");
+      setToast(STRINGS.addPlace.added);
       onAdded?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add place.");
+      setError(err instanceof Error ? err.message : STRINGS.addPlace.failed);
     } finally {
       setIsSubmitting(false);
     }
@@ -141,12 +142,12 @@ export function AddPlaceForm({ onAdded }: AddPlaceFormProps) {
   return (
     <View style={styles.form}>
       <AppText variant="title" accessibilityRole="header">
-        Add place
+        {STRINGS.addPlace.heading}
       </AppText>
 
       <TextInput
-        accessibilityLabel="Place name"
-        placeholder="Place name"
+        accessibilityLabel={STRINGS.addPlace.nameLabel}
+        placeholder={STRINGS.addPlace.nameLabel}
         placeholderTextColor={colors.textMuted}
         style={inputStyle}
         value={name}
@@ -156,8 +157,8 @@ export function AddPlaceForm({ onAdded }: AddPlaceFormProps) {
         }}
       />
       <TextInput
-        accessibilityLabel="Address"
-        placeholder="Address"
+        accessibilityLabel={STRINGS.addPlace.addressLabel}
+        placeholder={STRINGS.addPlace.addressLabel}
         placeholderTextColor={colors.textMuted}
         style={inputStyle}
         value={address}
@@ -167,7 +168,7 @@ export function AddPlaceForm({ onAdded }: AddPlaceFormProps) {
         }}
       />
       <AppText variant="label" style={{ color: colors.textMuted }}>
-        Location
+        {STRINGS.addPlace.locationHeading}
       </AppText>
       <LocationPicker
         value={picked}
@@ -212,7 +213,7 @@ export function AddPlaceForm({ onAdded }: AddPlaceFormProps) {
       </View>
 
       <AppText variant="label" style={{ color: colors.textMuted }}>
-        Accessibility features (optional, select any)
+        {STRINGS.addPlace.accessibilityFeaturesHeading}
       </AppText>
       <View style={styles.categories}>
         {ACCESSIBILITY_CATEGORIES.map((tag) => {
@@ -251,8 +252,8 @@ export function AddPlaceForm({ onAdded }: AddPlaceFormProps) {
 
       <TouchTarget
         accessibilityRole="button"
-        accessibilityLabel="Add place"
-        accessibilityHint="Creates a place and pins it on the map"
+        accessibilityLabel={STRINGS.addPlace.submit}
+        accessibilityHint={STRINGS.addPlace.submitHint}
         focusColor={colors.onPrimary}
         disabled={isSubmitting}
         onPress={() => void handleSubmit()}
@@ -262,7 +263,7 @@ export function AddPlaceForm({ onAdded }: AddPlaceFormProps) {
         ]}
       >
         <AppText variant="bodyStrong" style={{ color: colors.onPrimary }}>
-          {isSubmitting ? "Adding…" : "Add place"}
+          {isSubmitting ? STRINGS.addPlace.submitting : STRINGS.addPlace.submit}
         </AppText>
       </TouchTarget>
 

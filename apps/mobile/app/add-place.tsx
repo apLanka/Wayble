@@ -8,6 +8,7 @@ import {
 } from "react-native";
 
 import { AddPlaceForm } from "@/components/place/AddPlaceForm";
+import { STRINGS } from "@/constants/strings";
 import { Screen } from "@/components/ui/screen";
 import { spacing } from "@/constants/theme";
 
@@ -28,7 +29,9 @@ export default function AddPlaceScreen() {
         >
           <AddPlaceForm
             onAdded={() => {
-              AccessibilityInfo.announceForAccessibility("Place added");
+              AccessibilityInfo.announceForAccessibility(
+                STRINGS.addPlace.a11y.added,
+              );
               router.back();
             }}
           />

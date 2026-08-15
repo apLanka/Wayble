@@ -1,6 +1,7 @@
 import React from "react";
 import { Platform, StyleSheet } from "react-native";
 
+import { STRINGS } from "@/constants/strings";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { radii, spacing } from "@/constants/theme";
@@ -20,8 +21,8 @@ export function AddPlaceButton({
   return (
     <TouchTarget
       accessibilityRole="button"
-      accessibilityLabel="Add a place"
-      accessibilityHint="Opens a form to add a new place to the map"
+      accessibilityLabel={STRINGS.addPlace.button.a11yLabel}
+      accessibilityHint={STRINGS.addPlace.button.a11yHint}
       focusColor={appTheme.colors.onPrimary}
       onPress={onPress}
       style={[
@@ -33,7 +34,7 @@ export function AddPlaceButton({
         variant="bodyStrong"
         style={[styles.text, { color: appTheme.colors.onPrimary }]}
       >
-        + Add place
+        {STRINGS.addPlace.button.label}
       </AppText>
     </TouchTarget>
   );

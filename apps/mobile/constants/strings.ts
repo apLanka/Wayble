@@ -183,6 +183,7 @@ export const STRINGS = {
        */
       accessibilityNeeds: "Accessibility Needs",
       notFound: "Not Found",
+      addPlace: "Add a place",
     },
     back: "Back",
   },
@@ -566,6 +567,41 @@ export const STRINGS = {
 
     placeMarker: (category: string, label: string): string =>
       category === "all" ? STRINGS.map.placeMarkerLabel : `${label} place`,
+  },
+
+  /**
+   * The add-place screen: form, location picker and the map button that opens
+   * it. The place categories rendered as pills are enum values from the
+   * backend schema, not copy.
+   */
+  addPlace: {
+    heading: "Add place",
+    nameLabel: "Place name",
+    addressLabel: "Address",
+    locationHeading: "Location",
+    accessibilityFeaturesHeading:
+      "Accessibility features (optional, select any)",
+    submit: "Add place",
+    submitting: "Adding…",
+    submitHint: "Creates a place and pins it on the map",
+    added: "Place added.",
+    nameRequired: "Name is required.",
+    locationRequired: "Pick a location on the map.",
+    failed: "Failed to add place.",
+    picker: {
+      mapLabel: "Map. Drag the map to place the pin on the location.",
+      empty: "Move the map to pick a spot",
+      useMyLocation: "Use my location",
+      useMyLocationLabel: "Use my current location",
+    },
+    button: {
+      label: "+ Add place",
+      a11yLabel: "Add a place",
+      a11yHint: "Opens a form to add a new place to the map",
+    },
+    a11y: {
+      added: "Place added",
+    },
   },
 
   /**

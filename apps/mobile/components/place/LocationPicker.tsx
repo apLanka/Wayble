@@ -2,6 +2,7 @@ import Mapbox from "@rnmapbox/maps";
 import { useCallback, useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { STRINGS } from "@/constants/strings";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { DEFAULT_MAP_CENTER } from "@/constants/default-location";
@@ -51,7 +52,7 @@ export function LocationPicker({
     <View style={styles.wrapper}>
       <View
         style={[styles.mapFrame, { borderColor: colors.border }]}
-        accessibilityLabel="Map. Drag the map to place the pin on the location."
+        accessibilityLabel={STRINGS.addPlace.picker.mapLabel}
       >
         <Mapbox.MapView
           style={styles.map}
@@ -80,7 +81,7 @@ export function LocationPicker({
             accessibilityElementsHidden
             style={styles.pin}
           >
-            📍
+            {PIN_EMOJI}
           </AppText>
         </View>
       </View>
@@ -93,12 +94,12 @@ export function LocationPicker({
         >
           {value
             ? `${value.latitude.toFixed(5)}, ${value.longitude.toFixed(5)}`
-            : "Move the map to pick a spot"}
+            : STRINGS.addPlace.picker.empty}
         </AppText>
         {userLocation ? (
           <TouchTarget
             accessibilityRole="button"
-            accessibilityLabel="Use my current location"
+            accessibilityLabel={STRINGS.addPlace.picker.useMyLocationLabel}
             onPress={() => {
               hasMoved.current = false;
               flyTo(userLocation, 600);
@@ -110,7 +111,7 @@ export function LocationPicker({
             ]}
           >
             <AppText variant="label" style={{ color: colors.text }}>
-              Use my location
+              {STRINGS.addPlace.picker.useMyLocation}
             </AppText>
           </TouchTarget>
         ) : null}
@@ -120,6 +121,8 @@ export function LocationPicker({
 }
 
 const PIN_SIZE = 36;
+// Iconography, not copy (hidden from screen readers).
+const PIN_EMOJI = "📍";
 
 const styles = StyleSheet.create({
   wrapper: {
