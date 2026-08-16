@@ -6,6 +6,7 @@ import type { AccessibleLocation } from "../../data/mock-data";
 type Props = {
   location: AccessibleLocation | null;
   onClose: () => void;
+  onShowDirection?: () => void;
 };
 
 const ACCESSIBILITY_EMOJIS = {
@@ -17,7 +18,7 @@ const ACCESSIBILITY_EMOJIS = {
 
 const SNAP_POINTS = ["40%"];
 
-export function DetailSheet({ location, onClose }: Props) {
+export function DetailSheet({ location, onClose, onShowDirection }: Props) {
   const sheetRef = useRef<BottomSheet>(null);
 
   useEffect(() => {
@@ -93,6 +94,17 @@ export function DetailSheet({ location, onClose }: Props) {
                 ✓ {f}
               </Text>
             ))}
+
+            {onShowDirection && (
+              <TouchableOpacity
+                style={styles.directionButton}
+                onPress={onShowDirection}
+              >
+                <Text style={styles.directionButtonText}>
+                  Show the direction
+                </Text>
+              </TouchableOpacity>
+            )}
           </>
         )}
       </BottomSheetView>
@@ -165,5 +177,18 @@ const styles = StyleSheet.create({
   feature: {
     fontSize: 14,
     marginBottom: 4,
+  },
+  directionButton: {
+    backgroundColor: "#0B6B3A",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 16,
+    marginBottom: 20,
+  },
+  directionButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
