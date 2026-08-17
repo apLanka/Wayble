@@ -12,13 +12,11 @@ const validAttribute = {
 async function seedGraph(t: ReturnType<typeof convexTest>) {
   return t.run(async (ctx) => {
     const authorId = await ctx.db.insert("users", {
-      authSubject: "auth-author",
       displayName: "Report Author",
       role: "member",
       updatedAt: 1,
     });
     const verifierId = await ctx.db.insert("users", {
-      authSubject: "auth-verifier",
       displayName: "Report Verifier",
       role: "member",
       updatedAt: 1,
@@ -208,7 +206,6 @@ test("rejects invalid entity enum values", async () => {
   await expect(
     t.run((ctx) =>
       ctx.db.insert("users", {
-        authSubject: "auth-invalid-role",
         displayName: "Invalid Role",
         role: "owner" as never,
         updatedAt: 1,
@@ -219,7 +216,6 @@ test("rejects invalid entity enum values", async () => {
   await expect(
     t.run(async (ctx) => {
       const userId = await ctx.db.insert("users", {
-        authSubject: "auth-invalid-category",
         displayName: "Invalid Category Creator",
         role: "member",
         updatedAt: 1,
@@ -291,9 +287,9 @@ test("rejects documents with missing required fields", async () => {
 
   await expect(
     t.run((ctx) =>
-      ctx.db.insert("users", {
-        authSubject: "auth-missing-name",
-        role: "member",
+      ctx.db.insert("places", {
+        name: "Missing address",
+        category: "education",
         updatedAt: 1,
       } as never),
     ),
