@@ -1,0 +1,17 @@
+{
+  "cli": {
+    "version": ">= 22.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "internal": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_CONVEX_URL": "https://ideal-fish-713.convex.cloud"
+      }
+    }
+  }
+}
