@@ -7,7 +7,8 @@
     "dev": "expo start",
     "android": "expo start --android",
     "lint": "eslint .",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "build:internal": "eas build --profile internal --platform android"
   },
   "dependencies": {
     "@convex-dev/auth": "^0.0.95",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "@repo/eslint-config": "*",
     "@types/react": "~19.2.2",
+    "eas-cli": "^22.0.0",
     "eslint": "^9.31.0",
     "typescript": "~6.0.3"
   }
