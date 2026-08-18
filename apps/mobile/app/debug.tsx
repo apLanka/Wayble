@@ -11,6 +11,11 @@ import { useAppTheme } from "@/hooks/use-app-theme";
 export default function DebugScreen() {
   const health = useQuery(api.health.ping);
   const touch = useMutation(api.health.touch);
+  const geoNearest = useQuery(api.geoSpike.nearest, {
+    point: { latitude: 6.9147, longitude: 79.9723 }, // SLIIT Campus
+    limit: 5,
+  });
+  const seedGeo = useMutation(api.geoSpike.seed);
   const { appTheme } = useAppTheme();
 
   if (health === undefined) {
@@ -57,6 +62,47 @@ export default function DebugScreen() {
             Touch
           </AppText>
         </TouchTarget>
+
+        <View style={styles.values}>
+          <AppText variant="title" accessibilityRole="header">
+            Geospatial Spike
+          </AppText>
+          <TouchTarget
+            accessibilityRole="button"
+            accessibilityLabel="Seed test points"
+            focusColor={appTheme.colors.onPrimary}
+            onPress={() => void seedGeo()}
+            style={[
+              styles.touchButton,
+              {
+                backgroundColor: appTheme.colors.primary,
+                marginBottom: spacing.md,
+              },
+            ]}
+          >
+            <AppText
+              variant="bodyStrong"
+              style={{ color: appTheme.colors.onPrimary }}
+            >
+              Seed geo spike points
+            </AppText>
+          </TouchTarget>
+          <AppText variant="bodyStrong">
+            Nearest to SLIIT Campus (6.9147, 79.9723):
+          </AppText>
+          {geoNearest === undefined ? (
+            <AppText>Loading...</AppText>
+          ) : geoNearest.length === 0 ? (
+            <AppText>No points (seed first)</AppText>
+          ) : (
+            geoNearest.map((pt, i) => (
+              <AppText key={pt.key}>
+                {i + 1}. {pt.key.replace("spike:", "")} (
+                {(pt.distance / 1000).toFixed(2)}km)
+              </AppText>
+            ))
+          )}
+        </View>
       </ScrollView>
     </Screen>
   );
