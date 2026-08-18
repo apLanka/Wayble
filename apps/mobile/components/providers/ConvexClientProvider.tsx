@@ -1,4 +1,6 @@
-import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { ConvexAuthProvider } from "@convex-dev/auth/react";
+import { ConvexReactClient } from "convex/react";
+import * as SecureStore from "expo-secure-store";
 import { ReactNode } from "react";
 
 const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
@@ -16,16 +18,22 @@ const convex = new ConvexReactClient(convexUrl, {
   unsavedChangesWarning: false,
 });
 
+const secureStorage = {
+  getItem: SecureStore.getItemAsync,
+  setItem: SecureStore.setItemAsync,
+  removeItem: SecureStore.deleteItemAsync,
+};
+
 interface ConvexClientProviderProps {
   children: ReactNode;
 }
 
-// No auth provider yet. When US-01 lands, this is where ClerkProvider +
-// ConvexProviderWithClerk (or Convex Auth) wraps the client — see the team's
-// wandrlust repo for the Clerk variant, including the expo-secure-store
-// tokenCache the session needs to survive an app restart.
 export default function ConvexClientProvider({
   children,
 }: ConvexClientProviderProps) {
-  return <ConvexProvider client={convex}>{children}</ConvexProvider>;
+  return (
+    <ConvexAuthProvider client={convex} storage={secureStorage}>
+      {children}
+    </ConvexAuthProvider>
+  );
 }
