@@ -34,6 +34,20 @@ export default function TabsLayout() {
         />
         <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="google-maps">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: "map", selected: "map.fill" }}
+          md="map"
+        />
+        <NativeTabs.Trigger.Label>Apple Maps</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="mapbox">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: "location", selected: "location.fill" }}
+          md="place"
+        />
+        <NativeTabs.Trigger.Label>Mapbox</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
