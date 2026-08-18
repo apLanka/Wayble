@@ -12,7 +12,7 @@ export const userRoleValidator = v.union(
   v.literal("admin"),
 );
 
-const placeCategoryValidator = v.union(
+export const placeCategoryValidator = v.union(
   v.literal("education"),
   v.literal("food_and_drink"),
   v.literal("government"),
