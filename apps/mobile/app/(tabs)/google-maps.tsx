@@ -9,6 +9,8 @@ import CategoryFilter from "../../components/map/CategoryFilter";
 import DetailSheet from "../../components/map/DetailSheet";
 import AccessibilityPin from "../../components/map/AccessibilityPin";
 import type { Category } from "../../components/map/CategoryFilter";
+import { LocationPermissionBanner } from "../../components/map/LocationPermissionBanner";
+import { useLocationPermission } from "../../hooks/use-location-permission";
 
 const HIGH_CONTRAST_STYLE = [
   { elementType: "geometry", stylers: [{ color: "#212121" }] },
@@ -42,6 +44,7 @@ const INITIAL_REGION = {
 export default function GoogleMapsScreen() {
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [selected, setSelected] = useState<AccessibleLocation | null>(null);
+  const { location, status, requestPermission } = useLocationPermission();
 
   const filtered =
     activeCategory === "all"
@@ -51,9 +54,20 @@ export default function GoogleMapsScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <CategoryFilter selected={activeCategory} onSelect={setActiveCategory} />
+      <LocationPermissionBanner status={status} onRequest={requestPermission} />
       <MapView
         style={{ flex: 1 }}
-        initialRegion={INITIAL_REGION}
+        initialRegion={
+          location
+            ? {
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+                latitudeDelta: 0.04,
+                longitudeDelta: 0.04,
+              }
+            : INITIAL_REGION
+        }
+        showsUserLocation={status === "granted"}
         customMapStyle={HIGH_CONTRAST_STYLE}
         clusterColor="#1565C0"
         radius={40}
