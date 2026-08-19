@@ -4,16 +4,16 @@ import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import { CATEGORY_COLORS } from "./CategoryFilter";
 
 type Props = {
-  category: "all" | "food" | "retail" | "transit" | "health";
+  category: "all" | "wheelchair" | "elevator" | "bathroom" | "multi";
   onPress?: () => void;
 };
 
 const PIN_EMOJI: Record<Props["category"], string> = {
   all: "📍",
-  food: "🍽️",
-  retail: "🛍️",
-  transit: "🚇",
-  health: "⚕️",
+  wheelchair: "♿️",
+  elevator: "🛗",
+  bathroom: "🚻",
+  multi: "🌟",
 };
 
 export default function AccessibilityPin({ category, onPress }: Props) {
