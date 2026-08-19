@@ -247,8 +247,8 @@ export default function MapboxTab() {
                   circleRadius: [
                     "case",
                     ["==", ["get", "isHighlighted"], true],
-                    8,
-                    4,
+                    14,
+                    10,
                   ],
                   circleColor: [
                     "case",
@@ -262,13 +262,13 @@ export default function MapboxTab() {
                     "#8b5cf6", // multi (Purple)
                     /* default */ "#6b7280", // all/other (Gray)
                   ],
-                  circleStrokeWidth: 2,
+                  circleStrokeWidth: 3,
                   circleStrokeColor: "#ffffff",
                   circleOpacity: [
                     "case",
                     ["==", ["get", "isHighlighted"], true],
                     1,
-                    0.4,
+                    0.7,
                   ],
                 }}
               />
