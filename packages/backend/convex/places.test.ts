@@ -39,6 +39,13 @@ test("places sync with geospatial index", async () => {
   });
   expect(nearest[0]?.distance).toBeGreaterThan(1_000_000);
 
+  nearest = await asUser.query(api.places.nearest, {
+    point: { latitude: 10.1, longitude: 10.1 },
+    limit: 1,
+    maxDistance: 1_000,
+  });
+  expect(nearest).toHaveLength(0);
+
   await asUser.mutation(api.places.remove, { id: placeId });
 
   nearest = await asUser.query(api.places.nearest, {
