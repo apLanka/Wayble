@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   button: {
     position: "absolute",
     right: 16,
-    zIndex: 999, // Ensure it's on top and clickable
+    zIndex: 0,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
       },
       android: {
-        elevation: 5,
+        elevation: 1,
       },
     }),
   },

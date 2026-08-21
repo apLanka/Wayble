@@ -12,6 +12,8 @@ node_modules
 .expo
 dist
 web-build
+/android
+/ios
 *.jks
 *.p8
 *.p12
