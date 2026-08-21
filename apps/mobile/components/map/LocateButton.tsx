@@ -1,5 +1,10 @@
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet, Platform } from "react-native";
+import { StyleSheet, Platform } from "react-native";
+
+import { AppText } from "@/components/ui/app-text";
+import { TouchTarget } from "@/components/ui/touch-target";
+import { radii, spacing } from "@/constants/theme";
+import { useAppTheme } from "@/hooks/use-app-theme";
 
 interface LocateButtonProps {
   onPress: () => void;
@@ -10,14 +15,30 @@ export function LocateButton({
   onPress,
   bottomOffset = 30,
 }: LocateButtonProps) {
+  const { appTheme } = useAppTheme();
+
   return (
-    <TouchableOpacity
-      style={[styles.button, { bottom: bottomOffset }]}
+    <TouchTarget
+      accessibilityRole="button"
+      accessibilityLabel="Locate me"
+      accessibilityHint="Centers the map on your current location"
       onPress={onPress}
-      activeOpacity={0.8}
+      style={[
+        styles.button,
+        {
+          bottom: bottomOffset,
+          backgroundColor: appTheme.colors.surface,
+          borderColor: appTheme.colors.border,
+        },
+      ]}
     >
-      <Text style={styles.text}>Locate me 📍</Text>
-    </TouchableOpacity>
+      <AppText
+        variant="bodyStrong"
+        style={[styles.text, { color: appTheme.colors.text }]}
+      >
+        Locate me 📍
+      </AppText>
+    </TouchTarget>
   );
 }
 
@@ -26,10 +47,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 16,
     zIndex: 0,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-    backgroundColor: "#ffffff",
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radii.pill,
+    borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
     ...Platform.select({
@@ -40,13 +61,11 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
       },
       android: {
-        elevation: 1,
+        elevation: 2,
       },
     }),
   },
   text: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
   },
 });
