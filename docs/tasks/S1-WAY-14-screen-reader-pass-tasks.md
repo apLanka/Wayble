@@ -94,10 +94,10 @@ T13 VoiceOver walkthrough (iOS)
 
 **Files:** `apps/mobile/app/(tabs)/mapbox/index.tsx`
 
-- [ ] User location marker: Add `accessible` and `accessibilityLabel="Your current location"` to the container View; hide emoji with `importantForAccessibility="no-hide-descendants"`.
-- [ ] Empty state: Add `accessibilityRole="text"` to the "No places found" text.
-- [ ] Replace hardcoded `backgroundColor: "#fff"` with `appTheme.colors.background` in styles.
-- [ ] Replace hardcoded `color: "#6b7280"` with `appTheme.colors.textMuted` in empty state text.
+- [x] User location marker: Add `accessible` and `accessibilityLabel="Your current location"` to the container View; hide emoji with `importantForAccessibility="no-hide-descendants"`.
+- [x] Empty state: Add `accessibilityRole="text"` to the "No places found" text.
+- [x] Replace hardcoded `backgroundColor: "#fff"` with `appTheme.colors.background` in styles.
+- [x] Replace hardcoded `color: "#6b7280"` with `appTheme.colors.textMuted` in empty state text.
 
 **Done when:** Marker is announced, empty state is accessible, and dark mode renders correctly.
 
@@ -107,9 +107,9 @@ T13 VoiceOver walkthrough (iOS)
 
 **Files:** `apps/mobile/app/(tabs)/mapbox/place/[id].tsx`
 
-- [ ] Add `importantForAccessibility="no"` to the decorative category dot `View`.
-- [ ] Add `accessible` and `accessibilityLabel` to each accessibility category tile (e.g., `"Wheelchair accessible"`).
-- [ ] Add `accessibilityRole="note"` to the disclaimer box container.
+- [x] Add `importantForAccessibility="no"` to the decorative category dot `View`.
+- [x] Add `accessible` and `accessibilityLabel` to each accessibility category tile (e.g., `"Wheelchair accessible"`).
+- [x] Add `accessibilityRole="summary"` to the disclaimer box container.
 
 **Done when:** Decorative elements are hidden, tiles are labelled, and disclaimer is properly announced.
 
@@ -119,7 +119,7 @@ T13 VoiceOver walkthrough (iOS)
 
 **Files:** `apps/mobile/app/place/[id].tsx`
 
-- [ ] Hide the address pin emoji (📍) from screen reader using `importantForAccessibility="no-hide-descendants"` on the emoji `AppText`, or wrap in a View with `accessibilityElementsHidden`.
+- [x] Hide the address pin emoji (📍) from screen reader using `importantForAccessibility="no-hide-descendants"` on the emoji `AppText`, or wrap in a View with `accessibilityElementsHidden`.
 
 **Done when:** Screen reader does not read "pin" emoji, only reads the address text.
 

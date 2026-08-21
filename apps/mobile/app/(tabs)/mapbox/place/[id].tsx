@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
+import { CATEGORY_LABELS } from "@/components/map/CategoryFilter";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
 import { formatDistance } from "@/utils/format-distance";
@@ -63,6 +64,8 @@ export default function PlaceDetailScreen() {
           <View style={styles.metaRow}>
             <View
               style={[styles.categoryDot, { backgroundColor: categoryColor }]}
+              importantForAccessibility="no"
+              accessibilityElementsHidden
             />
             <AppText
               style={[styles.category, { color: appTheme.colors.textMuted }]}
@@ -99,29 +102,40 @@ export default function PlaceDetailScreen() {
                 Accessibility Profile
               </AppText>
               <View style={styles.accessibilityRow}>
-                {accessibilityCategories.map((cat: string) => (
-                  <View
-                    key={cat}
-                    style={[
-                      styles.accessibilityTile,
-                      { backgroundColor: appTheme.colors.surface },
-                    ]}
-                  >
-                    <AppText style={styles.accessibilityEmoji}>
-                      {ACCESSIBILITY_EMOJIS[
-                        cat as keyof typeof ACCESSIBILITY_EMOJIS
-                      ] || "✓"}
-                    </AppText>
-                    <AppText
+                {accessibilityCategories.map((cat: string) => {
+                  const label =
+                    CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ||
+                    `${cat} accessible`;
+                  return (
+                    <View
+                      key={cat}
                       style={[
-                        styles.accessibilityTileText,
-                        { color: appTheme.colors.text },
+                        styles.accessibilityTile,
+                        {
+                          backgroundColor: appTheme.colors.surface,
+                          borderColor: appTheme.colors.border,
+                        },
                       ]}
+                      accessible
+                      accessibilityRole="text"
+                      accessibilityLabel={label}
                     >
-                      {cat}
-                    </AppText>
-                  </View>
-                ))}
+                      <AppText style={styles.accessibilityEmoji}>
+                        {ACCESSIBILITY_EMOJIS[
+                          cat as keyof typeof ACCESSIBILITY_EMOJIS
+                        ] || "✓"}
+                      </AppText>
+                      <AppText
+                        style={[
+                          styles.accessibilityTileText,
+                          { color: appTheme.colors.text },
+                        ]}
+                      >
+                        {cat}
+                      </AppText>
+                    </View>
+                  );
+                })}
               </View>
             </View>
           )}
@@ -148,6 +162,8 @@ export default function PlaceDetailScreen() {
               styles.disclaimerBox,
               { backgroundColor: appTheme.colors.surface },
             ]}
+            accessible
+            accessibilityRole="summary"
           >
             <AppText
               style={[

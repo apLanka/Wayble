@@ -212,7 +212,13 @@ export default function MapboxTab() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: appTheme.colors.background },
+      ]}
+      edges={["top"]}
+    >
       <SearchBar
         value={searchQuery}
         onChangeText={setSearchQuery}
@@ -279,7 +285,10 @@ export default function MapboxTab() {
         >
           {filtered.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <AppText style={styles.emptyText}>
+              <AppText
+                accessibilityRole="text"
+                style={[styles.emptyText, { color: appTheme.colors.textMuted }]}
+              >
                 No places found nearby.
               </AppText>
             </View>
@@ -346,6 +355,8 @@ export default function MapboxTab() {
                 ]}
               >
                 <View
+                  accessible
+                  accessibilityLabel="Your current location"
                   style={{
                     width: 60,
                     height: 60,
@@ -354,6 +365,8 @@ export default function MapboxTab() {
                   }}
                 >
                   <AppText
+                    importantForAccessibility="no-hide-descendants"
+                    accessibilityElementsHidden
                     style={{
                       fontSize: 48,
                       lineHeight: 60,
@@ -480,7 +493,6 @@ export default function MapboxTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   listContainer: {
     flex: 1,
@@ -493,7 +505,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: "#6b7280",
   },
   mapContainer: {
     flex: 1,
