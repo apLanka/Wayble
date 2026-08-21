@@ -14,9 +14,17 @@ export function ViewModeToggle({ isListMode, onToggle }: ViewModeToggleProps) {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: appTheme.colors.surface }]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: appTheme.colors.surface,
+          borderBottomColor: appTheme.colors.border,
+        },
+      ]}
     >
-      <AppText style={styles.label}>List View</AppText>
+      <AppText style={[styles.label, { color: appTheme.colors.text }]}>
+        List View
+      </AppText>
       <Switch
         value={isListMode}
         onValueChange={onToggle}
@@ -41,7 +49,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(0,0,0,0.1)", // Using a light fixed alpha for simplicity over the map
   },
   label: {
     fontSize: 16,

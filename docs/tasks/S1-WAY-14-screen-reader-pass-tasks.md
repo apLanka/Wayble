@@ -63,8 +63,8 @@ T13 VoiceOver walkthrough (iOS)
 
 **Files:** `apps/mobile/components/map/AccessibilityPin.tsx`
 
-- [ ] Add `accessibilityRole="button"` and `accessibilityLabel` derived from category label (e.g., "Wheelchair accessible place").
-- [ ] Replace `TouchableOpacity` with `TouchTarget` for minimum touch target compliance.
+- [x] Add `accessibilityRole="button"` and `accessibilityLabel` derived from category label (e.g., "Wheelchair accessible place").
+- [x] Replace `TouchableOpacity` with `TouchTarget` for minimum touch target compliance.
 
 **Done when:** Map pins are announced with their category when focused by screen reader.
 
@@ -74,7 +74,7 @@ T13 VoiceOver walkthrough (iOS)
 
 **Files:** `apps/mobile/components/map/SearchBar.tsx`
 
-- [ ] Add `accessibilityRole="button"` and `accessibilityLabel` to each dropdown result `TouchableOpacity` (e.g., `"City Library, 0.5 km away"`).
+- [x] Add `accessibilityRole="button"` and `accessibilityLabel` to each dropdown result `TouchableOpacity` (e.g., `"City Library, 0.5 km away"`).
 
 **Done when:** Each search result item is individually focusable and announced with its name and distance.
 
@@ -84,7 +84,7 @@ T13 VoiceOver walkthrough (iOS)
 
 **Files:** `apps/mobile/components/map/ViewModeToggle.tsx`
 
-- [ ] Replace hardcoded `borderBottomColor: "rgba(0,0,0,0.1)"` with `appTheme.colors.border`.
+- [x] Replace hardcoded `borderBottomColor: "rgba(0,0,0,0.1)"` with `appTheme.colors.border`.
 
 **Done when:** Border is visible and correct in both light and dark modes.
 
