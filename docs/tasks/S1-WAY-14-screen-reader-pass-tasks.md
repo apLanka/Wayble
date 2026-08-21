@@ -129,7 +129,7 @@ T13 VoiceOver walkthrough (iOS)
 
 **Files:** `apps/mobile/app/index.tsx`
 
-- [ ] Add `accessibilityLabel="Loading, please wait"` to the `ActivityIndicator`.
+- [x] Add `accessibilityLabel="Loading, please wait"` to the `ActivityIndicator`.
 
 **Done when:** Loading spinner announces its purpose to screen readers.
 
@@ -139,7 +139,7 @@ T13 VoiceOver walkthrough (iOS)
 
 **Files:** `docs/tasks/WAY-14-screen-reader-walkthrough-log.md`
 
-- [ ] Create a structured walkthrough log document with per-screen entry template containing: screen name, platform, tester, focus order, labels, roles, alerts, issues found, pass/fail.
+- [x] Create a structured walkthrough log document with per-screen entry template containing: screen name, platform, tester, focus order, labels, roles, alerts, issues found, pass/fail.
 
 **Done when:** Template document exists and is ready for team members to fill in.
 
@@ -149,8 +149,8 @@ T13 VoiceOver walkthrough (iOS)
 
 **Files:** N/A (runs across workspace)
 
-- [ ] Run `bun run check-types` — all files compile with no errors.
-- [ ] Run `bun run lint` — no new lint violations introduced.
+- [x] Run `bun run check-types` — all files compile with no errors.
+- [x] Run `bun run lint` — no new lint violations introduced.
 
 **Done when:** CI-equivalent checks pass locally.
 
@@ -160,10 +160,10 @@ T13 VoiceOver walkthrough (iOS)
 
 **Files:** `docs/tasks/WAY-14-screen-reader-walkthrough-log.md` (update)
 
-- [ ] Enable TalkBack on an Android emulator or device.
-- [ ] Navigate all 9 Sprint 1 screens: Sign In → Sign Up → Home → Map (list mode) → Map (map mode) → Map Place Detail → Settings → Place Detail → Debug.
-- [ ] Verify every interactive element is focusable, announced correctly, and actionable.
-- [ ] Log results in the walkthrough document.
+- [x] Enable TalkBack on an Android emulator or device.
+- [x] Navigate all 9 Sprint 1 screens: Sign In → Sign Up → Home → Map (list mode) → Map (map mode) → Map Place Detail → Settings → Place Detail → Debug.
+- [x] Verify every interactive element is focusable, announced correctly, and actionable.
+- [x] Log results in the walkthrough document.
 
 **Done when:** All screens pass TalkBack navigation and results are logged.
 
@@ -173,9 +173,9 @@ T13 VoiceOver walkthrough (iOS)
 
 **Files:** `docs/tasks/WAY-14-screen-reader-walkthrough-log.md` (update)
 
-- [ ] Enable VoiceOver on an iOS simulator or device.
-- [ ] Navigate all 9 Sprint 1 screens.
-- [ ] Verify every interactive element is focusable, announced correctly, and actionable.
-- [ ] Log results in the walkthrough document.
+- [x] Enable VoiceOver on an iOS simulator or device.
+- [x] Navigate all 9 Sprint 1 screens.
+- [x] Verify every interactive element is focusable, announced correctly, and actionable.
+- [x] Log results in the walkthrough document.
 
 **Done when:** All screens pass VoiceOver navigation and results are logged.
