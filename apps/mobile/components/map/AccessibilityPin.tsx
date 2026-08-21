@@ -1,18 +1,19 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
-import type { AccessibleLocation } from "../../data/mock-data";
+
 import { CATEGORY_COLORS } from "./CategoryFilter";
 
 type Props = {
-  category: AccessibleLocation["category"];
+  category: "all" | "wheelchair" | "elevator" | "bathroom" | "multi";
   onPress?: () => void;
 };
 
-const PIN_EMOJI: Record<AccessibleLocation["category"], string> = {
-  wheelchair: "♿",
+const PIN_EMOJI: Record<Props["category"], string> = {
+  all: "📍",
+  wheelchair: "♿️",
   elevator: "🛗",
   bathroom: "🚻",
-  multi: "⭐",
+  multi: "🌟",
 };
 
 export default function AccessibilityPin({ category, onPress }: Props) {

@@ -48,6 +48,10 @@ export const create = mutation({
     category: placeCategoryValidator,
     address: v.string(),
     location: v.object({ latitude: v.number(), longitude: v.number() }),
+    accessibilityCategories: v.optional(
+      v.array(accessibilityCategoryValidator),
+    ),
+    features: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -95,7 +99,7 @@ export const seedMockPlaces = mutation({
         category: "other",
         address: p.address,
         location: p.location,
-        accessibilityCategory: p.accessibilityCategory,
+        accessibilityCategories: [p.accessibilityCategory],
         features: p.features,
         createdBy: userId,
         updatedAt: Date.now(),
