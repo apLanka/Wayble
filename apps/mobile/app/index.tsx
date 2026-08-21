@@ -18,7 +18,11 @@ export default function IndexRoute() {
           backgroundColor: appTheme.colors.background,
         }}
       >
-        <ActivityIndicator size="large" color={appTheme.colors.primary} />
+        <ActivityIndicator
+          size="large"
+          color={appTheme.colors.primary}
+          accessibilityLabel="Loading, please wait"
+        />
       </View>
     );
   }
