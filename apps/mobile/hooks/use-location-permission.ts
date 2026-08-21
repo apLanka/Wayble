@@ -25,10 +25,15 @@ export function useLocationPermission() {
 
   const fetchLocation = async () => {
     try {
+      console.log("Fetching location...");
       const loc = await Location.getCurrentPositionAsync({});
+      console.log("Got location:", loc.coords.latitude, loc.coords.longitude);
       setLocation(loc);
-    } catch {
+      return loc;
+    } catch (e) {
+      console.log("Fetch location error:", e);
       setErrorMsg("Failed to get current location.");
+      return null;
     }
   };
 
@@ -40,18 +45,40 @@ export function useLocationPermission() {
         await Location.requestForegroundPermissionsAsync();
       setStatus(newStatus);
       if (newStatus === "granted") {
-        await fetchLocation();
+        return await fetchLocation();
       }
+      return null;
     } catch {
       setErrorMsg("Failed to request permission.");
+      return null;
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const refreshLocation = async () => {
+    try {
+      const currentStatus = (await Location.getForegroundPermissionsAsync())
+        .status;
+      if (currentStatus === "granted") {
+        return await fetchLocation();
+      }
+    } catch {
+      // Ignore
+    }
+    return null;
   };
 
   useEffect(() => {
     checkStatus();
   }, []);
 
-  return { location, status, isLoading, errorMsg, requestPermission };
+  return {
+    location,
+    status,
+    isLoading,
+    errorMsg,
+    requestPermission,
+    refreshLocation,
+  };
 }
