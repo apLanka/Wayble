@@ -102,7 +102,9 @@ export default defineSchema({
     location: locationValidator,
     createdBy: v.id("users"),
     updatedAt: v.number(),
-    accessibilityCategory: v.optional(accessibilityCategoryValidator),
+    accessibilityCategories: v.optional(
+      v.array(accessibilityCategoryValidator),
+    ),
     features: v.optional(v.array(v.string())),
   }),
 
