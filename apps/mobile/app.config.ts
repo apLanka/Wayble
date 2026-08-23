@@ -6,6 +6,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: config.slug ?? "mobile",
   plugins: [
     ...(config.plugins ?? []),
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission:
+          "Wayble needs your location to show accessible places near you.",
+        isAndroidBackgroundLocationEnabled: false,
+      },
+    ],
     // Download token is no longer passed via plugin config — set the
     // RNMAPBOX_MAPS_DOWNLOAD_TOKEN env var before running expo/eas build
     // instead (the old RNMapboxMapsDownloadToken plugin prop is deprecated).
