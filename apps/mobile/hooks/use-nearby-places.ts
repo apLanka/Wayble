@@ -55,8 +55,35 @@ export function useNearbyPlaces() {
       : "skip",
   );
 
+  // Calculate distance client-side for search results using Haversine formula
+  const searchWithDistance = useMemo(() => {
+    if (!rawSearch || !point) return rawSearch;
+
+    return rawSearch.map((place) => {
+      // Haversine formula
+      const R = 6371e3; // Earth radius in meters
+      const lat1 = (point.latitude * Math.PI) / 180;
+      const lat2 = (place.location.latitude * Math.PI) / 180;
+      const deltaLat =
+        ((place.location.latitude - point.latitude) * Math.PI) / 180;
+      const deltaLon =
+        ((place.location.longitude - point.longitude) * Math.PI) / 180;
+
+      const a =
+        Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+        Math.cos(lat1) *
+          Math.cos(lat2) *
+          Math.sin(deltaLon / 2) *
+          Math.sin(deltaLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c;
+
+      return { ...place, distance };
+    });
+  }, [rawSearch, point]);
+
   // Cast locations to our expected shape which includes distance
-  const locations = (isSearchActive ? rawSearch : rawNearest) as
+  const locations = (isSearchActive ? searchWithDistance : rawNearest) as
     NearbyPlace[] | undefined;
 
   // Development/Demo fallback: if we have locations but map feels empty, log a hint
