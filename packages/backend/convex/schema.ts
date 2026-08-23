@@ -12,7 +12,7 @@ export const userRoleValidator = v.union(
   v.literal("admin"),
 );
 
-const placeCategoryValidator = v.union(
+export const placeCategoryValidator = v.union(
   v.literal("education"),
   v.literal("food_and_drink"),
   v.literal("government"),
@@ -23,6 +23,16 @@ const placeCategoryValidator = v.union(
   v.literal("transport"),
   v.literal("workplace"),
   v.literal("other"),
+);
+
+// Mobile map's accessibility-feature category (pin color/filter) — orthogonal
+// to placeCategoryValidator's business type. Optional/additive: not every
+// place has this set.
+export const accessibilityCategoryValidator = v.union(
+  v.literal("wheelchair"),
+  v.literal("elevator"),
+  v.literal("bathroom"),
+  v.literal("multi"),
 );
 
 const reportStatusValidator = v.union(
@@ -92,7 +102,11 @@ export default defineSchema({
     location: locationValidator,
     createdBy: v.id("users"),
     updatedAt: v.number(),
-  }),
+    accessibilityCategories: v.optional(
+      v.array(accessibilityCategoryValidator),
+    ),
+    features: v.optional(v.array(v.string())),
+  }).searchIndex("search_name", { searchField: "name" }),
 
   reports: defineTable({
     placeId: v.id("places"),
