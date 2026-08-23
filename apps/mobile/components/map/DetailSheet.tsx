@@ -20,7 +20,12 @@ const ACCESSIBILITY_EMOJIS = {
 
 const SNAP_POINTS = ["40%"];
 
-export default function DetailSheet({ location, placeId, onClose, onShowDirection }: Props) {
+export function DetailSheet({
+  location,
+  placeId,
+  onClose,
+  onShowDirection,
+}: Props) {
   const sheetRef = useRef<BottomSheet>(null);
   const router = useRouter();
 
