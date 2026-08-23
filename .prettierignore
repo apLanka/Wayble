@@ -4,6 +4,8 @@ node_modules
 packages/backend/convex/_generated
 bun.lock
 apps/mobile/expo-env.d.ts
+apps/mobile/ios
+apps/mobile/android
 
 # Local-only tooling and working docs (git-ignored; no value in formatting)
 .claude
