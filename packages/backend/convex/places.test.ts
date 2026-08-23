@@ -4,6 +4,47 @@ import { expect, test } from "vitest";
 import { api } from "./_generated/api";
 import schema from "./schema";
 
+test("search places by name", async () => {
+  const t = convexTest(schema, import.meta.glob("./**/*.*s"));
+  geospatialTest.register(t);
+
+  const userId = await t.run(async (ctx) => {
+    return await ctx.db.insert("users", {});
+  });
+  const asUser = t.withIdentity({ subject: userId });
+
+  await asUser.mutation(api.places.create, {
+    name: "Central Library",
+    category: "education",
+    address: "123 Main St",
+    location: { latitude: 10, longitude: 10 },
+  });
+
+  await asUser.mutation(api.places.create, {
+    name: "Central Park",
+    category: "outdoor",
+    address: "456 Park Ave",
+    location: { latitude: 20, longitude: 20 },
+  });
+
+  let results = await asUser.query(api.places.search, {
+    query: "Central",
+  });
+  expect(results).toHaveLength(2);
+
+  results = await asUser.query(api.places.search, {
+    query: "Library",
+  });
+  expect(results).toHaveLength(1);
+  expect(results[0]?.name).toBe("Central Library");
+
+  results = await asUser.query(api.places.search, {
+    query: "Central",
+    limit: 1,
+  });
+  expect(results).toHaveLength(1);
+});
+
 test("places sync with geospatial index", async () => {
   const t = convexTest(schema, import.meta.glob("./**/*.*s"));
   geospatialTest.register(t);

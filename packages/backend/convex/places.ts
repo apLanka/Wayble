@@ -42,6 +42,19 @@ export const nearest = query({
   },
 });
 
+export const search = query({
+  args: {
+    query: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("places")
+      .withSearchIndex("search_name", (q) => q.search("name", args.query))
+      .take(args.limit ?? 10);
+  },
+});
+
 export const create = mutation({
   args: {
     name: v.string(),
