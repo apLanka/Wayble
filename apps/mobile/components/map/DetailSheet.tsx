@@ -3,18 +3,24 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import type { AccessibleLocation } from "../../data/mock-data";
-import { CATEGORY_COLORS } from "./CategoryFilter";
 
 type Props = {
   location: AccessibleLocation | null;
-  /** Optional Convex place ID for navigating to the full detail screen. */
   placeId?: string;
   onClose: () => void;
+  onShowDirection?: () => void;
+};
+
+const ACCESSIBILITY_EMOJIS = {
+  wheelchair: "♿️",
+  elevator: "🛗",
+  bathroom: "🚻",
+  multi: "🌟",
 };
 
 const SNAP_POINTS = ["40%"];
 
-export default function DetailSheet({ location, placeId, onClose }: Props) {
+export default function DetailSheet({ location, placeId, onClose, onShowDirection }: Props) {
   const sheetRef = useRef<BottomSheet>(null);
   const router = useRouter();
 
@@ -43,7 +49,7 @@ export default function DetailSheet({ location, placeId, onClose }: Props) {
   return (
     <BottomSheet
       ref={sheetRef}
-      index={-1}
+      index={location ? 0 : -1}
       snapPoints={SNAP_POINTS}
       enableDynamicSizing={false}
       enablePanDownToClose
@@ -58,22 +64,57 @@ export default function DetailSheet({ location, placeId, onClose }: Props) {
                 <Text style={styles.close}>✕</Text>
               </TouchableOpacity>
             </View>
-            <View
-              style={[
-                styles.badge,
-                { backgroundColor: CATEGORY_COLORS[location.category] },
-              ]}
-            >
-              <Text style={styles.badgeText}>{location.category}</Text>
+            <View style={[styles.badge, { backgroundColor: "#6b7280" }]}>
+              <Text style={styles.badgeText}>
+                {location.category.replace(/_/g, " ")}
+              </Text>
             </View>
             <Text style={styles.address}>{location.address}</Text>
-            {location.features.map((f) => (
+
+            {/* Accessibility badges */}
+            {(
+              (
+                location as AccessibleLocation & {
+                  accessibilityCategories?: string[];
+                }
+              ).accessibilityCategories ?? []
+            ).length > 0 && (
+              <View style={styles.accessibilityRow}>
+                {(
+                  (
+                    location as AccessibleLocation & {
+                      accessibilityCategories?: string[];
+                    }
+                  ).accessibilityCategories ?? []
+                ).map((cat: string) => (
+                  <View key={cat} style={styles.accessibilityTile}>
+                    <Text style={styles.accessibilityEmoji}>
+                      {ACCESSIBILITY_EMOJIS[
+                        cat as keyof typeof ACCESSIBILITY_EMOJIS
+                      ] || "✓"}
+                    </Text>
+                    <Text style={styles.accessibilityTileText}>{cat}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {(location.features ?? []).map((f) => (
               <Text key={f} style={styles.feature}>
                 ✓ {f}
               </Text>
             ))}
 
-            {/* View Details navigation link */}
+            {onShowDirection && (
+              <TouchableOpacity
+                style={styles.directionButton}
+                onPress={onShowDirection}
+              >
+                <Text style={styles.directionButtonText}>
+                  Show the direction
+                </Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
               style={styles.detailsButton}
               onPress={handleViewDetails}
@@ -130,9 +171,45 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 10,
   },
+  accessibilityRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 12,
+  },
+  accessibilityTile: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f3f4f6",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    gap: 4,
+  },
+  accessibilityEmoji: {
+    fontSize: 16,
+  },
+  accessibilityTileText: {
+    fontSize: 12,
+    color: "#4b5563",
+    textTransform: "capitalize",
+  },
   feature: {
     fontSize: 14,
     marginBottom: 4,
+  },
+  directionButton: {
+    backgroundColor: "#0B6B3A",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 16,
+    marginBottom: 20,
+  },
+  directionButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   detailsButton: {
     marginTop: 12,
