@@ -1,10 +1,12 @@
 import React, { useRef, useCallback, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { useRouter } from "expo-router";
 import type { AccessibleLocation } from "../../data/mock-data";
 
 type Props = {
   location: AccessibleLocation | null;
+  placeId?: string;
   onClose: () => void;
   onShowDirection?: () => void;
 };
@@ -18,8 +20,14 @@ const ACCESSIBILITY_EMOJIS = {
 
 const SNAP_POINTS = ["40%"];
 
-export function DetailSheet({ location, onClose, onShowDirection }: Props) {
+export function DetailSheet({
+  location,
+  placeId,
+  onClose,
+  onShowDirection,
+}: Props) {
   const sheetRef = useRef<BottomSheet>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (location) {
@@ -35,6 +43,13 @@ export function DetailSheet({ location, onClose, onShowDirection }: Props) {
     },
     [onClose],
   );
+
+  const handleViewDetails = useCallback(() => {
+    const targetId = placeId ?? location?.id;
+    if (targetId) {
+      router.push(`/place/${targetId}` as never);
+    }
+  }, [placeId, location?.id, router]);
 
   return (
     <BottomSheet
@@ -105,6 +120,16 @@ export function DetailSheet({ location, onClose, onShowDirection }: Props) {
                 </Text>
               </TouchableOpacity>
             )}
+            <TouchableOpacity
+              style={styles.detailsButton}
+              onPress={handleViewDetails}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="View full accessibility details"
+              accessibilityHint="Opens the full place detail screen with all accessibility attributes"
+            >
+              <Text style={styles.detailsButtonText}>View Details →</Text>
+            </TouchableOpacity>
           </>
         )}
       </BottomSheetView>
@@ -190,5 +215,18 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  detailsButton: {
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: "#0B6B3A",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  detailsButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "600",
   },
 });
