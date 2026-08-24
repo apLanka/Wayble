@@ -1,7 +1,9 @@
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
-import { CATEGORY_COLORS } from "./CategoryFilter";
+import { AppText } from "@/components/ui/app-text";
+import { TouchTarget } from "@/components/ui/touch-target";
+import { CATEGORY_COLORS, CATEGORY_LABELS } from "./CategoryFilter";
 
 type Props = {
   category: "all" | "wheelchair" | "elevator" | "bathroom" | "multi";
@@ -19,14 +21,19 @@ const PIN_EMOJI: Record<Props["category"], string> = {
 export default function AccessibilityPin({ category, onPress }: Props) {
   const emoji = PIN_EMOJI[category];
   const color = CATEGORY_COLORS[category];
+  const categoryLabel = CATEGORY_LABELS[category] || category;
+  const a11yLabel =
+    category === "all" ? "Place marker" : `${categoryLabel} place`;
+
   return (
-    <TouchableOpacity
+    <TouchTarget
+      accessibilityRole="button"
+      accessibilityLabel={a11yLabel}
       style={[styles.pin, { backgroundColor: color }]}
       onPress={onPress}
-      activeOpacity={0.8}
     >
-      <Text style={styles.emoji}>{emoji}</Text>
-    </TouchableOpacity>
+      <AppText style={styles.emoji}>{emoji}</AppText>
+    </TouchTarget>
   );
 }
 

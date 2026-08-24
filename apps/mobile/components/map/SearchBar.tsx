@@ -86,47 +86,62 @@ export function SearchBar({
             data={results}
             keyExtractor={(item) => item._id}
             keyboardShouldPersistTaps="handled"
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.dropdownItem,
-                  { borderBottomColor: appTheme.colors.border },
-                ]}
-                onPress={() => {
-                  onSelectResult?.(item);
-                  Keyboard.dismiss();
-                }}
-              >
-                <View style={styles.itemHeader}>
-                  <AppText
-                    style={[styles.itemName, { color: appTheme.colors.text }]}
-                  >
-                    {item.name}
-                  </AppText>
-                  {item.distance !== undefined && (
+            renderItem={({ item }) => {
+              const distanceStr =
+                item.distance !== undefined
+                  ? `${(item.distance / 1000).toFixed(1)} km away`
+                  : "";
+              const featuresStr =
+                item.accessibilityCategories &&
+                item.accessibilityCategories.length > 0
+                  ? item.accessibilityCategories.join(", ")
+                  : "";
+              const a11yLabel = `${item.name}${distanceStr ? `, ${distanceStr}` : ""}${featuresStr ? `, features: ${featuresStr}` : ""}`;
+
+              return (
+                <TouchableOpacity
+                  style={[
+                    styles.dropdownItem,
+                    { borderBottomColor: appTheme.colors.border },
+                  ]}
+                  onPress={() => {
+                    onSelectResult?.(item);
+                    Keyboard.dismiss();
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={a11yLabel}
+                >
+                  <View style={styles.itemHeader}>
                     <AppText
-                      style={[
-                        styles.itemDistance,
-                        { color: appTheme.colors.textMuted },
-                      ]}
+                      style={[styles.itemName, { color: appTheme.colors.text }]}
                     >
-                      {(item.distance / 1000).toFixed(1)} km
+                      {item.name}
                     </AppText>
-                  )}
-                </View>
-                {item.accessibilityCategories &&
-                  item.accessibilityCategories.length > 0 && (
-                    <AppText
-                      style={[
-                        styles.itemFeatures,
-                        { color: appTheme.colors.primary },
-                      ]}
-                    >
-                      {item.accessibilityCategories.join(" • ")}
-                    </AppText>
-                  )}
-              </TouchableOpacity>
-            )}
+                    {item.distance !== undefined && (
+                      <AppText
+                        style={[
+                          styles.itemDistance,
+                          { color: appTheme.colors.textMuted },
+                        ]}
+                      >
+                        {(item.distance / 1000).toFixed(1)} km
+                      </AppText>
+                    )}
+                  </View>
+                  {item.accessibilityCategories &&
+                    item.accessibilityCategories.length > 0 && (
+                      <AppText
+                        style={[
+                          styles.itemFeatures,
+                          { color: appTheme.colors.primary },
+                        ]}
+                      >
+                        {item.accessibilityCategories.join(" • ")}
+                      </AppText>
+                    )}
+                </TouchableOpacity>
+              );
+            }}
           />
         </View>
       )}
