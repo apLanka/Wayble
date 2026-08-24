@@ -99,8 +99,19 @@ export default function PlaceDetailScreen() {
 
             <CategoryBadge category={place.category} />
 
-            <View style={styles.addressRow}>
-              <AppText style={styles.addressIcon}>📍</AppText>
+            <View
+              style={styles.addressRow}
+              accessible
+              accessibilityRole="text"
+              accessibilityLabel={`Address: ${place.address}`}
+            >
+              <AppText
+                style={styles.addressIcon}
+                importantForAccessibility="no-hide-descendants"
+                accessibilityElementsHidden
+              >
+                📍
+              </AppText>
               <AppText
                 style={[styles.address, { color: appTheme.colors.textMuted }]}
                 numberOfLines={2}

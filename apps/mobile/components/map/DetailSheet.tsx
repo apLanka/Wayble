@@ -1,7 +1,11 @@
 import React, { useRef, useCallback, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
+
+import { AppText } from "@/components/ui/app-text";
+import { CATEGORY_LABELS } from "@/components/map/CategoryFilter";
+import { useAppTheme } from "@/hooks/use-app-theme";
 import type { AccessibleLocation } from "../../data/mock-data";
 
 type Props = {
@@ -28,6 +32,7 @@ export function DetailSheet({
 }: Props) {
   const sheetRef = useRef<BottomSheet>(null);
   const router = useRouter();
+  const { appTheme } = useAppTheme();
 
   useEffect(() => {
     if (location) {
@@ -59,22 +64,56 @@ export function DetailSheet({
       enableDynamicSizing={false}
       enablePanDownToClose
       onChange={handleSheetChange}
+      backgroundStyle={{ backgroundColor: appTheme.colors.surface }}
+      handleIndicatorStyle={{ backgroundColor: appTheme.colors.border }}
     >
-      <BottomSheetView style={styles.content}>
+      <BottomSheetView
+        style={[styles.content, { backgroundColor: appTheme.colors.surface }]}
+      >
         {location && (
           <>
             <View style={styles.header}>
-              <Text style={styles.name}>{location.name}</Text>
-              <TouchableOpacity onPress={onClose} hitSlop={8}>
-                <Text style={styles.close}>✕</Text>
+              <AppText
+                style={[styles.name, { color: appTheme.colors.text }]}
+                accessibilityRole="header"
+              >
+                {location.name}
+              </AppText>
+              <TouchableOpacity
+                onPress={onClose}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Close place details"
+              >
+                <AppText
+                  style={[styles.close, { color: appTheme.colors.textMuted }]}
+                >
+                  ✕
+                </AppText>
               </TouchableOpacity>
             </View>
-            <View style={[styles.badge, { backgroundColor: "#6b7280" }]}>
-              <Text style={styles.badgeText}>
+
+            <View
+              style={[
+                styles.badge,
+                { backgroundColor: appTheme.colors.primary + "20" },
+              ]}
+              accessible
+              accessibilityRole="text"
+              accessibilityLabel={`Category: ${location.category.replace(/_/g, " ")}`}
+            >
+              <AppText
+                style={[styles.badgeText, { color: appTheme.colors.primary }]}
+              >
                 {location.category.replace(/_/g, " ")}
-              </Text>
+              </AppText>
             </View>
-            <Text style={styles.address}>{location.address}</Text>
+
+            <AppText
+              style={[styles.address, { color: appTheme.colors.textMuted }]}
+            >
+              {location.address}
+            </AppText>
 
             {/* Accessibility badges */}
             {(
@@ -91,44 +130,92 @@ export function DetailSheet({
                       accessibilityCategories?: string[];
                     }
                   ).accessibilityCategories ?? []
-                ).map((cat: string) => (
-                  <View key={cat} style={styles.accessibilityTile}>
-                    <Text style={styles.accessibilityEmoji}>
-                      {ACCESSIBILITY_EMOJIS[
-                        cat as keyof typeof ACCESSIBILITY_EMOJIS
-                      ] || "✓"}
-                    </Text>
-                    <Text style={styles.accessibilityTileText}>{cat}</Text>
-                  </View>
-                ))}
+                ).map((cat: string) => {
+                  const label =
+                    CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ||
+                    `${cat} accessible`;
+                  return (
+                    <View
+                      key={cat}
+                      style={[
+                        styles.accessibilityTile,
+                        {
+                          backgroundColor: appTheme.colors.surfaceElevated,
+                          borderColor: appTheme.colors.border,
+                        },
+                      ]}
+                      accessible
+                      accessibilityRole="text"
+                      accessibilityLabel={label}
+                    >
+                      <AppText style={styles.accessibilityEmoji}>
+                        {ACCESSIBILITY_EMOJIS[
+                          cat as keyof typeof ACCESSIBILITY_EMOJIS
+                        ] || "✓"}
+                      </AppText>
+                      <AppText
+                        style={[
+                          styles.accessibilityTileText,
+                          { color: appTheme.colors.text },
+                        ]}
+                      >
+                        {cat}
+                      </AppText>
+                    </View>
+                  );
+                })}
               </View>
             )}
 
             {(location.features ?? []).map((f) => (
-              <Text key={f} style={styles.feature}>
+              <AppText
+                key={f}
+                style={[styles.feature, { color: appTheme.colors.text }]}
+              >
                 ✓ {f}
-              </Text>
+              </AppText>
             ))}
 
             {onShowDirection && (
               <TouchableOpacity
-                style={styles.directionButton}
+                style={[
+                  styles.directionButton,
+                  { backgroundColor: appTheme.colors.primary },
+                ]}
                 onPress={onShowDirection}
+                accessibilityRole="button"
+                accessibilityLabel="Show walking directions"
+                activeOpacity={0.7}
               >
-                <Text style={styles.directionButtonText}>
+                <AppText
+                  style={[
+                    styles.directionButtonText,
+                    { color: appTheme.colors.onPrimary },
+                  ]}
+                >
                   Show the direction
-                </Text>
+                </AppText>
               </TouchableOpacity>
             )}
             <TouchableOpacity
-              style={styles.detailsButton}
+              style={[
+                styles.detailsButton,
+                { backgroundColor: appTheme.colors.primary },
+              ]}
               onPress={handleViewDetails}
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel="View full accessibility details"
               accessibilityHint="Opens the full place detail screen with all accessibility attributes"
             >
-              <Text style={styles.detailsButtonText}>View Details →</Text>
+              <AppText
+                style={[
+                  styles.detailsButtonText,
+                  { color: appTheme.colors.onPrimary },
+                ]}
+              >
+                View Details →
+              </AppText>
             </TouchableOpacity>
           </>
         )}
@@ -157,7 +244,6 @@ const styles = StyleSheet.create({
   },
   close: {
     fontSize: 18,
-    color: "#666",
   },
   badge: {
     alignSelf: "flex-start",
@@ -167,12 +253,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   badgeText: {
-    color: "#fff",
     fontSize: 12,
     textTransform: "capitalize",
+    fontWeight: "600",
   },
   address: {
-    color: "#666",
     fontSize: 14,
     marginBottom: 10,
   },
@@ -185,10 +270,10 @@ const styles = StyleSheet.create({
   accessibilityTile: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f3f4f6",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
+    borderWidth: 1,
     gap: 4,
   },
   accessibilityEmoji: {
@@ -196,7 +281,6 @@ const styles = StyleSheet.create({
   },
   accessibilityTileText: {
     fontSize: 12,
-    color: "#4b5563",
     textTransform: "capitalize",
   },
   feature: {
@@ -204,7 +288,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   directionButton: {
-    backgroundColor: "#0B6B3A",
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
@@ -212,7 +295,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   directionButtonText: {
-    color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -220,12 +302,10 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingVertical: 10,
     paddingHorizontal: 16,
-    backgroundColor: "#0B6B3A",
     borderRadius: 10,
     alignItems: "center",
   },
   detailsButtonText: {
-    color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "600",
   },
