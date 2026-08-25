@@ -1,4 +1,7 @@
-import type { AccessibilityAttributeKey } from "@packages/backend/convex/accessibility";
+import {
+  ACCESSIBILITY_ATTRIBUTE_KEYS,
+  type AccessibilityAttributeKey,
+} from "@packages/backend/convex/accessibility";
 
 /**
  * Display metadata for each accessibility attribute key.
@@ -196,3 +199,49 @@ export const PLACE_CATEGORY_COLORS: Record<string, string> = {
   workplace: "#455A64",
   other: "#616161",
 };
+
+/**
+ * Representative emoji per attribute key, used as the row icon.
+ *
+ * Emoji rather than `expo-symbols` so rendering does not depend on the native
+ * SF Symbols module being present in the build. Always rendered *alongside*
+ * the text label from `ATTRIBUTE_METADATA`, never on its own.
+ */
+export const ATTRIBUTE_ICON_EMOJI: Record<AccessibilityAttributeKey, string> = {
+  "mobility.step_free_entrance": "♿",
+  "mobility.wide_entrance": "🚪",
+  "mobility.step_free_interior": "↔️",
+  "mobility.elevator": "🛗",
+  "mobility.accessible_restroom": "🚻",
+  "mobility.accessible_parking": "🅿️",
+  "mobility.wheelchair_seating": "💺",
+  "vision.braille_signage": "⠿",
+  "vision.tactile_guidance": "✋",
+  "vision.high_contrast_signage": "👁️",
+  "vision.visual_hazard_marking": "⚠️",
+  "hearing.hearing_loop": "👂",
+  "hearing.visual_alarms": "🔔",
+  "communication.accessible_service_option": "💬",
+  "sensory.clear_signage": "🪧",
+  "sensory.quiet_space": "🔇",
+  "sensory.low_stimulation_option": "🔅",
+  "assistance.service_animals": "🐕",
+  "assistance.staff_support": "👥",
+};
+
+/**
+ * Attribute keys bucketed by their display category, in taxonomy order.
+ *
+ * Derived from the backend key list so a new attribute appears in the UI
+ * automatically once it has display metadata.
+ */
+export const ATTRIBUTE_KEYS_BY_CATEGORY: Record<
+  string,
+  AccessibilityAttributeKey[]
+> = ACCESSIBILITY_ATTRIBUTE_KEYS.reduce<
+  Record<string, AccessibilityAttributeKey[]>
+>((acc, key) => {
+  const { category } = ATTRIBUTE_METADATA[key];
+  (acc[category] ??= []).push(key);
+  return acc;
+}, {});
