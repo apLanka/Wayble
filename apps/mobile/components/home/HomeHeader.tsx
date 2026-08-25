@@ -42,10 +42,10 @@ export function HomeHeader({ displayName }: HomeHeaderProps) {
           </AppText>
         </View>
         <TouchTarget
-          onPress={() => router.push("/settings")}
+          onPress={() => router.push("/profile")}
           accessibilityRole="button"
-          accessibilityLabel="Open settings"
-          accessibilityHint="Opens account and app settings"
+          accessibilityLabel="Open profile"
+          accessibilityHint="Opens your profile and accessibility needs"
           style={styles.profileButton}
         >
           <AppSymbol

@@ -49,4 +49,5 @@ export const HOME_SYMBOLS = {
   elevator: { ios: "arrow.up.arrow.down", android: "elevator" },
   bathroom: { ios: "toilet", android: "wc" },
   multi: { ios: "sparkles", android: "star" },
+  edit: { ios: "pencil", android: "edit" },
 } as const satisfies Record<string, PlatformSymbol>;
