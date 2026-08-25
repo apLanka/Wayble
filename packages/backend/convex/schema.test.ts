@@ -1,5 +1,5 @@
 import { convexTest } from "convex-test";
-import { expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.*s");
@@ -308,4 +308,104 @@ test("rejects documents with missing required fields", async () => {
       } as never),
     ),
   ).rejects.toThrow();
+});
+
+describe("US-21 notification schema", () => {
+  test("stores notification preferences and a coarse location on the user", async () => {
+    const t = convexTest(schema, modules);
+    const userId = await t.run(async (ctx) =>
+      ctx.db.insert("users", {
+        email: "notify@example.com",
+        role: "member",
+        updatedAt: 1,
+        verifyNearbyEnabled: true,
+        verifyNearbyRadiusMeters: 2000,
+        lastKnownLocation: {
+          latitude: 6.906,
+          longitude: 79.861,
+          updatedAt: 1,
+          timeZoneOffsetMinutes: 330,
+        },
+      }),
+    );
+    const user = await t.run(async (ctx) => ctx.db.get(userId));
+    expect(user?.verifyNearbyEnabled).toBe(true);
+    expect(user?.lastKnownLocation?.timeZoneOffsetMinutes).toBe(330);
+  });
+
+  test("finds opted-in users by index without scanning every user", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("users", { role: "member", updatedAt: 1 });
+      await ctx.db.insert("users", {
+        role: "member",
+        updatedAt: 1,
+        verifyNearbyEnabled: true,
+      });
+    });
+    const optedIn = await t.run(async (ctx) =>
+      ctx.db
+        .query("users")
+        .withIndex("by_verify_nearby_enabled", (q) =>
+          q.eq("verifyNearbyEnabled", true),
+        )
+        .collect(),
+    );
+    expect(optedIn).toHaveLength(1);
+  });
+
+  test("stores a push token and finds it by token", async () => {
+    const t = convexTest(schema, modules);
+    const userId = await t.run(async (ctx) =>
+      ctx.db.insert("users", { role: "member", updatedAt: 1 }),
+    );
+    await t.run(async (ctx) =>
+      ctx.db.insert("pushTokens", {
+        userId,
+        token: "ExponentPushToken[abc]",
+        platform: "android",
+        updatedAt: 1,
+      }),
+    );
+    const found = await t.run(async (ctx) =>
+      ctx.db
+        .query("pushTokens")
+        .withIndex("by_token", (q) => q.eq("token", "ExponentPushToken[abc]"))
+        .unique(),
+    );
+    expect(found?.platform).toBe("android");
+  });
+
+  test("stores a pending notification claim", async () => {
+    const t = convexTest(schema, modules);
+    const { userId, placeId } = await t.run(async (ctx) => {
+      const userId = await ctx.db.insert("users", {
+        role: "member",
+        updatedAt: 1,
+      });
+      const placeId = await ctx.db.insert("places", {
+        name: "Central Library",
+        category: "education",
+        address: "1 Main St",
+        location: { latitude: 6.9, longitude: 79.8 },
+        createdBy: userId,
+        updatedAt: 1,
+      });
+      return { userId, placeId };
+    });
+
+    const logId = await t.run(async (ctx) =>
+      ctx.db.insert("notificationLog", {
+        userId,
+        placeId,
+        kind: "verify_nearby",
+        reason: "never_reported",
+        status: "pending",
+        scheduledAt: 1,
+      }),
+    );
+    const log = await t.run(async (ctx) => ctx.db.get(logId));
+    expect(log?.status).toBe("pending");
+    expect(log?.sentAt).toBeUndefined();
+  });
 });

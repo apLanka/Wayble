@@ -14,6 +14,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         isAndroidBackgroundLocationEnabled: false,
       },
     ],
+    [
+      "expo-notifications",
+      {
+        icon: "./assets/images/android-icon-monochrome.png",
+        color: "#0B6B3A",
+      },
+    ],
     // Download token is no longer passed via plugin config — set the
     // RNMAPBOX_MAPS_DOWNLOAD_TOKEN env var before running expo/eas build
     // instead (the old RNMapboxMapsDownloadToken plugin prop is deprecated).

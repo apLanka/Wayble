@@ -62,6 +62,28 @@ const flagStatusValidator = v.union(
   v.literal("dismissed"),
 );
 
+const notificationKindValidator = v.literal("verify_nearby");
+
+const notificationReasonValidator = v.union(
+  v.literal("never_reported"),
+  v.literal("stale"),
+);
+
+export const notificationStatusValidator = v.union(
+  v.literal("pending"),
+  v.literal("sent"),
+  v.literal("failed"),
+);
+
+const pushPlatformValidator = v.union(v.literal("ios"), v.literal("android"));
+
+const lastKnownLocationValidator = v.object({
+  latitude: v.number(),
+  longitude: v.number(),
+  updatedAt: v.number(),
+  timeZoneOffsetMinutes: v.number(),
+});
+
 const locationValidator = v.object({
   latitude: v.number(),
   longitude: v.number(),
@@ -95,10 +117,21 @@ export default defineSchema({
     // from the same taxonomy that reports use. Optional so existing users
     // need no migration; an empty array means "explicitly cleared".
     accessibilityNeeds: v.optional(v.array(accessibilityAttributeKeyValidator)),
+
+    // US-21: opt-in, off by default. Flat rather than nested in a prefs
+    // object so the sweep can select opted-in users by index instead of
+    // scanning the whole users table.
+    verifyNearbyEnabled: v.optional(v.boolean()),
+    verifyNearbyRadiusMeters: v.optional(v.number()),
+    // Rounded to ~110 m before storage — this feature needs neighbourhood
+    // accuracy, not tracking accuracy.
+    lastKnownLocation: v.optional(lastKnownLocationValidator),
+
     updatedAt: v.optional(v.number()),
   })
     .index("email", ["email"])
-    .index("phone", ["phone"]),
+    .index("phone", ["phone"])
+    .index("by_verify_nearby_enabled", ["verifyNearbyEnabled"]),
 
   places: defineTable({
     name: v.string(),
@@ -150,4 +183,40 @@ export default defineSchema({
   })
     .index("by_report", ["reportId"])
     .index("by_author", ["authorId"]),
+
+  // One row per device. Tokens rotate and a user may have several devices,
+  // so this cannot live on the user document. `disabledAt` is set when Expo
+  // reports DeviceNotRegistered, so dead tokens stop being retried.
+  pushTokens: defineTable({
+    userId: v.id("users"),
+    token: v.string(),
+    platform: pushPlatformValidator,
+    deviceName: v.optional(v.string()),
+    updatedAt: v.number(),
+    disabledAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_token", ["token"]),
+
+  // Every intended notification, written as `pending` inside the sweep's
+  // transaction before any send is attempted. This is what makes the rate
+  // limit and per-place cooldown race-free rather than best-effort, and it
+  // doubles as delivery evidence.
+  notificationLog: defineTable({
+    userId: v.id("users"),
+    placeId: v.id("places"),
+    attributeKey: v.optional(accessibilityAttributeKeyValidator),
+    kind: notificationKindValidator,
+    reason: notificationReasonValidator,
+    // Age of the data at claim time. The copy builder needs it to say "7
+    // months old", and it cannot be recomputed once reports change.
+    ageDays: v.optional(v.number()),
+    status: notificationStatusValidator,
+    scheduledAt: v.number(),
+    sentAt: v.optional(v.number()),
+    errorCode: v.optional(v.string()),
+  })
+    .index("by_user_and_scheduledAt", ["userId", "scheduledAt"])
+    .index("by_user_and_place", ["userId", "placeId"])
+    .index("by_status_and_scheduledAt", ["status", "scheduledAt"]),
 });
