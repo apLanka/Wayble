@@ -19,6 +19,14 @@ export default function SettingsScreen() {
   const currentUser = useQuery(api.users.currentUser);
   const { status } = useLocationPermission();
 
+  const needsCount = currentUser?.accessibilityNeeds?.length ?? 0;
+  const needsSummary =
+    currentUser == null
+      ? "Sign in to set your needs"
+      : needsCount === 0
+        ? "Not set yet"
+        : `${needsCount} need${needsCount === 1 ? "" : "s"} selected`;
+
   const handleSignOut = async () => {
     await signOut();
     router.replace("/sign-in");
@@ -94,6 +102,35 @@ export default function SettingsScreen() {
             </AppText>
           </TouchTarget>
         </View>
+
+        {/* Accessibility Needs Card */}
+        <TouchTarget
+          accessibilityRole="button"
+          accessibilityLabel={`Accessibility needs. ${needsSummary}`}
+          accessibilityHint="Opens the screen where you choose the accessibility features you need"
+          onPress={() => router.push("/settings/accessibility-needs")}
+          style={[
+            styles.statusCard,
+            styles.navCard,
+            {
+              backgroundColor: appTheme.colors.surface,
+              borderColor: appTheme.colors.border,
+            },
+          ]}
+        >
+          <View style={styles.navCardText}>
+            <AppText variant="label">Accessibility needs</AppText>
+            <AppText style={{ color: appTheme.colors.textMuted }}>
+              {needsSummary}
+            </AppText>
+          </View>
+          <AppText
+            variant="bodyStrong"
+            style={{ color: appTheme.colors.textMuted }}
+          >
+            ›
+          </AppText>
+        </TouchTarget>
 
         {/* Theme Card */}
         <View
@@ -207,6 +244,15 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   accountDetails: {
+    gap: spacing.xs,
+  },
+  navCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  navCardText: {
+    flex: 1,
     gap: spacing.xs,
   },
   signOutButton: {

@@ -70,3 +70,47 @@ export type AccessibilityAttributeValue = Infer<
 export type AccessibilityAttribute = Infer<
   typeof accessibilityAttributeValidator
 >;
+
+/**
+ * Every version 1 attribute key, in the order they should be presented.
+ *
+ * The validator above defines the vocabulary but cannot be iterated, and UI
+ * that offers the user a choice of attributes (US-02 needs selection) has to
+ * enumerate them. Keep this list in step with the validator — the assertion
+ * below fails `tsc` if a key is added to the union but not here.
+ */
+export const ACCESSIBILITY_ATTRIBUTE_KEYS = [
+  "mobility.step_free_entrance",
+  "mobility.wide_entrance",
+  "mobility.step_free_interior",
+  "mobility.elevator",
+  "mobility.accessible_restroom",
+  "mobility.accessible_parking",
+  "mobility.wheelchair_seating",
+  "vision.braille_signage",
+  "vision.tactile_guidance",
+  "vision.high_contrast_signage",
+  "vision.visual_hazard_marking",
+  "hearing.hearing_loop",
+  "hearing.visual_alarms",
+  "communication.accessible_service_option",
+  "sensory.clear_signage",
+  "sensory.quiet_space",
+  "sensory.low_stimulation_option",
+  "assistance.service_animals",
+  "assistance.staff_support",
+] as const satisfies readonly AccessibilityAttributeKey[];
+
+/**
+ * Compile-time proof that `ACCESSIBILITY_ATTRIBUTE_KEYS` covers the whole
+ * union. If a key is missing, `Exclude<...>` is non-`never` and this fails.
+ */
+type _EveryAttributeKeyIsListed =
+  Exclude<
+    AccessibilityAttributeKey,
+    (typeof ACCESSIBILITY_ATTRIBUTE_KEYS)[number]
+  > extends never
+    ? true
+    : never;
+const _everyAttributeKeyIsListed: _EveryAttributeKeyIsListed = true;
+void _everyAttributeKeyIsListed;
