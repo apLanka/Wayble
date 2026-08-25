@@ -11,7 +11,6 @@ import { TouchTarget } from "@/components/ui/touch-target";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { useLocationPermission } from "@/hooks/use-location-permission";
-import { usePushRegistration } from "@/hooks/use-push-registration";
 
 export default function SettingsScreen() {
   const { appTheme } = useAppTheme();
@@ -19,7 +18,6 @@ export default function SettingsScreen() {
   const router = useRouter();
   const currentUser = useQuery(api.users.currentUser);
   const { status } = useLocationPermission();
-  const { unregister } = usePushRegistration();
 
   const needsCount = currentUser?.accessibilityNeeds?.length ?? 0;
   const needsSummary =
@@ -29,17 +27,7 @@ export default function SettingsScreen() {
         ? "Not set yet"
         : `${needsCount} need${needsCount === 1 ? "" : "s"} selected`;
 
-  const notificationsSummary =
-    currentUser == null
-      ? "Sign in to manage notifications"
-      : currentUser.verifyNearbyEnabled
-        ? "On — nearby verification requests"
-        : "Off";
-
   const handleSignOut = async () => {
-    // Drop this device's token first — after signOut the mutation would be
-    // unauthenticated and would throw.
-    await unregister();
     await signOut();
     router.replace("/sign-in");
   };
@@ -120,7 +108,7 @@ export default function SettingsScreen() {
           accessibilityRole="button"
           accessibilityLabel={`Accessibility needs. ${needsSummary}`}
           accessibilityHint="Opens the screen where you choose the accessibility features you need"
-          onPress={() => router.push("/settings/accessibility-needs")}
+          onPress={() => router.push("/(tabs)/profile/accessibility-needs")}
           style={[
             styles.statusCard,
             styles.navCard,
@@ -134,35 +122,6 @@ export default function SettingsScreen() {
             <AppText variant="label">Accessibility needs</AppText>
             <AppText style={{ color: appTheme.colors.textMuted }}>
               {needsSummary}
-            </AppText>
-          </View>
-          <AppText
-            variant="bodyStrong"
-            style={{ color: appTheme.colors.textMuted }}
-          >
-            ›
-          </AppText>
-        </TouchTarget>
-
-        {/* Notifications Card */}
-        <TouchTarget
-          accessibilityRole="button"
-          accessibilityLabel={`Notifications. ${notificationsSummary}`}
-          accessibilityHint="Opens notification settings"
-          onPress={() => router.push("/settings/notifications")}
-          style={[
-            styles.statusCard,
-            styles.navCard,
-            {
-              backgroundColor: appTheme.colors.surface,
-              borderColor: appTheme.colors.border,
-            },
-          ]}
-        >
-          <View style={styles.navCardText}>
-            <AppText variant="label">Notifications</AppText>
-            <AppText style={{ color: appTheme.colors.textMuted }}>
-              {notificationsSummary}
             </AppText>
           </View>
           <AppText
@@ -228,6 +187,42 @@ export default function SettingsScreen() {
             <AppText variant="bodyStrong">Open Settings</AppText>
           </TouchTarget>
         </View>
+
+        {/* Developer */}
+        <View
+          accessible
+          accessibilityLabel="Developer tools"
+          style={[
+            styles.statusCard,
+            {
+              backgroundColor: appTheme.colors.surface,
+              borderColor: appTheme.colors.border,
+            },
+          ]}
+        >
+          <AppText variant="label">Developer</AppText>
+          <AppText style={{ color: appTheme.colors.textMuted }}>
+            Convex connection health check and debug utilities.
+          </AppText>
+          <TouchTarget
+            accessibilityRole="button"
+            accessibilityLabel="Open debug screen"
+            accessibilityHint="Opens the Convex connection health check"
+            focusColor={appTheme.colors.onPrimary}
+            onPress={() => router.push("/debug")}
+            style={[
+              styles.debugButton,
+              { backgroundColor: appTheme.colors.primary },
+            ]}
+          >
+            <AppText
+              variant="bodyStrong"
+              style={{ color: appTheme.colors.onPrimary }}
+            >
+              Open debug screen
+            </AppText>
+          </TouchTarget>
+        </View>
       </ScrollView>
     </Screen>
   );
@@ -267,5 +262,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  debugButton: {
+    marginTop: spacing.sm,
+    height: 44,
+    borderRadius: radii.md,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.lg,
   },
 });

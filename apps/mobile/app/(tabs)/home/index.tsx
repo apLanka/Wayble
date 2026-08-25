@@ -1,69 +1,181 @@
-import { Link } from "expo-router";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { api } from "@packages/backend/convex/_generated/api";
+import { useQuery } from "convex/react";
+import { useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
+import {
+  Dimensions,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 
-import { AppText } from "@/components/ui/app-text";
+import { CategoryShortcuts } from "@/components/home/CategoryShortcuts";
+import { HomeHeader } from "@/components/home/HomeHeader";
+import { HomeNearbySection } from "@/components/home/HomeNearbySection";
+import { QuickActionCard } from "@/components/home/QuickActionCard";
+import { SearchEntry } from "@/components/home/SearchEntry";
+import { SectionHeader } from "@/components/home/SectionHeader";
+import { HOME_SYMBOLS } from "@/components/ui/app-symbol";
+import type { Category } from "@/components/map/CategoryFilter";
 import { Screen } from "@/components/ui/screen";
-import { TouchTarget } from "@/components/ui/touch-target";
 import { spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { useNearbyPlaces } from "@/hooks/use-nearby-places";
+
+const { width } = Dimensions.get("window");
+const NEARBY_PREVIEW_LIMIT = 5;
 
 export default function HomeScreen() {
-  const { appTheme } = useAppTheme();
+  const { appTheme, isDark } = useAppTheme();
+  const router = useRouter();
+  const currentUser = useQuery(api.users.currentUser);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const { status, isLoading, requestPermission, refreshLocation, locations } =
+    useNearbyPlaces();
+
+  const nearbyPreview = useMemo(
+    () => (locations ? locations.slice(0, NEARBY_PREVIEW_LIMIT) : []),
+    [locations],
+  );
+
+  const isNearbyLoading =
+    status === "granted" && (isLoading || locations === undefined);
+
+  const displayName = currentUser?.displayName || currentUser?.name || null;
+
+  const openMap = useCallback(() => {
+    router.push("/mapbox");
+  }, [router]);
+
+  const openMapWithSearch = useCallback(() => {
+    router.push({
+      pathname: "/mapbox",
+      params: { focusSearch: "true" },
+    });
+  }, [router]);
+
+  const openMapNearMe = useCallback(() => {
+    router.push({
+      pathname: "/mapbox",
+      params: { nearMe: "true" },
+    });
+  }, [router]);
+
+  const openMapWithCategory = useCallback(
+    (category: Category) => {
+      router.push({
+        pathname: "/mapbox",
+        params: { category },
+      });
+    },
+    [router],
+  );
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refreshLocation();
+    setRefreshing(false);
+  }, [refreshLocation]);
 
   return (
-    <Screen>
+    <Screen style={styles.screen}>
+      <View
+        pointerEvents="none"
+        style={[
+          styles.ambientGlow,
+          {
+            backgroundColor: isDark
+              ? appTheme.colors.primary + "18"
+              : appTheme.colors.primary + "10",
+          },
+        ]}
+      />
+
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        accessibilityLabel="Wayble home"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={appTheme.colors.primary}
+          />
+        }
       >
-        <View style={styles.introduction}>
-          <AppText variant="display" accessibilityRole="header">
-            Accessibility Mapper
-          </AppText>
-          <AppText style={{ color: appTheme.colors.textMuted }}>
-            Explore and understand accessibility in public spaces.
-          </AppText>
+        <HomeHeader displayName={displayName} />
+
+        <SearchEntry onPress={openMapWithSearch} />
+
+        <View style={styles.section}>
+          <SectionHeader title="Quick actions" />
+          <View style={styles.quickActions}>
+            <QuickActionCard
+              label="Open Map"
+              symbol={HOME_SYMBOLS.openMap}
+              accessibilityLabel="Open map"
+              accessibilityHint="Opens the full map view"
+              onPress={openMap}
+            />
+            <QuickActionCard
+              label="Near Me"
+              symbol={HOME_SYMBOLS.nearMe}
+              accessibilityLabel="Show places near me"
+              accessibilityHint="Opens the map centered on your location"
+              onPress={openMapNearMe}
+            />
+          </View>
         </View>
 
-        <Link href="/debug" asChild>
-          <TouchTarget
-            accessibilityRole="button"
-            accessibilityLabel="Open debug screen"
-            accessibilityHint="Opens the Convex connection health check"
-            focusColor={appTheme.colors.onPrimary}
-            style={{
-              ...styles.debugButton,
-              backgroundColor: appTheme.colors.primary,
-            }}
-          >
-            <AppText
-              variant="bodyStrong"
-              style={{ color: appTheme.colors.onPrimary }}
-            >
-              Open debug screen
-            </AppText>
-          </TouchTarget>
-        </Link>
+        <View style={styles.section}>
+          <SectionHeader title="Browse by need" />
+          <CategoryShortcuts onSelectCategory={openMapWithCategory} />
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeader
+            title="Nearby accessible places"
+            actionLabel="See all"
+            onActionPress={openMap}
+          />
+          <HomeNearbySection
+            places={nearbyPreview}
+            isLoading={isNearbyLoading}
+            status={status}
+            onRequestPermission={requestPermission}
+            onPlacePress={(place) => router.push(`/place/${place._id}`)}
+            onOpenMap={openMap}
+          />
+        </View>
       </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
-    flexGrow: 1,
-    justifyContent: "center",
-    gap: spacing.xl,
-    paddingVertical: spacing.xl,
+  screen: {
+    position: "relative",
   },
-  introduction: {
+  ambientGlow: {
+    position: "absolute",
+    top: 0,
+    left: width * 0.1,
+    right: width * 0.1,
+    height: width * 0.55,
+    borderRadius: (width * 0.55) / 2,
+  },
+  content: {
+    gap: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
+  },
+  section: {
     gap: spacing.sm,
   },
-  debugButton: {
-    alignItems: "center",
-    borderRadius: spacing.sm,
-    justifyContent: "center",
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+  quickActions: {
+    flexDirection: "row",
+    gap: spacing.md,
   },
 });

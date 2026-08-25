@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   TextInput,
@@ -19,6 +19,7 @@ interface SearchBarProps {
   placeholder?: string;
   results?: NearbyPlace[];
   onSelectResult?: (place: NearbyPlace) => void;
+  focusOnMount?: boolean;
 }
 
 export function SearchBar({
@@ -27,9 +28,17 @@ export function SearchBar({
   placeholder = "Search places...",
   results,
   onSelectResult,
+  focusOnMount = false,
 }: SearchBarProps) {
   const { appTheme } = useAppTheme();
   const inputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    if (focusOnMount) {
+      const timer = setTimeout(() => inputRef.current?.focus(), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [focusOnMount]);
 
   const showDropdown = value.length > 0 && results && results.length > 0;
 
