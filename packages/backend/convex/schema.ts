@@ -3,6 +3,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
   ACCESSIBILITY_TAXONOMY_VERSION,
+  accessibilityAttributeKeyValidator,
   accessibilityAttributeValidator,
 } from "./accessibility";
 
@@ -90,6 +91,10 @@ export default defineSchema({
     displayName: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
     role: v.optional(userRoleValidator),
+    // US-02: the accessibility attributes this user personally needs, drawn
+    // from the same taxonomy that reports use. Optional so existing users
+    // need no migration; an empty array means "explicitly cleared".
+    accessibilityNeeds: v.optional(v.array(accessibilityAttributeKeyValidator)),
     updatedAt: v.optional(v.number()),
   })
     .index("email", ["email"])
