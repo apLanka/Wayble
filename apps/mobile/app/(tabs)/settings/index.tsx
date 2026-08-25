@@ -150,6 +150,42 @@ export default function SettingsScreen() {
             <AppText variant="bodyStrong">Open Settings</AppText>
           </TouchTarget>
         </View>
+
+        {/* Developer */}
+        <View
+          accessible
+          accessibilityLabel="Developer tools"
+          style={[
+            styles.statusCard,
+            {
+              backgroundColor: appTheme.colors.surface,
+              borderColor: appTheme.colors.border,
+            },
+          ]}
+        >
+          <AppText variant="label">Developer</AppText>
+          <AppText style={{ color: appTheme.colors.textMuted }}>
+            Convex connection health check and debug utilities.
+          </AppText>
+          <TouchTarget
+            accessibilityRole="button"
+            accessibilityLabel="Open debug screen"
+            accessibilityHint="Opens the Convex connection health check"
+            focusColor={appTheme.colors.onPrimary}
+            onPress={() => router.push("/debug")}
+            style={[
+              styles.debugButton,
+              { backgroundColor: appTheme.colors.primary },
+            ]}
+          >
+            <AppText
+              variant="bodyStrong"
+              style={{ color: appTheme.colors.onPrimary }}
+            >
+              Open debug screen
+            </AppText>
+          </TouchTarget>
+        </View>
       </ScrollView>
     </Screen>
   );
@@ -180,5 +216,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  debugButton: {
+    marginTop: spacing.sm,
+    height: 44,
+    borderRadius: radii.md,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.lg,
   },
 });

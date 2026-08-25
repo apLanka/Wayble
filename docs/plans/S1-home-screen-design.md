@@ -44,7 +44,7 @@ The **Map tab** (`apps/mobile/app/(tabs)/mapbox/index.tsx`) already delivers the
 2. **Action-first** — Every section should lead somewhere useful within one tap.
 3. **Accessible by default** — 44pt touch targets, combined screen-reader labels, Dynamic Type, light/dark support.
 4. **Delegate depth to Map** — Home previews and shortcuts; Map handles full search, filters, and exploration.
-5. **Auth-aware** — Guest users can explore; authenticated users see personalization and contribution prompts.
+5. **Auth-aware** — Guest users can explore; authenticated users see a personalized greeting.
 
 ---
 
@@ -73,8 +73,6 @@ Top-to-bottom scroll structure:
 │  │ ● Central Library  1.2 km   │    │
 │  │ ● Metro Station    2.1 km   │    │
 │  └─────────────────────────────┘    │
-├─────────────────────────────────────┤
-│  [Guest banner OR Contribute CTA]   │  ← Auth-aware footer card
 └─────────────────────────────────────┘
 ```
 
@@ -182,17 +180,6 @@ Exclude the "All places" chip on Home — that is the Map default.
 
 ---
 
-### 6. Bottom Card (Auth-aware)
-
-| User state        | Content                                                                            |
-| ----------------- | ---------------------------------------------------------------------------------- |
-| **Guest**         | "Sign up to contribute accessibility reports" + primary "Get Started" → `/sign-up` |
-| **Authenticated** | "Help the community" + "Add a report" → Map tab (future: dedicated report flow)    |
-
-**Style:** Card on `surface` with pill-style layout, echoing onboarding feature badges.
-
----
-
 ## Visual Style Guide
 
 ### Colors (from `theme.ts`)
@@ -239,7 +226,6 @@ Exclude the "All places" chip on Home — that is the Map default.
 - [ ] Quick action cards have distinct labels: "Open map", "Show places near me"
 - [ ] Category chips reuse Map tab labels for consistency
 - [ ] Place rows use combined `accessibilityLabel` (already in `PlaceListItem`)
-- [ ] Guest / contribute card is one accessible region
 - [ ] Logical focus order: top → bottom, left → right
 - [ ] All interactive elements meet 44×44pt minimum (`TouchTarget`)
 - [ ] Contrast meets WCAG AA (tokens already designed for this in S0-4)
@@ -257,8 +243,6 @@ Exclude the "All places" chip on Home — that is the Map default.
 | `QuickActionCard`   | `components/home/QuickActionCard.tsx`   | Reusable action tile (icon + label)              |
 | `SectionHeader`     | `components/home/SectionHeader.tsx`     | Title + optional trailing action                 |
 | `HomeNearbySection` | `components/home/HomeNearbySection.tsx` | List wrapper with loading / empty / error states |
-| `GuestPromptCard`   | `components/home/GuestPromptCard.tsx`   | Sign-up CTA for guests                           |
-| `ContributeCard`    | `components/home/ContributeCard.tsx`    | Report CTA for authenticated users               |
 
 ### Reuse as-is
 
@@ -288,7 +272,6 @@ Exclude the "All places" chip on Home — that is the Map default.
 | Map (default)         | `/mapbox`                     |
 | Map + category filter | `/mapbox?category=wheelchair` |
 | Map + search focus    | `/mapbox?focusSearch=true`    |
-| Sign up               | `/sign-up`                    |
 | Settings              | `/settings` (tab)             |
 
 ### Map tab coordination
@@ -320,11 +303,10 @@ Replace the placeholder in `apps/mobile/app/(tabs)/home/index.tsx`:
 ### Phase 2 — Polish
 
 1. Category shortcut chips with Map deep-links
-2. Guest prompt / contribute cards
-3. Location permission banner in nearby section
-4. Pull-to-refresh
-5. Ambient glow decoration (onboarding-style)
-6. Map tab support for `?category` and `?focusSearch` query params
+2. Location permission banner in nearby section
+3. Pull-to-refresh
+4. Ambient glow decoration (onboarding-style)
+5. Map tab support for `?category` and `?focusSearch` query params
 
 **Deliverable:** Feature-complete Home aligned with onboarding visual language.
 
@@ -345,7 +327,7 @@ Replace the placeholder in `apps/mobile/app/(tabs)/home/index.tsx`:
 - New backend queries (existing `places.nearest` and `users.currentUser` are sufficient for Phase 1–2)
 - Debug tools on Home (keep debug at `/debug` or dev-only entry in Settings)
 - Persisted user theme override
-- "Add report" full flow (link to Map until report UI exists)
+- Contribution / sign-up prompts on Home (handled via onboarding, auth, and place detail flows)
 
 ---
 
@@ -357,8 +339,7 @@ Home is complete when a user can:
 2. Open search or the full map in one tap
 3. Browse by accessibility need via category shortcuts (Phase 2)
 4. View 3–5 nearby places and open place details
-5. Understand how to sign up and contribute (guest) or add a report (authenticated)
-6. Use the screen comfortably with VoiceOver / TalkBack and in dark mode
+5. Use the screen comfortably with VoiceOver / TalkBack and in dark mode
 
 ---
 
@@ -377,4 +358,4 @@ Home is complete when a user can:
 
 - [S0-4 — Expo App Shell](./S0-4-expo-app-shell.md) — design tokens, tab shell, accessibility defaults
 - [US-05 — View Place Attributes](./US-05-view-a-place-recorded-accessibility-attributes.md) — place detail screen Home links into
-- [S1-US-01 — Sign Up and Log In](./S1-US-01-sign-up-and-log-in.md) — auth flows for guest prompt card
+- [S1-US-01 — Sign Up and Log In](./S1-US-01-sign-up-and-log-in.md) — auth flows for personalized greeting

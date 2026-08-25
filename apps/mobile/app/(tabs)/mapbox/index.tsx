@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, StyleSheet, FlatList, Animated } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 import Mapbox from "@rnmapbox/maps";
 import { LocationPermissionBanner } from "@/components/map/LocationPermissionBanner";
 import { LocateButton } from "@/components/map/LocateButton";
 import { DetailSheet } from "@/components/map/DetailSheet";
 import { CategoryFilter } from "@/components/map/CategoryFilter";
+import type { Category } from "@/components/map/CategoryFilter";
 import { PlaceListItem } from "@/components/map/PlaceListItem";
 import { ViewModeToggle } from "@/components/map/ViewModeToggle";
 import { SearchBar } from "@/components/map/SearchBar";
@@ -26,9 +27,16 @@ if (MAPBOX_TOKEN) {
 
 export default function MapboxTab() {
   const router = useRouter();
+  const { category, focusSearch, nearMe } = useLocalSearchParams<{
+    category?: string;
+    focusSearch?: string;
+    nearMe?: string;
+  }>();
   const { appTheme } = useAppTheme();
   const { isScreenReaderEnabled } = useScreenReader();
   const [manualListMode, setManualListMode] = useState<boolean | null>(null);
+  const [focusSearchOnMount, setFocusSearchOnMount] = useState(false);
+  const deepLinkHandled = useRef(false);
 
   const {
     location,
@@ -172,6 +180,31 @@ export default function MapboxTab() {
     }
   };
 
+  useEffect(() => {
+    if (deepLinkHandled.current) return;
+
+    const hasDeepLink = category || focusSearch === "true" || nearMe === "true";
+    if (!hasDeepLink) return;
+
+    deepLinkHandled.current = true;
+
+    const validCategories: Category[] = [
+      "wheelchair",
+      "elevator",
+      "bathroom",
+      "multi",
+    ];
+    if (category && validCategories.includes(category as Category)) {
+      setActiveCategories([category as Category]);
+    }
+    if (focusSearch === "true") {
+      setFocusSearchOnMount(true);
+    }
+    if (nearMe === "true") {
+      void handleLocateMe();
+    }
+  }, [category, focusSearch, nearMe, setActiveCategories]);
+
   // Prepare GeoJSON for map
   const routeGeojson = routeCoordinates
     ? {
@@ -222,6 +255,8 @@ export default function MapboxTab() {
       <SearchBar
         value={searchQuery}
         onChangeText={setSearchQuery}
+        placeholder="Search accessible places…"
+        focusOnMount={focusSearchOnMount}
         results={
           searchQuery.trim().length > 0
             ? (locations as NearbyPlace[])
