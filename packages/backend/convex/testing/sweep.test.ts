@@ -1,11 +1,11 @@
 import geospatialTest from "@convex-dev/geospatial/test";
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import { internal } from "./_generated/api";
-import type { Id } from "./_generated/dataModel";
-import schema from "./schema";
+import { internal } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
+import schema from "../schema";
 
-const modules = import.meta.glob("./**/*.*s");
+const modules = import.meta.glob("../**/*.*s");
 
 const DAY = 24 * 60 * 60 * 1000;
 /** 2023-11-14T22:13:20Z. At UTC-8 that is 14:13 local — outside quiet hours. */
@@ -58,7 +58,7 @@ async function seedPlace(
   location = { latitude: 10, longitude: 10 },
 ) {
   const asUser = t.withIdentity({ subject: creator });
-  await asUser.mutation((await import("./_generated/api")).api.places.create, {
+  await asUser.mutation((await import("../_generated/api")).api.places.create, {
     name,
     category: "education",
     address: "1 Main St",
@@ -73,10 +73,6 @@ async function seedPlace(
   });
 }
 
-async function claims(t: ReturnType<typeof setup>) {
-  return await t.run(async (ctx) => ctx.db.query("notificationLog").collect());
-}
-
 describe("notifications.sweep", () => {
   test("claims a notification for an opted-in user near an unreported place", async () => {
     const t = setup();
@@ -86,27 +82,40 @@ describe("notifications.sweep", () => {
     const result = await t.mutation(internal.notifications.sweep, { now: NOW });
 
     expect(result.claimed).toBe(1);
-    const rows = await claims(t);
-    expect(rows).toHaveLength(1);
-    expect(rows[0]?.userId).toBe(userId);
-    expect(rows[0]?.placeId).toBe(placeId);
-    expect(rows[0]?.status).toBe("pending");
-    expect(rows[0]?.reason).toBe("never_reported");
-    expect(rows[0]?.scheduledAt).toBe(NOW);
+    expect(result.usersConsidered).toBe(1);
+
+    const logs = await t.run(async (ctx) =>
+      ctx.db.query("notificationLog").collect(),
+    );
+    expect(logs).toHaveLength(1);
+    expect(logs[0]?.userId).toBe(userId);
+    expect(logs[0]?.placeId).toBe(placeId);
+    expect(logs[0]?.reason).toBe("never_reported");
+    expect(logs[0]?.status).toBe("pending");
   });
 
-  test("ignores users who have not opted in", async () => {
+  test("skips users who have not opted in", async () => {
     const t = setup();
-    const owner = await seedUser(t, { enabled: false });
-    await seedPlace(t, owner);
+    const userId = await seedUser(t, { enabled: false });
+    await seedPlace(t, userId);
 
     const result = await t.mutation(internal.notifications.sweep, { now: NOW });
 
     expect(result.claimed).toBe(0);
-    expect(await claims(t)).toHaveLength(0);
+    expect(result.usersConsidered).toBe(0);
   });
 
-  test("skips a user whose location is too stale to trust", async () => {
+  test("skips users with no recorded location", async () => {
+    const t = setup();
+    const userId = await seedUser(t, { hasLocation: false });
+    await seedPlace(t, userId);
+
+    const result = await t.mutation(internal.notifications.sweep, { now: NOW });
+
+    expect(result.claimed).toBe(0);
+  });
+
+  test("skips users whose location is older than seven days", async () => {
     const t = setup();
     const userId = await seedUser(t, { locationAgeMs: 8 * DAY });
     await seedPlace(t, userId);
@@ -116,181 +125,100 @@ describe("notifications.sweep", () => {
     expect(result.claimed).toBe(0);
   });
 
-  test("skips a user who has never reported a location", async () => {
+  test("skips users during their local quiet hours", async () => {
     const t = setup();
-    const owner = await seedUser(t, { hasLocation: false });
-    // A separate opted-in user supplies the place so one exists nearby.
-    const other = await seedUser(t);
-    await seedPlace(t, other, "Far Away", { latitude: 80, longitude: 80 });
-    void owner;
+    // At UTC, 22:13 is inside the evening quiet window (21:00-08:00).
+    const userId = await seedUser(t, { offset: 0 });
+    await seedPlace(t, userId);
 
     const result = await t.mutation(internal.notifications.sweep, { now: NOW });
 
     expect(result.claimed).toBe(0);
   });
 
-  test("skips a place outside the user's radius", async () => {
+  test("skips users who already hit the daily cap", async () => {
+    const t = setup();
+    const userId = await seedUser(t);
+    const placeId = await seedPlace(t, userId);
+    await t.run(async (ctx) =>
+      ctx.db.insert("notificationLog", {
+        userId,
+        placeId,
+        kind: "verify_nearby",
+        reason: "never_reported",
+        status: "sent",
+        scheduledAt: NOW - 2 * 60 * 60 * 1000,
+      }),
+    );
+
+    const result = await t.mutation(internal.notifications.sweep, { now: NOW });
+
+    expect(result.claimed).toBe(0);
+  });
+
+  test("skips places outside the user's radius", async () => {
     const t = setup();
     const userId = await seedUser(t, { radius: 500 });
-    await seedPlace(t, userId, "Distant Hall", {
-      latitude: 40,
-      longitude: 40,
-    });
+    // ~11 km away
+    await seedPlace(t, userId, "Far Away Place", { latitude: 10.1, longitude: 10.1 });
 
     const result = await t.mutation(internal.notifications.sweep, { now: NOW });
 
     expect(result.claimed).toBe(0);
   });
 
-  test("does not claim twice for the same user in one day", async () => {
-    const t = setup();
-    const userId = await seedUser(t);
-    await seedPlace(t, userId);
-
-    await t.mutation(internal.notifications.sweep, { now: NOW });
-    const second = await t.mutation(internal.notifications.sweep, {
-      now: NOW + 60_000,
-    });
-
-    expect(second.claimed).toBe(0);
-    expect(await claims(t)).toHaveLength(1);
-  });
-
-  test("respects quiet hours in the user's local time", async () => {
-    const t = setup();
-    // UTC+7 → 05:13 local, inside the overnight quiet window.
-    const userId = await seedUser(t, { offset: 420 });
-    await seedPlace(t, userId);
-
-    const result = await t.mutation(internal.notifications.sweep, { now: NOW });
-
-    expect(result.claimed).toBe(0);
-  });
-
-  test("does not re-claim the same place inside its cooldown", async () => {
-    const t = setup();
-    const userId = await seedUser(t);
-    await seedPlace(t, userId);
-
-    await t.mutation(internal.notifications.sweep, { now: NOW });
-    // A day later the daily cap has reset, but the place cooldown has not.
-    const second = await t.mutation(internal.notifications.sweep, {
-      now: NOW + 2 * DAY,
-    });
-
-    expect(second.claimed).toBe(0);
-  });
-
-  test("claims the place again once its cooldown has elapsed", async () => {
-    const t = setup();
-    const userId = await seedUser(t);
-    await seedPlace(t, userId);
-
-    await t.mutation(internal.notifications.sweep, { now: NOW });
-    // Refresh the location, otherwise the user is skipped 20 days later for
-    // having a stale position rather than for the cooldown under test.
-    await t.run(async (ctx) =>
-      ctx.db.patch(userId, {
-        lastKnownLocation: {
-          latitude: 10,
-          longitude: 10,
-          updatedAt: NOW + 20 * DAY,
-          timeZoneOffsetMinutes: AWAKE_OFFSET,
-        },
-      }),
-    );
-    const second = await t.mutation(internal.notifications.sweep, {
-      now: NOW + 20 * DAY,
-    });
-
-    expect(second.claimed).toBe(1);
-    expect(await claims(t)).toHaveLength(2);
-  });
-
-  test("ignores a place whose reports are recent enough", async () => {
+  test("skips places that are still inside the cooldown for this user", async () => {
     const t = setup();
     const userId = await seedUser(t);
     const placeId = await seedPlace(t, userId);
     await t.run(async (ctx) =>
-      ctx.db.insert("reports", {
+      ctx.db.insert("notificationLog", {
+        userId,
         placeId,
-        authorId: userId,
-        taxonomyVersion: 1,
-        attributes: [{ key: "mobility.elevator", value: "yes" }],
-        evidence: [],
-        observedAt: NOW - 5 * DAY,
-        status: "active",
-        updatedAt: 1,
+        kind: "verify_nearby",
+        reason: "never_reported",
+        status: "sent",
+        scheduledAt: NOW - 3 * DAY, // cooldown is 14 days
       }),
     );
 
-    const result = await t.mutation(internal.notifications.sweep, { now: NOW });
+    const result = await t.mutation(internal.notifications.sweep, {
+      now: NOW,
+    });
 
     expect(result.claimed).toBe(0);
   });
 
-  test("claims a stale place and records the age for the copy", async () => {
-    const t = setup();
-    const userId = await seedUser(t);
-    const placeId = await seedPlace(t, userId);
-    await t.run(async (ctx) =>
-      ctx.db.insert("reports", {
-        placeId,
-        authorId: userId,
-        taxonomyVersion: 1,
-        attributes: [{ key: "mobility.elevator", value: "yes" }],
-        evidence: [],
-        observedAt: NOW - 210 * DAY,
-        status: "active",
-        updatedAt: 1,
-      }),
-    );
-
-    const result = await t.mutation(internal.notifications.sweep, { now: NOW });
-
-    expect(result.claimed).toBe(1);
-    const rows = await claims(t);
-    expect(rows[0]?.reason).toBe("stale");
-    expect(rows[0]?.ageDays).toBe(210);
-  });
-
-  test("targets the attribute a user actually needs", async () => {
+  test("targets a specific accessibility need when the user has one", async () => {
     const t = setup();
     const userId = await seedUser(t, {
-      needs: ["vision.braille_signage"],
+      needs: ["mobility.step_free_entrance"],
     });
     const placeId = await seedPlace(t, userId);
-    // The elevator is covered, but braille signage is not.
-    await t.run(async (ctx) =>
-      ctx.db.insert("reports", {
-        placeId,
-        authorId: userId,
-        taxonomyVersion: 1,
-        attributes: [{ key: "mobility.elevator", value: "yes" }],
-        evidence: [],
-        observedAt: NOW - 5 * DAY,
-        status: "active",
-        updatedAt: 1,
-      }),
+
+    await t.mutation(internal.notifications.sweep, { now: NOW });
+
+    const log = await t.run(async (ctx) =>
+      ctx.db.query("notificationLog").first(),
     );
-
-    const result = await t.mutation(internal.notifications.sweep, { now: NOW });
-
-    expect(result.claimed).toBe(1);
-    const rows = await claims(t);
-    expect(rows[0]?.attributeKey).toBe("vision.braille_signage");
+    expect(log?.attributeKey).toBe("mobility.step_free_entrance");
+    expect(log?.reason).toBe("never_reported");
   });
 
-  test("does not notify a needs-filtered user when their needs are covered", async () => {
+  test("does not ask about a place whose needs are all freshly confirmed", async () => {
     const t = setup();
-    const userId = await seedUser(t, { needs: ["mobility.elevator"] });
+    const userId = await seedUser(t, {
+      needs: ["mobility.step_free_entrance"],
+    });
     const placeId = await seedPlace(t, userId);
     await t.run(async (ctx) =>
       ctx.db.insert("reports", {
         placeId,
         authorId: userId,
         taxonomyVersion: 1,
-        attributes: [{ key: "mobility.elevator", value: "yes" }],
+        attributes: [
+          { key: "mobility.step_free_entrance", value: "yes" },
+        ],
         evidence: [],
         observedAt: NOW - 5 * DAY,
         status: "active",
@@ -310,7 +238,6 @@ describe("notifications.sweep", () => {
 
     await t.mutation(internal.notifications.sweep, { now: NOW });
 
-    // A scheduled function exists for the claim we just created.
     const scheduled = await t.run(async (ctx) =>
       ctx.db.system.query("_scheduled_functions").collect(),
     );

@@ -1,9 +1,9 @@
 import { convexTest } from "convex-test";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { internal } from "./_generated/api";
-import schema from "./schema";
+import { internal } from "../_generated/api";
+import schema from "../schema";
 
-const modules = import.meta.glob("./**/*.*s");
+const modules = import.meta.glob("../**/*.*s");
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -48,8 +48,6 @@ async function seedPendingClaim(
 }
 
 function stubPushResponse(body: unknown) {
-  // Typed via the generic rather than unused parameters, so
-  // `mock.calls[n][1]` is the request init and lint stays clean.
   const fetchMock = vi.fn<
     (
       url: string,
@@ -63,7 +61,6 @@ function stubPushResponse(body: unknown) {
   return fetchMock;
 }
 
-/** The JSON payload of the nth fetch call, or a clear failure if absent. */
 function sentPayload(
   fetchMock: ReturnType<typeof stubPushResponse>,
   index = 0,
@@ -72,6 +69,89 @@ function sentPayload(
   if (!call) throw new Error(`fetch was not called ${index + 1} time(s)`);
   return JSON.parse(String(call[1].body));
 }
+
+describe("notifications.getDeliveryContext", () => {
+  test("returns null if notificationLog row does not exist", async () => {
+    const t = convexTest(schema, modules);
+    const { logId } = await seedPendingClaim(t);
+    await t.run(async (ctx) => ctx.db.delete(logId));
+
+    const result = await t.query(internal.notifications.getDeliveryContext, {
+      logId,
+    });
+    expect(result).toBeNull();
+  });
+
+  test("returns fallback placeName when place has been deleted", async () => {
+    const t = convexTest(schema, modules);
+    const { logId, placeId } = await seedPendingClaim(t);
+    await t.run(async (ctx) => ctx.db.delete(placeId));
+
+    const result = await t.query(internal.notifications.getDeliveryContext, {
+      logId,
+    });
+    expect(result).not.toBeNull();
+    expect(result?.placeName).toBe("A nearby place");
+  });
+
+  test("filters out disabled push tokens from the delivery context", async () => {
+    const t = convexTest(schema, modules);
+    const { logId, userId, tokenId } = await seedPendingClaim(t);
+
+    // Add a second token that is disabled
+    await t.run(async (ctx) => {
+      await ctx.db.insert("pushTokens", {
+        userId,
+        token: "ExponentPushToken[dead]",
+        platform: "ios",
+        updatedAt: 1,
+        disabledAt: 500,
+      });
+    });
+
+    const result = await t.query(internal.notifications.getDeliveryContext, {
+      logId,
+    });
+    expect(result?.tokens).toHaveLength(1);
+    expect(result?.tokens[0]?.id).toBe(tokenId);
+  });
+});
+
+describe("notifications.recordResult", () => {
+  test("updates status to sent and sets sentAt timestamp", async () => {
+    const t = convexTest(schema, modules);
+    const { logId } = await seedPendingClaim(t);
+
+    await t.mutation(internal.notifications.recordResult, {
+      logId,
+      status: "sent",
+      disableTokenIds: [],
+    });
+
+    const log = await t.run(async (ctx) => ctx.db.get(logId));
+    expect(log?.status).toBe("sent");
+    expect(log?.sentAt).toBeGreaterThan(0);
+  });
+
+  test("updates status to failed, records errorCode, and disables tokens", async () => {
+    const t = convexTest(schema, modules);
+    const { logId, tokenId } = await seedPendingClaim(t);
+
+    await t.mutation(internal.notifications.recordResult, {
+      logId,
+      status: "failed",
+      errorCode: "DeviceNotRegistered",
+      disableTokenIds: [tokenId],
+    });
+
+    const log = await t.run(async (ctx) => ctx.db.get(logId));
+    expect(log?.status).toBe("failed");
+    expect(log?.errorCode).toBe("DeviceNotRegistered");
+
+    const token = await t.run(async (ctx) => ctx.db.get(tokenId));
+    expect(token?.disabledAt).toBeGreaterThan(0);
+  });
+});
 
 describe("notifications.deliver", () => {
   test("posts to Expo and marks the claim as sent", async () => {

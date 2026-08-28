@@ -3,7 +3,7 @@ import {
   attributeNeedsVerification,
   needsVerification,
   type VerificationNeedInput,
-} from "./verificationNeed";
+} from "../verificationNeed";
 
 const NOW = 1_700_000_000_000;
 const DAY = 24 * 60 * 60 * 1000;

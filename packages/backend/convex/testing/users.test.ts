@@ -1,9 +1,10 @@
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import { api } from "./_generated/api";
-import schema from "./schema";
+import { api } from "../_generated/api";
+import schema from "../schema";
+import { roundCoordinate } from "../users";
 
-const modules = import.meta.glob("./**/*.*s");
+const modules = import.meta.glob("../**/*.*s");
 
 /** Seeds a member user and returns its id. */
 async function seedUser(t: ReturnType<typeof convexTest>) {
@@ -16,6 +17,41 @@ async function seedUser(t: ReturnType<typeof convexTest>) {
     });
   });
 }
+
+describe("users.currentUser", () => {
+  test("currentUser returns null when not logged in", async () => {
+    const t = convexTest(schema, modules);
+    const user = await t.query(api.users.currentUser, {});
+    expect(user).toBeNull();
+  });
+
+  test("currentUser returns authenticated user profile", async () => {
+    const t = convexTest(schema, modules);
+    const userId = await seedUser(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    const user = await asUser.query(api.users.currentUser, {});
+    expect(user).not.toBeNull();
+    expect(user?._id).toBe(userId);
+    expect(user?.email).toBe("member@example.com");
+    expect(user?.displayName).toBe("Initial Name");
+  });
+});
+
+describe("roundCoordinate utility", () => {
+  test("rounds positive coordinates to 3 decimal places (~110m)", () => {
+    expect(roundCoordinate(6.927079)).toBe(6.927);
+    expect(roundCoordinate(79.861244)).toBe(79.861);
+    expect(roundCoordinate(10.12345)).toBe(10.123);
+    expect(roundCoordinate(10.1236)).toBe(10.124);
+  });
+
+  test("rounds negative coordinates correctly", () => {
+    expect(roundCoordinate(-33.8688197)).toBe(-33.869);
+    expect(roundCoordinate(-0.0004)).toBe(-0);
+    expect(roundCoordinate(-122.419416)).toBe(-122.419);
+  });
+});
 
 describe("US-02 accessibility needs profile", () => {
   test("rejects unauthenticated callers", async () => {
@@ -120,6 +156,19 @@ describe("US-02 accessibility needs profile", () => {
     expect(updated?.displayName).toBe("Renamed");
     expect(updated?.accessibilityNeeds).toEqual(["vision.tactile_guidance"]);
   });
+
+  test("updating avatarUrl updates avatar and preserves other fields", async () => {
+    const t = convexTest(schema, modules);
+    const userId = await seedUser(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    const updated = await asUser.mutation(api.users.updateProfile, {
+      avatarUrl: "https://example.com/photo.jpg",
+    });
+
+    expect(updated?.avatarUrl).toBe("https://example.com/photo.jpg");
+    expect(updated?.displayName).toBe("Initial Name");
+  });
 });
 
 describe("US-21 location and notification preferences", () => {
@@ -192,15 +241,60 @@ describe("US-21 location and notification preferences", () => {
     expect(user?.verifyNearbyRadiusMeters).toBe(5000);
   });
 
-  test("rejects a radius outside the supported range", async () => {
+  test("accepts boundary values: minimum radius 250m and maximum 20,000m", async () => {
+    const t = convexTest(schema, modules);
+    const userId = await seedUser(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    // Minimum 250m
+    await asUser.mutation(api.users.updateNotificationPrefs, {
+      verifyNearbyRadiusMeters: 250,
+    });
+    let user = await t.run(async (ctx) => ctx.db.get(userId));
+    expect(user?.verifyNearbyRadiusMeters).toBe(250);
+
+    // Maximum 20,000m
+    await asUser.mutation(api.users.updateNotificationPrefs, {
+      verifyNearbyRadiusMeters: 20000,
+    });
+    user = await t.run(async (ctx) => ctx.db.get(userId));
+    expect(user?.verifyNearbyRadiusMeters).toBe(20000);
+  });
+
+  test("rejects a radius below 250m or above 20,000m", async () => {
     const t = convexTest(schema, modules);
     const userId = await seedUser(t);
     const asUser = t.withIdentity({ subject: userId });
 
     await expect(
       asUser.mutation(api.users.updateNotificationPrefs, {
-        verifyNearbyRadiusMeters: 100_000,
+        verifyNearbyRadiusMeters: 249,
       }),
-    ).rejects.toThrow("radius");
+    ).rejects.toThrow("Unsupported radius");
+
+    await expect(
+      asUser.mutation(api.users.updateNotificationPrefs, {
+        verifyNearbyRadiusMeters: 20001,
+      }),
+    ).rejects.toThrow("Unsupported radius");
+  });
+
+  test("disabling notification toggle preserves previously set radius", async () => {
+    const t = convexTest(schema, modules);
+    const userId = await seedUser(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    await asUser.mutation(api.users.updateNotificationPrefs, {
+      verifyNearbyEnabled: true,
+      verifyNearbyRadiusMeters: 3500,
+    });
+
+    await asUser.mutation(api.users.updateNotificationPrefs, {
+      verifyNearbyEnabled: false,
+    });
+
+    const user = await t.run(async (ctx) => ctx.db.get(userId));
+    expect(user?.verifyNearbyEnabled).toBe(false);
+    expect(user?.verifyNearbyRadiusMeters).toBe(3500);
   });
 });
