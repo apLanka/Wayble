@@ -77,6 +77,13 @@ describe("resolveConvexUrl", () => {
     });
   });
 
+  test("falls back to VITE_CONVEX_URL when no override or CONVEX_URL", () => {
+    expect(resolveConvexUrl({ VITE_CONVEX_URL: "a" })).toEqual({
+      url: "a",
+      source: "convex-url",
+    });
+  });
+
   test("treats a blank override as absent", () => {
     expect(
       resolveConvexUrl({ CONVEX_URL: "a", CONVEX_URL_OVERRIDE: "   " }),

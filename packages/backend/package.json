@@ -6,6 +6,7 @@
     "dev": "convex dev",
     "codegen": "convex codegen",
     "setup": "convex dev --until-success",
+    "seed": "convex run seed:seedPlaces",
     "lint": "eslint .",
     "check-types": "tsc --noEmit",
     "test": "vitest"
