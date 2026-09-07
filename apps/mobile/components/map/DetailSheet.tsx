@@ -2,11 +2,19 @@ import React, { useRef, useCallback, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
+import { useQuery } from "convex/react";
 
 import { AppText } from "@/components/ui/app-text";
 import { CATEGORY_LABELS } from "@/components/map/CategoryFilter";
+import { ConfidenceBadge } from "@/components/place/ConfidenceBadge";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { api } from "@packages/backend/convex/_generated/api";
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { AccessibleLocation } from "../../data/mock-data";
+
+// Mock locations use ids like "loc-001" — not real Convex ids. Only query
+// when placeId is a real place, else there's nothing to fetch confidence for.
+const MOCK_ID_PREFIX = "loc-";
 
 type Props = {
   location: AccessibleLocation | null;
@@ -55,6 +63,13 @@ export function DetailSheet({
       router.push(`/place/${targetId}` as never);
     }
   }, [placeId, location?.id, router]);
+
+  const realPlaceId = placeId ?? location?.id;
+  const isRealPlace = !!realPlaceId && !realPlaceId.startsWith(MOCK_ID_PREFIX);
+  const place = useQuery(
+    api.places.getPlace,
+    isRealPlace ? { placeId: realPlaceId as Id<"places"> } : "skip",
+  );
 
   return (
     <BottomSheet
@@ -108,6 +123,13 @@ export function DetailSheet({
                 {location.category.replace(/_/g, " ")}
               </AppText>
             </View>
+
+            {place && (
+              <ConfidenceBadge
+                tier={place.confidence.tier}
+                isStale={place.confidence.isStale}
+              />
+            )}
 
             <AppText
               style={[styles.address, { color: appTheme.colors.textMuted }]}
