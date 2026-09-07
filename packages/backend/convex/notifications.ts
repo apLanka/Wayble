@@ -8,6 +8,7 @@ import {
   type MutationCtx,
 } from "./_generated/server";
 import type { AccessibilityAttributeKey } from "./accessibility";
+import { DEFAULT_CONFIDENCE_OPTS } from "./confidence";
 import { buildVerifyNearbyPush } from "./notificationCopy";
 import { DEFAULT_POLICY_OPTS, shouldNotify } from "./notificationPolicy";
 import { geo } from "./places";
@@ -24,8 +25,6 @@ const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 const MINUTE_MS = 60 * 1000;
 const DAY_MS = 24 * 60 * MINUTE_MS;
 
-/** A report older than this is treated as needing re-verification. */
-const STALE_AFTER_DAYS = 180;
 /** A location we have not refreshed in a week is too old to act on. */
 const LOCATION_MAX_AGE_MS = 7 * DAY_MS;
 /** Users examined per sweep. Bounded so the mutation never scans the table. */
@@ -351,7 +350,7 @@ function matchNeed(
   needs: AccessibilityAttributeKey[] | undefined,
   now: number,
 ): Omit<Candidate, "placeId"> | null {
-  const opts = { staleAfterDays: STALE_AFTER_DAYS };
+  const opts = { staleAfterDays: DEFAULT_CONFIDENCE_OPTS.staleAfterDays };
 
   if (needs && needs.length > 0) {
     for (const key of needs) {
