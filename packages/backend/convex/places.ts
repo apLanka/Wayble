@@ -12,6 +12,9 @@ import type {
   AccessibilityAttribute,
   AccessibilityAttributeKey,
 } from "./accessibility";
+import { computeConfidence } from "./confidence";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 // Component has no DB triggers — create/update/remove mutations below keep
 // the places table and this index in sync manually, in the same mutation.
@@ -205,6 +208,39 @@ export const getPlace = query({
         ? Math.max(...activeReports.map((r) => r.observedAt))
         : null;
 
+    // Whole-place confidence, not per-attribute — the attribute merge above
+    // already discards per-report lineage, so there is no per-attribute
+    // signal left to aggregate against.
+    const allVerifications = (
+      await Promise.all(
+        activeReports.map((r) =>
+          ctx.db
+            .query("verifications")
+            .withIndex("by_report", (q) => q.eq("reportId", r._id))
+            .collect(),
+        ),
+      )
+    ).flat();
+
+    const agreeCount = allVerifications.filter(
+      (ver) => ver.verdict === "confirm",
+    ).length;
+    const totalVotes = allVerifications.length;
+    const distinctVerifiers = new Set(
+      allVerifications.map((ver) => ver.authorId),
+    ).size;
+
+    const confidence = computeConfidence({
+      agreeCount,
+      totalVotes,
+      distinctVerifiers,
+      reportAgeDays: lastReportedAt
+        ? Math.floor((Date.now() - lastReportedAt) / DAY_MS)
+        : Infinity,
+      now: Date.now(),
+      lastVerifiedAt: lastReportedAt,
+    });
+
     return {
       _id: place._id,
       name: place.name,
@@ -214,6 +250,7 @@ export const getPlace = query({
       attributes,
       reportCount: activeReports.length,
       lastReportedAt,
+      confidence,
     };
   },
 });
