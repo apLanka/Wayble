@@ -517,7 +517,9 @@ export default function MapboxTab() {
           placeId={selectedPlaceId ?? undefined}
           onClose={() => {
             setSelectedPlaceId(null);
-            setRouteCoordinates(null);
+            // Route not cleared here — "Show the direction" closes the
+            // sheet via this same handler and the just-fetched route must
+            // stay visible. New searches/selections clear it separately.
           }}
           onShowDirection={() => fetchRoute(selectedPlace)}
         />
