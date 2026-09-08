@@ -7,6 +7,7 @@ import { api } from "@packages/backend/convex/_generated/api";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { CategoryBadge } from "@/components/place/CategoryBadge";
+import { ConfidenceBadge } from "@/components/place/ConfidenceBadge";
 import { AttributeGroup } from "@/components/place/AttributeGroup";
 import { NoDataPrompt } from "@/components/place/NoDataPrompt";
 import {
@@ -132,19 +133,25 @@ export default function PlaceDetailScreen() {
                 >
                   Accessibility Attributes
                 </AppText>
-                <View
-                  style={[
-                    styles.countBadge,
-                    { backgroundColor: appTheme.colors.primary + "20" },
-                  ]}
-                >
-                  <AppText
-                    variant="label"
-                    style={{ color: appTheme.colors.primary, fontSize: 12 }}
+                <View style={styles.headerBadges}>
+                  <ConfidenceBadge
+                    tier={place.confidence.tier}
+                    isStale={place.confidence.isStale}
+                  />
+                  <View
+                    style={[
+                      styles.countBadge,
+                      { backgroundColor: appTheme.colors.primary + "20" },
+                    ]}
                   >
-                    {place.reportCount}{" "}
-                    {place.reportCount === 1 ? "report" : "reports"}
-                  </AppText>
+                    <AppText
+                      variant="label"
+                      style={{ color: appTheme.colors.primary, fontSize: 12 }}
+                    >
+                      {place.reportCount}{" "}
+                      {place.reportCount === 1 ? "report" : "reports"}
+                    </AppText>
+                  </View>
                 </View>
               </View>
 
@@ -238,5 +245,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 3,
+  },
+  headerBadges: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
   },
 });
