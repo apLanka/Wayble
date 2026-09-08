@@ -162,6 +162,17 @@ export const remove = mutation({
   },
 });
 
+// Debug-only: populates the place picker on the debug screen. No pagination
+// — capped list is fine for that use case, add real pagination if this ever
+// serves a user-facing list.
+export const listPlaces = query({
+  args: {},
+  handler: async (ctx) => {
+    const places = await ctx.db.query("places").take(100);
+    return places.map((p) => ({ _id: p._id, name: p.name }));
+  },
+});
+
 export const getPlace = query({
   args: { placeId: v.id("places") },
   handler: async (ctx, args) => {

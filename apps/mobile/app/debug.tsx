@@ -9,6 +9,7 @@ import {
 } from "react-native";
 
 import { AddPlaceForm } from "@/components/debug/AddPlaceForm";
+import { VerifyPlaceForm } from "@/components/debug/VerifyPlaceForm";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
@@ -71,6 +72,7 @@ export default function DebugScreen() {
           </TouchTarget>
 
           <AddPlaceForm />
+          <VerifyPlaceForm />
         </ScrollView>
       </KeyboardAvoidingView>
     </Screen>

@@ -10,6 +10,7 @@
 
 import type * as accessibility from "../accessibility.js";
 import type * as auth from "../auth.js";
+import type * as confidence from "../confidence.js";
 import type * as crons from "../crons.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
@@ -18,6 +19,7 @@ import type * as notificationPolicy from "../notificationPolicy.js";
 import type * as notifications from "../notifications.js";
 import type * as places from "../places.js";
 import type * as pushTokens from "../pushTokens.js";
+import type * as reports from "../reports.js";
 import type * as seed from "../seed.js";
 import type * as seed_placesSeedData from "../seed/placesSeedData.js";
 import type * as users from "../users.js";
@@ -32,6 +34,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   accessibility: typeof accessibility;
   auth: typeof auth;
+  confidence: typeof confidence;
   crons: typeof crons;
   health: typeof health;
   http: typeof http;
@@ -40,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   places: typeof places;
   pushTokens: typeof pushTokens;
+  reports: typeof reports;
   seed: typeof seed;
   "seed/placesSeedData": typeof seed_placesSeedData;
   users: typeof users;
