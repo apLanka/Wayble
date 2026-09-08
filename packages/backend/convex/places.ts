@@ -52,6 +52,10 @@ export const search = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    // A search index returns nothing for an empty term, so list places instead.
+    if (!args.query.trim()) {
+      return await ctx.db.query("places").take(args.limit ?? 10);
+    }
     return await ctx.db
       .query("places")
       .withSearchIndex("search_name", (q) => q.search("name", args.query))
