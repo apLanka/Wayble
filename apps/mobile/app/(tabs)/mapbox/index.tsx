@@ -514,6 +514,7 @@ export default function MapboxTab() {
       {selectedPlace && !isListMode && (
         <DetailSheet
           location={selectedPlace as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+          placeId={selectedPlaceId ?? undefined}
           onClose={() => {
             setSelectedPlaceId(null);
             setRouteCoordinates(null);
