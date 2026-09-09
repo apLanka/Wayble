@@ -67,10 +67,29 @@ export function DetailSheet({
 
   const handleViewDetails = useCallback(() => {
     const targetId = placeId ?? location?.id;
-    if (targetId) {
-      router.push(`/place/${targetId}` as never);
-    }
-  }, [placeId, location?.id, router]);
+    if (!targetId || !location) return;
+    // Same route as list-mode's handlePlacePress (mapbox/index.tsx) —
+    // params-based legacy screen, kept consistent across both entry points.
+    router.push({
+      pathname: "/mapbox/place/[id]",
+      params: {
+        id: targetId,
+        name: location.name,
+        category: location.category,
+        address: location.address || "",
+        features: location.features ? JSON.stringify(location.features) : "",
+        accessibilityCategories: (
+          location as AccessibleLocation & { accessibilityCategories?: string[] }
+        ).accessibilityCategories
+          ? JSON.stringify(
+              (location as AccessibleLocation & { accessibilityCategories?: string[] })
+                .accessibilityCategories,
+            )
+          : "",
+        distance: "",
+      },
+    });
+  }, [placeId, location, router]);
 
   const realPlaceId = placeId ?? location?.id;
   const isRealPlace = !!realPlaceId && !realPlaceId.startsWith(MOCK_ID_PREFIX);
@@ -214,7 +233,10 @@ export function DetailSheet({
                   styles.directionButton,
                   { backgroundColor: appTheme.colors.primary },
                 ]}
-                onPress={onShowDirection}
+                onPress={() => {
+                  onShowDirection();
+                  onClose();
+                }}
                 accessibilityRole="button"
                 accessibilityLabel="Show walking directions"
                 activeOpacity={0.7}
