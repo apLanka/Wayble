@@ -218,59 +218,65 @@ export function DetailSheet({
               </View>
             )}
 
-            {(location.features ?? []).map((f) => (
-              <AppText
-                key={f}
-                style={[styles.feature, { color: appTheme.colors.text }]}
-              >
-                ✓ {f}
-              </AppText>
-            ))}
+            {(location.features ?? []).length > 0 && (
+              <View style={styles.features}>
+                {(location.features ?? []).map((f) => (
+                  <AppText
+                    key={f}
+                    style={[styles.feature, { color: appTheme.colors.text }]}
+                  >
+                    ✓ {f}
+                  </AppText>
+                ))}
+              </View>
+            )}
 
-            {onShowDirection && (
+            <View style={styles.actions}>
+              {onShowDirection && (
+                <TouchableOpacity
+                  style={[
+                    styles.directionButton,
+                    { backgroundColor: appTheme.colors.primary },
+                  ]}
+                  onPress={() => {
+                    onShowDirection();
+                    onClose();
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Show walking directions"
+                  activeOpacity={0.7}
+                >
+                  <AppText
+                    style={[
+                      styles.directionButtonText,
+                      { color: appTheme.colors.onPrimary },
+                    ]}
+                  >
+                    Show the direction
+                  </AppText>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 style={[
-                  styles.directionButton,
+                  styles.detailsButton,
                   { backgroundColor: appTheme.colors.primary },
                 ]}
-                onPress={() => {
-                  onShowDirection();
-                  onClose();
-                }}
-                accessibilityRole="button"
-                accessibilityLabel="Show walking directions"
+                onPress={handleViewDetails}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="View full accessibility details"
+                accessibilityHint="Opens the full place detail screen with all accessibility attributes"
               >
                 <AppText
                   style={[
-                    styles.directionButtonText,
+                    styles.detailsButtonText,
                     { color: appTheme.colors.onPrimary },
                   ]}
                 >
-                  Show the direction
+                  View Details →
                 </AppText>
               </TouchableOpacity>
-            )}
-            <TouchableOpacity
-              style={[
-                styles.detailsButton,
-                { backgroundColor: appTheme.colors.primary },
-              ]}
-              onPress={handleViewDetails}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="View full accessibility details"
-              accessibilityHint="Opens the full place detail screen with all accessibility attributes"
-            >
-              <AppText
-                style={[
-                  styles.detailsButtonText,
-                  { color: appTheme.colors.onPrimary },
-                ]}
-              >
-                View Details →
-              </AppText>
-            </TouchableOpacity>
+            </View>
           </>
         )}
       </BottomSheetScrollView>
@@ -278,17 +284,18 @@ export function DetailSheet({
   );
 }
 
+const SPACING = 12;
+
 const styles = StyleSheet.create({
   content: {
-    flex: 1,
     paddingHorizontal: 16,
     paddingTop: 8,
+    gap: SPACING,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 8,
   },
   name: {
     fontSize: 18,
@@ -304,7 +311,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 3,
-    marginBottom: 8,
   },
   badgeText: {
     fontSize: 12,
@@ -313,13 +319,11 @@ const styles = StyleSheet.create({
   },
   address: {
     fontSize: 14,
-    marginBottom: 10,
   },
   accessibilityRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-    marginBottom: 12,
   },
   accessibilityTile: {
     flexDirection: "row",
@@ -337,23 +341,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: "capitalize",
   },
+  features: {
+    gap: 4,
+  },
   feature: {
     fontSize: 14,
-    marginBottom: 4,
+  },
+  actions: {
+    gap: SPACING,
+    marginTop: SPACING / 2,
   },
   directionButton: {
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 16,
-    marginBottom: 20,
   },
   directionButtonText: {
     fontSize: 16,
     fontWeight: "bold",
   },
   detailsButton: {
-    marginTop: 12,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 10,
