@@ -1,6 +1,6 @@
 import React, { useRef, useCallback, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 
@@ -16,6 +16,16 @@ import type { AccessibleLocation } from "../../data/mock-data";
 // when placeId is a real place, else there's nothing to fetch confidence for.
 const MOCK_ID_PREFIX = "loc-";
 
+// Real fix for the tab-bar overlap: content was clipped/overflowing a fixed
+// 40% snap point (BottomSheetView has flex:1, no scroll) — the "View
+// Details" button spilled past the sheet's own bottom edge, into the
+// floating tab bar's space. BottomSheetScrollView + dynamic sizing makes the
+// sheet fit its content instead of clipping it. Sheet itself is anchored
+// flush to the screen bottom (no `bottomInset`); this padding on the scroll
+// content is what actually reserves room so the last button clears the
+// floating tab bar.
+const TAB_BAR_INSET = 100;
+
 type Props = {
   location: AccessibleLocation | null;
   placeId?: string;
@@ -29,8 +39,6 @@ const ACCESSIBILITY_EMOJIS = {
   bathroom: "🚻",
   multi: "🌟",
 };
-
-const SNAP_POINTS = ["40%"];
 
 export function DetailSheet({
   location,
@@ -75,15 +83,17 @@ export function DetailSheet({
     <BottomSheet
       ref={sheetRef}
       index={location ? 0 : -1}
-      snapPoints={SNAP_POINTS}
-      enableDynamicSizing={false}
+      enableDynamicSizing
       enablePanDownToClose
       onChange={handleSheetChange}
       backgroundStyle={{ backgroundColor: appTheme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: appTheme.colors.border }}
     >
-      <BottomSheetView
-        style={[styles.content, { backgroundColor: appTheme.colors.surface }]}
+      <BottomSheetScrollView
+        contentContainerStyle={[
+          styles.content,
+          { backgroundColor: appTheme.colors.surface, paddingBottom: TAB_BAR_INSET },
+        ]}
       >
         {location && (
           <>
@@ -241,7 +251,7 @@ export function DetailSheet({
             </TouchableOpacity>
           </>
         )}
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheet>
   );
 }
