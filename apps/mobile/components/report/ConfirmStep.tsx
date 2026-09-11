@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { StyleSheet, View } from "react-native";
 
 import { AttributeRow } from "@/components/place/AttributeRow";
@@ -66,6 +67,27 @@ export function ConfirmStep({ draft, isSubmitting, onSubmit }: Props) {
         </View>
       ) : null}
 
+      {draft.photo ? (
+        <View style={styles.summaryBlock}>
+          <AppText variant="label" style={{ color: colors.textMuted }}>
+            Your photo
+          </AppText>
+          {/* Labelled with the caption alone: that is exactly what a screen
+              reader user will hear on the place screen once this is saved. */}
+          <Image
+            source={{ uri: draft.photo.uri }}
+            style={[styles.thumbnail, { borderColor: colors.border }]}
+            contentFit="cover"
+            accessible
+            accessibilityRole="image"
+            accessibilityLabel={draft.photo.caption.trim()}
+          />
+          <AppText style={{ color: colors.text }}>
+            {draft.photo.caption.trim()}
+          </AppText>
+        </View>
+      ) : null}
+
       <TouchTarget
         accessibilityRole="button"
         accessibilityLabel="Submit report"
@@ -98,6 +120,12 @@ const styles = StyleSheet.create({
   },
   summaryBlock: {
     gap: spacing.xs,
+  },
+  thumbnail: {
+    width: 160,
+    aspectRatio: 4 / 3,
+    borderRadius: radii.md,
+    borderWidth: 1,
   },
   submit: {
     minHeight: 52,

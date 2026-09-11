@@ -329,7 +329,11 @@ export default function ReportScreen() {
           ) : null}
 
           {step === 2 ? (
-            <NotesStep draft={safeDraft} dispatch={dispatch} />
+            <NotesStep
+              draft={safeDraft}
+              dispatch={dispatch}
+              placeName={place?.name}
+            />
           ) : null}
 
           {step === 3 ? (

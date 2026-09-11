@@ -64,3 +64,29 @@ export function defaultCaption(placeName: string | undefined): string {
   const caption = name ? `Photo taken at ${name}` : "Photo taken at this place";
   return caption.slice(0, MAX_CAPTION_LENGTH);
 }
+
+/** Longest edge, in pixels, a photo is scaled down to before upload. */
+export const MAX_PHOTO_EDGE = 1600;
+
+/** JPEG quality for the re-encode, 0–1. */
+export const PHOTO_JPEG_QUALITY = 0.7;
+
+/**
+ * The resize to apply before upload, or null to keep the original size.
+ *
+ * Only one dimension is given so the manipulator keeps the aspect ratio, and
+ * a photo already within bounds is never scaled up. Unknown dimensions (0,
+ * which some Android providers report) skip the resize rather than guess,
+ * since a guessed cap could enlarge a small photo; the JPEG re-encode still
+ * runs, and the size check is the backstop.
+ */
+export function resizeFor(
+  width: number,
+  height: number,
+): { width: number } | { height: number } | null {
+  if (width <= 0 || height <= 0) return null;
+  if (width >= height) {
+    return width > MAX_PHOTO_EDGE ? { width: MAX_PHOTO_EDGE } : null;
+  }
+  return height > MAX_PHOTO_EDGE ? { height: MAX_PHOTO_EDGE } : null;
+}

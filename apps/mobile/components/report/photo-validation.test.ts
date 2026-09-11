@@ -5,8 +5,10 @@ import {
   MAX_PHOTO_BYTES,
 } from "@packages/backend/convex/reportLimits";
 import {
+  MAX_PHOTO_EDGE,
   defaultCaption,
   photoValidationMessage,
+  resizeFor,
   validatePhoto,
 } from "./photo-validation";
 
@@ -91,5 +93,29 @@ describe("defaultCaption", () => {
 
   test("never exceeds the caption limit", () => {
     expect(defaultCaption("x".repeat(1000))).toHaveLength(MAX_CAPTION_LENGTH);
+  });
+});
+
+describe("resizeFor", () => {
+  test("caps the width of a large landscape photo", () => {
+    expect(resizeFor(4032, 3024)).toEqual({ width: MAX_PHOTO_EDGE });
+  });
+
+  test("caps the height of a large portrait photo", () => {
+    expect(resizeFor(3024, 4032)).toEqual({ height: MAX_PHOTO_EDGE });
+  });
+
+  test("caps the width of a large square photo", () => {
+    expect(resizeFor(3000, 3000)).toEqual({ width: MAX_PHOTO_EDGE });
+  });
+
+  test("leaves a photo within bounds at its own size", () => {
+    expect(resizeFor(MAX_PHOTO_EDGE, 900)).toBeNull();
+    expect(resizeFor(800, 1200)).toBeNull();
+  });
+
+  test("skips the resize when the dimensions are unknown", () => {
+    expect(resizeFor(0, 0)).toBeNull();
+    expect(resizeFor(4032, 0)).toBeNull();
   });
 });
