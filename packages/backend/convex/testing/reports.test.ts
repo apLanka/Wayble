@@ -827,6 +827,65 @@ describe("reports.listForPlace", () => {
     expect(reports[0]?.authorDisplayName).toBe("A Wayble user");
   });
 
+  test("returns no photos for a report without evidence", async () => {
+    const t = convexTest(schema, modules);
+    const { placeId } = await seedReports(t, { count: 1 });
+
+    const reports = await t.query(api.reports.listForPlace, { placeId });
+
+    expect(reports[0]?.photos).toEqual([]);
+  });
+
+  test("resolves a photo to a URL and caption, never the storageId", async () => {
+    const t = convexTest(schema, modules);
+    const { placeId, reportIds } = await seedReports(t, { count: 1 });
+    const storageId = await t.run(async (ctx) => {
+      const storageId = await ctx.storage.store(new Blob(["jpeg bytes"]));
+      await ctx.db.patch(reportIds[0]!, {
+        evidence: [{ storageId, caption: "Ramp at the side entrance" }],
+      });
+      return storageId;
+    });
+
+    const reports = await t.query(api.reports.listForPlace, { placeId });
+
+    expect(reports[0]?.photos).toHaveLength(1);
+    expect(reports[0]?.photos[0]?.caption).toBe("Ramp at the side entrance");
+    expect(reports[0]?.photos[0]?.url).toMatch(/^https:\/\//);
+    expect(JSON.stringify(reports)).not.toContain(storageId);
+  });
+
+  test("drops a photo whose file has been deleted", async () => {
+    const t = convexTest(schema, modules);
+    const { placeId, reportIds } = await seedReports(t, { count: 1 });
+    await t.run(async (ctx) => {
+      const storageId = await ctx.storage.store(new Blob(["jpeg bytes"]));
+      await ctx.db.patch(reportIds[0]!, {
+        evidence: [{ storageId, caption: "Gone" }],
+      });
+      await ctx.storage.delete(storageId);
+    });
+
+    const reports = await t.query(api.reports.listForPlace, { placeId });
+
+    expect(reports[0]?.photos).toEqual([]);
+  });
+
+  test("labels a captionless legacy photo instead of leaving it without alt text", async () => {
+    const t = convexTest(schema, modules);
+    const { placeId, reportIds } = await seedReports(t, { count: 1 });
+    await t.run(async (ctx) => {
+      const storageId = await ctx.storage.store(new Blob(["jpeg bytes"]));
+      await ctx.db.patch(reportIds[0]!, { evidence: [{ storageId }] });
+    });
+
+    const reports = await t.query(api.reports.listForPlace, { placeId });
+
+    expect(reports[0]?.photos[0]?.caption).toBe(
+      "Photo attached to this report",
+    );
+  });
+
   test("carries per-report tallies and the caller's own verdict", async () => {
     const t = convexTest(schema, modules);
     const voterId = await t.run(async (ctx) => {

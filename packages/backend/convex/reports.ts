@@ -1,7 +1,12 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
-import { mutation, query, type MutationCtx } from "./_generated/server";
+import {
+  mutation,
+  query,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
 import {
   ACCESSIBILITY_TAXONOMY_VERSION,
   accessibilityAttributeValidator,
@@ -343,9 +348,9 @@ export const listForPlace = query({
       );
     }
 
-    return reports
-      .filter((r) => r.status === "active")
-      .map((r) => {
+    const active = reports.filter((r) => r.status === "active");
+    const listed = await Promise.all(
+      active.map(async (r) => {
         const tally = tallies.get(r._id);
         return {
           _id: r._id,
@@ -359,11 +364,39 @@ export const listForPlace = query({
           confirmCount: tally?.confirm ?? 0,
           disputeCount: tally?.dispute ?? 0,
           myVerdict: tally?.mine ?? null,
+          photos: await resolvePhotos(ctx, r.evidence),
         };
-      })
-      .sort((a, b) => b.observedAt - a.observedAt);
+      }),
+    );
+    return listed.sort((a, b) => b.observedAt - a.observedAt);
   },
 });
+
+/**
+ * US-09 — a report's evidence as the client renders it: a URL and the alt
+ * text, never the `storageId`. The URL is all a thumbnail needs, and keeping
+ * IDs server-side means nothing downstream can try to re-attach them.
+ *
+ * `getUrl` returns null once a file is deleted, and a photo that cannot load
+ * is dropped rather than shown as a broken image. `caption` is optional in the
+ * schema though `submitReport` now requires it, so a row written before that
+ * gets a generic label instead of rendering an image with no alt text.
+ */
+async function resolvePhotos(
+  ctx: QueryCtx,
+  evidence: { storageId: Id<"_storage">; caption?: string }[],
+) {
+  const photos: { url: string; caption: string }[] = [];
+  for (const item of evidence) {
+    const url = await ctx.storage.getUrl(item.storageId);
+    if (url === null) continue;
+    photos.push({
+      url,
+      caption: item.caption?.trim() || "Photo attached to this report",
+    });
+  }
+  return photos;
+}
 
 /**
  * Debug-only mutation: exercises the report/verification pipeline end to
