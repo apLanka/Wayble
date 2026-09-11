@@ -35,7 +35,24 @@ describe("uploadPhoto", () => {
     const post = calls.find((c) => c.input === UPLOAD_URL);
     expect(post?.init?.method).toBe("POST");
     expect(post?.init?.headers).toEqual({ "Content-Type": "image/jpeg" });
-    expect(post?.init?.body).toBeInstanceOf(Blob);
+    expect(post?.init?.body).toBeInstanceOf(Uint8Array);
+    expect(new TextDecoder().decode(post?.init?.body as Uint8Array)).toBe(
+      "jpeg bytes",
+    );
+  });
+
+  test("never sends a Blob body, which expo/fetch would re-label", async () => {
+    // Regression: expo/fetch overwrites Content-Type with `blob.type` for a
+    // Blob body, and a Blob read from a local file has an empty type, so the
+    // upload reached Convex with an empty header and got 400 BadHeader.
+    const { impl, calls } = fakeFetch(async () =>
+      Response.json({ storageId: "kg2abc" }),
+    );
+
+    await uploadPhoto(photo, getUploadUrl, impl);
+
+    const post = calls.find((c) => c.input === UPLOAD_URL);
+    expect(post?.init?.body).not.toBeInstanceOf(Blob);
   });
 
   test("lets a getUploadUrl failure through unwrapped", async () => {

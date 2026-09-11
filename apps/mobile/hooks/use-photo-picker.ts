@@ -81,13 +81,14 @@ export function usePhotoPicker() {
       });
 
       // The manipulator reports dimensions but not bytes. Reading the file
-      // back as a blob is the one size measurement that matches what the
-      // upload will send.
-      const blob = await (await fetch(saved.uri)).blob();
+      // back is the one size measurement that matches what the upload will
+      // send. `arrayBuffer()`, not `blob()`: under expo/fetch the latter
+      // copies the whole file through base64 into React Native's Blob.
+      const bytes = await (await fetch(saved.uri)).arrayBuffer();
       const photo: PickedPhoto = {
         uri: saved.uri,
         mimeType: "image/jpeg",
-        fileSize: blob.size,
+        fileSize: bytes.byteLength,
       };
 
       const validation = validatePhoto(photo);

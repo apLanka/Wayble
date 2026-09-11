@@ -19,6 +19,14 @@ type Fetch = (input: string, init?: RequestInit) => Promise<Response>;
  * The Content-Type header is not decoration: Convex records it as the file's
  * `contentType`, and `submitReport` rejects a file without an allowed one.
  *
+ * The body is raw bytes, never a Blob. Expo SDK 57 installs `expo/fetch` as
+ * the global `fetch`, and for a Blob body it *replaces* the caller's
+ * Content-Type with `blob.type`. A Blob read from a local `file://` response
+ * has an empty type, so the upload went out with an empty Content-Type and
+ * Convex answered 400 BadHeader. Bytes are sent as-is with our header, and
+ * `arrayBuffer()` is also the native path, where `blob()` round-trips the file
+ * through base64.
+ *
  * `getUploadUrl` errors (e.g. signed out) are let through untouched so they
  * classify as what they are; only the transfer itself is wrapped. `fetch` is a
  * parameter so the error paths can be tested without a network.
@@ -32,11 +40,13 @@ export async function uploadPhoto(
 
   let response: Response;
   try {
-    const file = await (await fetchImpl(photo.uri)).blob();
+    const bytes = new Uint8Array(
+      await (await fetchImpl(photo.uri)).arrayBuffer(),
+    );
     response = await fetchImpl(uploadUrl, {
       method: "POST",
       headers: { "Content-Type": photo.mimeType },
-      body: file,
+      body: bytes,
     });
   } catch {
     throw new Error(`${UPLOAD_FAILED_PREFIX} network error`);
