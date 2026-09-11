@@ -164,6 +164,7 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
           <TouchTarget
             accessibilityRole="button"
             accessibilityLabel="Remove photo"
+            accessibilityHint="Takes the photo off this report. You can add another."
             onPress={handleRemove}
             style={[styles.secondaryButton, { borderColor: colors.border }]}
           >
@@ -176,11 +177,13 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
         <View style={styles.buttonRow}>
           <SourceButton
             label="Take photo"
+            hint="Opens the camera to photograph this place"
             disabled={isProcessing}
             onPress={() => void handlePick("camera")}
           />
           <SourceButton
             label="Choose from library"
+            hint="Opens your photo library to pick a photo"
             disabled={isProcessing}
             onPress={() => void handlePick("library")}
           />
@@ -212,6 +215,7 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
             <TouchTarget
               accessibilityRole="button"
               accessibilityLabel="Open Settings"
+              accessibilityHint="Opens Wayble's settings, where you can allow camera access"
               onPress={() => void Linking.openSettings()}
               style={styles.settingsLink}
             >
@@ -228,10 +232,12 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
 
 function SourceButton({
   label,
+  hint,
   disabled,
   onPress,
 }: {
   label: string;
+  hint: string;
   disabled: boolean;
   onPress: () => void;
 }) {
@@ -241,6 +247,7 @@ function SourceButton({
     <TouchTarget
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityHint={hint}
       accessibilityState={{ disabled, busy: disabled }}
       disabled={disabled}
       onPress={onPress}
