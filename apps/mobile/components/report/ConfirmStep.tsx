@@ -12,6 +12,8 @@ import { selectedAttributes } from "./report-draft";
 type Props = {
   draft: ReportDraft;
   isSubmitting: boolean;
+  /** True during the photo upload that precedes the submit itself. */
+  isUploadingPhoto: boolean;
   onSubmit: () => void;
 };
 
@@ -21,7 +23,12 @@ type Props = {
  * Recaps with the same `AttributeRow` used on the place detail screen, so
  * what the user approves here is literally what they will see there.
  */
-export function ConfirmStep({ draft, isSubmitting, onSubmit }: Props) {
+export function ConfirmStep({
+  draft,
+  isSubmitting,
+  isUploadingPhoto,
+  onSubmit,
+}: Props) {
   const { appTheme } = useAppTheme();
   const { colors } = appTheme;
   const attributes = selectedAttributes(draft);
@@ -101,7 +108,11 @@ export function ConfirmStep({ draft, isSubmitting, onSubmit }: Props) {
         ]}
       >
         <AppText variant="bodyStrong" style={{ color: colors.onPrimary }}>
-          {isSubmitting ? "Submitting…" : "Submit report"}
+          {isUploadingPhoto
+            ? "Uploading photo…"
+            : isSubmitting
+              ? "Submitting…"
+              : "Submit report"}
         </AppText>
       </TouchTarget>
     </View>
