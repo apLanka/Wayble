@@ -50,4 +50,5 @@ export const HOME_SYMBOLS = {
   bathroom: { ios: "toilet", android: "wc" },
   multi: { ios: "sparkles", android: "star" },
   edit: { ios: "pencil", android: "edit" },
+  feed: { ios: "antenna.radiowaves.left.and.right", android: "rss_feed" },
 } as const satisfies Record<string, PlatformSymbol>;

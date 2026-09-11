@@ -1,19 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 
 import { api } from "@packages/backend/convex/_generated/api";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
+import { TouchTarget } from "@/components/ui/touch-target";
 import { CategoryBadge } from "@/components/place/CategoryBadge";
 import { AttributeGroup } from "@/components/place/AttributeGroup";
 import { NoDataPrompt } from "@/components/place/NoDataPrompt";
+import { SubmitVerificationModal } from "@/components/feed/SubmitVerificationModal";
 import {
   ATTRIBUTE_METADATA,
   CATEGORY_DISPLAY_ORDER,
 } from "@/constants/accessibility-metadata";
-import { spacing } from "@/constants/theme";
+import { spacing, radii } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { AccessibilityAttributeKey } from "@packages/backend/convex/accessibility";
@@ -27,6 +29,8 @@ type Attribute = {
 export default function PlaceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { appTheme } = useAppTheme();
+  const router = useRouter();
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
 
   const place = useQuery(
     api.places.getPlace,
@@ -159,17 +163,76 @@ export default function PlaceDetailScreen() {
                   />
                 );
               })}
+
+              {/* ── Community Verification Actions ───────────── */}
+              <View style={styles.verificationActionsSection}>
+                <TouchTarget
+                  onPress={() => setIsVerifyModalOpen(true)}
+                  style={styles.actionTouchTarget}
+                  accessibilityRole="button"
+                  accessibilityLabel="Verify this place"
+                >
+                  <View
+                    style={[
+                      styles.verifyCtaButton,
+                      { backgroundColor: appTheme.colors.primary },
+                    ]}
+                  >
+                    <AppText
+                      variant="bodyStrong"
+                      style={{ color: appTheme.colors.onPrimary }}
+                    >
+                      ✓ Verify Accessibility
+                    </AppText>
+                  </View>
+                </TouchTarget>
+
+                <TouchTarget
+                  onPress={() =>
+                    router.push({
+                      pathname: "/feed",
+                      params: { placeId: place._id },
+                    })
+                  }
+                  style={styles.actionTouchTarget}
+                  accessibilityRole="button"
+                  accessibilityLabel="View live verification feed for this place"
+                >
+                  <View
+                    style={[
+                      styles.viewFeedButton,
+                      {
+                        borderColor: appTheme.colors.primary,
+                        backgroundColor: appTheme.colors.surface,
+                      },
+                    ]}
+                  >
+                    <AppText
+                      variant="bodyStrong"
+                      style={{ color: appTheme.colors.primary }}
+                    >
+                      📡 View Live Verification Activity
+                    </AppText>
+                  </View>
+                </TouchTarget>
+              </View>
             </View>
           ) : (
             /* ── No Data State ─────────────────────────────── */
             <NoDataPrompt
               onContribute={() => {
-                // Placeholder — will navigate to report submission in a future story
+                setIsVerifyModalOpen(true);
               }}
             />
           )}
         </ScrollView>
       </Screen>
+
+      <SubmitVerificationModal
+        visible={isVerifyModalOpen}
+        onClose={() => setIsVerifyModalOpen(false)}
+        defaultPlaceId={place._id}
+      />
     </>
   );
 }
@@ -238,5 +301,25 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 3,
+  },
+  verificationActionsSection: {
+    marginTop: spacing.md,
+    gap: spacing.sm,
+  },
+  actionTouchTarget: {
+    width: "100%",
+  },
+  verifyCtaButton: {
+    borderRadius: radii.md,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  viewFeedButton: {
+    borderRadius: radii.md,
+    paddingVertical: 12,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
