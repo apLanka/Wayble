@@ -1,6 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+import { mutation, query, type MutationCtx } from "./_generated/server";
 import {
   ACCESSIBILITY_TAXONOMY_VERSION,
   accessibilityAttributeValidator,
@@ -8,12 +9,35 @@ import {
   type AccessibilityAttributeKey,
 } from "./accessibility";
 import {
+  ALLOWED_PHOTO_MIME_TYPES,
   DUPLICATE_WINDOW_MS,
+  MAX_CAPTION_LENGTH,
   MAX_CLOCK_SKEW_MS,
+  MAX_EVIDENCE_PHOTOS,
   MAX_NOTE_LENGTH,
   MAX_OBSERVATION_AGE_MS,
+  MAX_PHOTO_BYTES,
   MAX_SUMMARY_LENGTH,
 } from "./reportLimits";
+
+/**
+ * US-09 — a short-lived URL the app POSTs one photo to before submitting.
+ *
+ * Auth-gated for the same reason `submitReport` is: Convex functions are
+ * public endpoints, and an open upload URL would turn the deployment into a
+ * free file host. The URL only creates a `_storage` row; nothing references
+ * it until `submitReport` attaches its `storageId` to a report.
+ */
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthenticated: must be logged in to upload a photo");
+    }
+    return await ctx.storage.generateUploadUrl();
+  },
+});
 
 /**
  * US-08 — submit an accessibility report for a place.
@@ -32,6 +56,13 @@ export const submitReport = mutation({
     attributes: v.array(accessibilityAttributeValidator),
     summary: v.optional(v.string()),
     observedAt: v.number(),
+    // US-09. Optional so a report without a photo is the same call it was
+    // before. `caption` is required here though optional in the schema: it is
+    // the photo's alt text, and a photo nobody can describe to a screen reader
+    // user is not evidence for them.
+    evidence: v.optional(
+      v.array(v.object({ storageId: v.id("_storage"), caption: v.string() })),
+    ),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -80,6 +111,9 @@ export const submitReport = mutation({
       throw new Error("Observation time is outside the allowed range");
     }
 
+    const evidence = args.evidence ?? [];
+    await assertValidEvidence(ctx, evidence);
+
     const cutoff = now - DUPLICATE_WINDOW_MS;
     const recent = await ctx.db
       .query("reports")
@@ -108,13 +142,18 @@ export const submitReport = mutation({
       );
     }
 
+    await assertEvidenceUnattached(ctx, evidence);
+
     const reportId = await ctx.db.insert("reports", {
       placeId: args.placeId,
       authorId: userId,
       taxonomyVersion: ACCESSIBILITY_TAXONOMY_VERSION,
       attributes: args.attributes,
       summary: args.summary,
-      evidence: [],
+      evidence: evidence.map((e) => ({
+        storageId: e.storageId,
+        caption: e.caption.trim(),
+      })),
       observedAt: args.observedAt,
       status: "active",
       updatedAt: now,
@@ -142,6 +181,84 @@ function assertNoDuplicateKeys(attributes: AccessibilityAttribute[]) {
       throw new Error(`Duplicate accessibility attribute: ${attribute.key}`);
     }
     seen.add(attribute.key);
+  }
+}
+
+type EvidenceArg = { storageId: Id<"_storage">; caption: string };
+
+/**
+ * US-09 — checks the photos against the stored files, not the client's word.
+ *
+ * The app validates size and type before uploading, but anything can call
+ * this mutation, so the `_storage` system row (written by Convex from the
+ * bytes and the upload's Content-Type header) is the only trustworthy source.
+ * A missing `contentType` means the client sent no header and is rejected
+ * along with the wrong ones.
+ *
+ * A rejected file is NOT deleted here. A mutation is one transaction, so a
+ * `ctx.storage.delete` followed by this throw would be rolled back with
+ * everything else. Unreferenced uploads are left for a cleanup job.
+ */
+async function assertValidEvidence(ctx: MutationCtx, evidence: EvidenceArg[]) {
+  if (evidence.length > MAX_EVIDENCE_PHOTOS) {
+    throw new Error(`Too many photos: maximum ${MAX_EVIDENCE_PHOTOS}`);
+  }
+
+  for (const item of evidence) {
+    if (item.caption.trim().length === 0) {
+      throw new Error("Photo description is required");
+    }
+    if (item.caption.length > MAX_CAPTION_LENGTH) {
+      throw new Error(
+        `Photo description too long: ${item.caption.length} characters, maximum ${MAX_CAPTION_LENGTH}`,
+      );
+    }
+
+    const file = await ctx.db.system.get(item.storageId);
+    if (!file) {
+      throw new Error("Unknown photo upload");
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+      throw new Error(
+        `Photo too large: ${file.size} bytes, maximum ${MAX_PHOTO_BYTES}`,
+      );
+    }
+    const allowed: readonly string[] = ALLOWED_PHOTO_MIME_TYPES;
+    if (!file.contentType || !allowed.includes(file.contentType)) {
+      throw new Error(
+        `Unsupported photo type: ${file.contentType ?? "unknown"}`,
+      );
+    }
+  }
+}
+
+/**
+ * US-09 — one upload belongs to one report.
+ *
+ * Without this, a caller could attach a `storageId` they saw elsewhere to
+ * their own report, and a later cleanup of either report would pull the photo
+ * out from under the other.
+ *
+ * `evidence` is an array inside each report, which Convex cannot index, so
+ * this reads the whole `reports` table. It runs last, after every cheaper
+ * guard, and only when a photo is attached. That is the same trade
+ * `listForPlace` makes with `verifications` and has the same ceiling to watch;
+ * when the table nears it, the fix is an `evidence` table with a
+ * `by_storage` index, not a comment.
+ */
+async function assertEvidenceUnattached(
+  ctx: MutationCtx,
+  evidence: EvidenceArg[],
+) {
+  if (evidence.length === 0) return;
+  const wanted = new Set(evidence.map((e) => e.storageId));
+  const reports = await ctx.db.query("reports").collect();
+  for (const report of reports) {
+    for (const existing of report.evidence) {
+      if (wanted.has(existing.storageId)) {
+        throw new Error("Photo already attached to another report");
+      }
+    }
   }
 }
 
