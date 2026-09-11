@@ -160,7 +160,10 @@ describe("notifications.sweep", () => {
     const t = setup();
     const userId = await seedUser(t, { radius: 500 });
     // ~11 km away
-    await seedPlace(t, userId, "Far Away Place", { latitude: 10.1, longitude: 10.1 });
+    await seedPlace(t, userId, "Far Away Place", {
+      latitude: 10.1,
+      longitude: 10.1,
+    });
 
     const result = await t.mutation(internal.notifications.sweep, { now: NOW });
 
@@ -194,7 +197,7 @@ describe("notifications.sweep", () => {
     const userId = await seedUser(t, {
       needs: ["mobility.step_free_entrance"],
     });
-    const placeId = await seedPlace(t, userId);
+    await seedPlace(t, userId);
 
     await t.mutation(internal.notifications.sweep, { now: NOW });
 
@@ -216,9 +219,7 @@ describe("notifications.sweep", () => {
         placeId,
         authorId: userId,
         taxonomyVersion: 1,
-        attributes: [
-          { key: "mobility.step_free_entrance", value: "yes" },
-        ],
+        attributes: [{ key: "mobility.step_free_entrance", value: "yes" }],
         evidence: [],
         observedAt: NOW - 5 * DAY,
         status: "active",
