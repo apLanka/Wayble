@@ -6,7 +6,15 @@ import {
   missingRequiredNotes,
   reportReducer,
   selectedAttributes,
+  type ReportPhoto,
 } from "./report-draft";
+
+const photo: ReportPhoto = {
+  uri: "file:///photo.jpg",
+  mimeType: "image/jpeg",
+  fileSize: 200_000,
+  caption: "Photo taken at Community Library",
+};
 
 describe("reportReducer", () => {
   test("chooseCategory sets the group and does not move the step", () => {
@@ -195,6 +203,14 @@ describe("reportReducer", () => {
     expect(reportReducer(dirty, { type: "reset" })).toEqual(emptyDraft);
   });
 
+  test("reset clears an attached photo", () => {
+    const withPhoto = reportReducer(emptyDraft, {
+      type: "setPhoto",
+      photo,
+    });
+    expect(reportReducer(withPhoto, { type: "reset" }).photo).toBeNull();
+  });
+
   test("reset does not alias the emptyDraft singleton", () => {
     // `toEqual` above compares the returned object against the very object
     // `reset` returns, so it cannot see aliasing. These identity checks can.
@@ -205,6 +221,59 @@ describe("reportReducer", () => {
     const reset = reportReducer(dirty, { type: "reset" });
     expect(reset.selected).not.toBe(emptyDraft.selected);
     expect(reset.notes).not.toBe(emptyDraft.notes);
+  });
+});
+
+describe("photo actions", () => {
+  test("emptyDraft has no photo", () => {
+    expect(emptyDraft.photo).toBeNull();
+  });
+
+  test("setPhoto attaches the photo and does not move the step", () => {
+    const at = reportReducer(emptyDraft, { type: "goToStep", step: 2 });
+    const next = reportReducer(at, { type: "setPhoto", photo });
+    expect(next.photo).toEqual(photo);
+    expect(next.step).toBe(2);
+  });
+
+  test("setPhoto replaces an earlier photo, caption included", () => {
+    let draft = reportReducer(emptyDraft, { type: "setPhoto", photo });
+    draft = reportReducer(draft, {
+      type: "setPhotoCaption",
+      caption: "Old ramp",
+    });
+    const retaken = { ...photo, uri: "file:///retake.jpg", caption: "New" };
+    draft = reportReducer(draft, { type: "setPhoto", photo: retaken });
+    expect(draft.photo).toEqual(retaken);
+  });
+
+  test("setPhotoCaption stores the caption verbatim", () => {
+    let draft = reportReducer(emptyDraft, { type: "setPhoto", photo });
+    draft = reportReducer(draft, {
+      type: "setPhotoCaption",
+      caption: "Ramp ",
+    });
+    expect(draft.photo?.caption).toBe("Ramp ");
+    expect(draft.photo?.uri).toBe(photo.uri);
+  });
+
+  test("setPhotoCaption without a photo leaves the draft untouched", () => {
+    const next = reportReducer(emptyDraft, {
+      type: "setPhotoCaption",
+      caption: "Ramp",
+    });
+    expect(next).toBe(emptyDraft);
+  });
+
+  test("removePhoto detaches the photo and keeps the rest of the draft", () => {
+    let draft = reportReducer(emptyDraft, {
+      type: "setSummary",
+      summary: "Side door",
+    });
+    draft = reportReducer(draft, { type: "setPhoto", photo });
+    draft = reportReducer(draft, { type: "removePhoto" });
+    expect(draft.photo).toBeNull();
+    expect(draft.summary).toBe("Side door");
   });
 });
 
@@ -339,9 +408,22 @@ describe("canAdvance", () => {
     expect(canAdvance(draft)).toBe(false);
   });
 
-  test("allows step three unconditionally", () => {
+  test("allows step three without a photo", () => {
     const draft = reportReducer(emptyDraft, { type: "goToStep", step: 2 });
     expect(canAdvance(draft)).toBe(true);
+  });
+
+  test("allows step three with a captioned photo", () => {
+    let draft = reportReducer(emptyDraft, { type: "goToStep", step: 2 });
+    draft = reportReducer(draft, { type: "setPhoto", photo });
+    expect(canAdvance(draft)).toBe(true);
+  });
+
+  test("blocks step three while the photo's caption is blank", () => {
+    let draft = reportReducer(emptyDraft, { type: "goToStep", step: 2 });
+    draft = reportReducer(draft, { type: "setPhoto", photo });
+    draft = reportReducer(draft, { type: "setPhotoCaption", caption: "  " });
+    expect(canAdvance(draft)).toBe(false);
   });
 
   test("blocks the confirm step, which has no next", () => {
