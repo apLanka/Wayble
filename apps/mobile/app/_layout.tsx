@@ -48,6 +48,7 @@ export default function RootLayout() {
               name="place/[id]"
               options={{ title: "Place Details" }}
             />
+            <Stack.Screen name="feed" options={{ title: "Activity Feed" }} />
           </Stack>
         </ThemeProvider>
       </ConvexClientProvider>

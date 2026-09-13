@@ -56,13 +56,6 @@ export default function HomeScreen() {
     });
   }, [router]);
 
-  const openMapNearMe = useCallback(() => {
-    router.push({
-      pathname: "/mapbox",
-      params: { nearMe: "true" },
-    });
-  }, [router]);
-
   const openMapWithCategory = useCallback(
     (category: Category) => {
       router.push({
@@ -72,6 +65,10 @@ export default function HomeScreen() {
     },
     [router],
   );
+
+  const openFeed = useCallback(() => {
+    router.push("/feed");
+  }, [router]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -120,11 +117,11 @@ export default function HomeScreen() {
               onPress={openMap}
             />
             <QuickActionCard
-              label="Near Me"
-              symbol={HOME_SYMBOLS.nearMe}
-              accessibilityLabel="Show places near me"
-              accessibilityHint="Opens the map centered on your location"
-              onPress={openMapNearMe}
+              label="Live Feed"
+              symbol={HOME_SYMBOLS.feed}
+              accessibilityLabel="Live activity feed"
+              accessibilityHint="View live community accessibility verifications"
+              onPress={openFeed}
             />
           </View>
         </View>
