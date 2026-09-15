@@ -8,11 +8,8 @@ import {
   accessibilityCategoryValidator,
   placeCategoryValidator,
 } from "./schema";
-import type {
-  AccessibilityAttribute,
-  AccessibilityAttributeKey,
-} from "./accessibility";
 import { computeConfidence } from "./confidence";
+import { aggregateAttributes } from "./placeAttributes";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -189,29 +186,9 @@ export const getPlace = query({
 
     const activeReports = reports.filter((r) => r.status === "active");
 
-    // Aggregate attributes using last-write-wins (most recent observedAt).
-    // For each attribute key, keep the value from the report with the latest
-    // observedAt timestamp.
-    const attributeMap = new Map<
-      AccessibilityAttributeKey,
-      { attribute: AccessibilityAttribute; observedAt: number }
-    >();
-
-    for (const report of activeReports) {
-      for (const attr of report.attributes) {
-        const existing = attributeMap.get(attr.key);
-        if (!existing || report.observedAt > existing.observedAt) {
-          attributeMap.set(attr.key, {
-            attribute: attr,
-            observedAt: report.observedAt,
-          });
-        }
-      }
-    }
-
-    const attributes = Array.from(attributeMap.values()).map(
-      (entry) => entry.attribute,
-    );
+    // Last-write-wins per key over active reports. Shared with `nearest` and
+    // `search` so a place's ranking and its detail screen use one rule.
+    const attributes = aggregateAttributes(reports);
 
     // Determine the most recent report timestamp.
     const lastReportedAt =
