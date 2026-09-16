@@ -23,7 +23,7 @@ import { AttributesStep } from "@/components/report/AttributesStep";
 import { CategoryStep } from "@/components/report/CategoryStep";
 import { ConfirmStep } from "@/components/report/ConfirmStep";
 import { NotesStep } from "@/components/report/NotesStep";
-import { StepIndicator, STEP_TITLES } from "@/components/report/StepIndicator";
+import { StepIndicator, stepTitle } from "@/components/report/StepIndicator";
 import {
   REPORT_STEPS,
   canAdvance,
@@ -54,8 +54,9 @@ export default function ReportScreen() {
 
   // Never seeded from anywhere, and `setSummary` is dispatched from
   // `NotesStep` alone: the reducer stores the summary verbatim, so
-  // `NotesStep`'s `maxLength` has to stay the only writer for its
-  // character counter to be able to reach zero without going negative.
+  // `NotesStep`'s `maxLength` has to stay the only thing bounding what its
+  // `onChangeText` can hand the reducer, for its character counter to be
+  // able to reach zero without going negative.
   const [draft, dispatch] = useReducer(reportReducer, emptyDraft);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -125,7 +126,7 @@ export default function ReportScreen() {
     // not follow the user to the next step still reading as a live failure.
     setError(null);
     dispatch({ type: "goToStep", step });
-    const title = STEP_TITLES[REPORT_STEPS[step] ?? ""] ?? "";
+    const title = stepTitle(step);
     if (title) {
       AccessibilityInfo.announceForAccessibility(
         `Step ${step + 1} of ${REPORT_STEPS.length}: ${title}`,
@@ -144,7 +145,7 @@ export default function ReportScreen() {
       () => {
         if (draft.step === 0) return false;
         dispatch({ type: "back" });
-        const title = STEP_TITLES[REPORT_STEPS[draft.step - 1] ?? ""] ?? "";
+        const title = stepTitle(draft.step - 1);
         AccessibilityInfo.announceForAccessibility(
           `Step ${draft.step} of ${REPORT_STEPS.length}: ${title}`,
         );
@@ -353,7 +354,10 @@ export default function ReportScreen() {
             {/* `step > 0` gates this footer and `step === 0` is its exact
                 complement, so that half of the guard below is unreachable
                 today; kept so the two cannot disagree if the gate is ever
-                relaxed. The `isSubmitting` half is the live one. */}
+                relaxed. The `isSubmitting` half is the live one, and it
+                drives the dimming too — `disabled` alone gives a screen
+                reader the state but a sighted user no visual cue, and
+                `ConfirmStep` already dims its own submit for that reason. */}
             <TouchTarget
               accessibilityRole="button"
               accessibilityLabel="Go back a step"
@@ -363,7 +367,7 @@ export default function ReportScreen() {
                 styles.footerButton,
                 {
                   borderColor: colors.border,
-                  opacity: step === 0 ? 0.5 : 1,
+                  opacity: isSubmitting || step === 0 ? 0.5 : 1,
                 },
               ]}
             >
@@ -374,9 +378,10 @@ export default function ReportScreen() {
             {step < 3 ? (
               <TouchTarget
                 accessibilityRole="button"
-                accessibilityLabel={`Continue to ${
-                  STEP_TITLES[REPORT_STEPS[step + 1] ?? ""] ?? "next step"
-                }`}
+                accessibilityLabel={`Continue to ${stepTitle(
+                  step + 1,
+                  "next step",
+                )}`}
                 accessibilityState={{ disabled: !canAdvance(safeDraft) }}
                 disabled={!canAdvance(safeDraft)}
                 onPress={() => goTo(step + 1)}

@@ -277,7 +277,6 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   addReportButton: {
-    minHeight: 44,
     borderRadius: radii.md,
     borderWidth: 1,
     alignItems: "center",

@@ -35,6 +35,14 @@ export function CategoryStep({ selected, onSelect }: Props) {
         Pick a group. You will confirm the exact details in the next step.
       </AppText>
 
+      {/* The `radiogroup` role and its label are NOT announced on iOS: this
+          container has no `accessible`, and React Native's iOS role mapper has
+          no radiogroup trait to map it to, so VoiceOver ignores both. Android
+          does map the role. `accessible` must therefore NOT be added to
+          make it announce — that would collapse all six radios into a single
+          element and the picker would stop being navigable. Each radio below
+          carries its own group name and count instead, which is the part
+          that does reach a screen reader. */}
       <View
         accessibilityRole="radiogroup"
         accessibilityLabel="Accessibility group"

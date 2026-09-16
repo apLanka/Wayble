@@ -21,8 +21,11 @@ type Props = {
 export function NotesStep({ draft, dispatch }: Props) {
   const { appTheme } = useAppTheme();
   const { colors } = appTheme;
-  // `maxLength` is the only writer of `draft.summary`, so this can never
-  // fall below zero.
+  // `onChangeText` is the writer; `maxLength` below is the clamp. Nothing
+  // else dispatches `setSummary`, and the reducer stores the text verbatim
+  // without clamping, so the counter's non-negativity depends on this
+  // component's `maxLength` holding. A second writer that bypassed the input
+  // could make `remaining` negative.
   const remaining = MAX_SUMMARY_LENGTH - draft.summary.length;
 
   return (

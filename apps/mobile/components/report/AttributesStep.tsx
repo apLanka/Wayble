@@ -164,7 +164,9 @@ function AttributeEditor({
               accessibilityRole="radio"
               accessibilityState={{ checked: isSelected }}
               accessibilityLabel={`${meta.label}: ${VALUE_LABELS[value] ?? value}`}
-              accessibilityHint={`${VALUE_LABELS[value] ?? value}. Double tap to ${
+              // No value label here: the label above already ends in it, so
+              // naming it again spoke every pill's value twice.
+              accessibilityHint={`Double tap to ${
                 isSelected ? "clear this value" : "set this value"
               }.`}
               onPress={() =>
