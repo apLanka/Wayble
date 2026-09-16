@@ -18,6 +18,7 @@ import type * as notificationPolicy from "../notificationPolicy.js";
 import type * as notifications from "../notifications.js";
 import type * as places from "../places.js";
 import type * as pushTokens from "../pushTokens.js";
+import type * as reportLimits from "../reportLimits.js";
 import type * as reports from "../reports.js";
 import type * as users from "../users.js";
 import type * as verificationNeed from "../verificationNeed.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   places: typeof places;
   pushTokens: typeof pushTokens;
+  reportLimits: typeof reportLimits;
   reports: typeof reports;
   users: typeof users;
   verificationNeed: typeof verificationNeed;
