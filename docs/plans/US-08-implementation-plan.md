@@ -829,13 +829,71 @@ test("rejects a NaN observedAt", async () => {
     }),
   ).rejects.toThrow("Observation time is outside the allowed range");
 });
+
+test("rejects an observedAt older than the maximum observation age", async () => {
+  const t = convexTest(schema, modules);
+  const { authorId: userId, placeId } = await seedAuthor(t);
+  const asUser = t.withIdentity({ subject: userId });
+
+  await expect(
+    asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [validAttribute],
+      observedAt: Date.now() - 366 * 24 * 60 * 60 * 1000,
+    }),
+  ).rejects.toThrow("Observation time is outside the allowed range");
+});
+
+test("accepts an observedAt exactly at the forward clock-skew tolerance", async () => {
+  const t = convexTest(schema, modules);
+  const { authorId: userId, placeId } = await seedAuthor(t);
+  const asUser = t.withIdentity({ subject: userId });
+  const observedAt = Date.now() + 5 * 60 * 1000;
+
+  const created = await asUser.mutation(api.reports.submitReport, {
+    placeId,
+    attributes: [validAttribute],
+    observedAt,
+  });
+
+  expect(created?.observedAt).toBe(observedAt);
+});
+
+test("allows a new report once the prior one is exactly 24 hours old", async () => {
+  const t = convexTest(schema, modules);
+  const { authorId: userId, placeId } = await seedAuthor(t);
+  const asUser = t.withIdentity({ subject: userId });
+
+  await t.run(async (ctx) => {
+    await ctx.db.insert("reports", {
+      placeId,
+      authorId: userId,
+      taxonomyVersion: 1,
+      attributes: [validAttribute],
+      evidence: [],
+      observedAt: Date.now() - 24 * 60 * 60 * 1000,
+      status: "active",
+      updatedAt: Date.now() - 24 * 60 * 60 * 1000,
+    });
+  });
+
+  await asUser.mutation(api.reports.submitReport, {
+    placeId,
+    attributes: [{ key: "mobility.elevator", value: "yes" }],
+    observedAt: Date.now(),
+  });
+
+  expect(
+    await t.run(async (ctx) => ctx.db.query("reports").collect()),
+  ).toHaveLength(2);
+});
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
 Run: `cd packages/backend && bunx vitest run reports.test.ts`
 
-Expected: FAIL on 5 of the 7 new cases — the forward-skew rejection, the NaN rejection and all three duplicate rejections have no guard yet. The "accepts inside tolerance", "older than 24 hours" and "ignores removed report" cases will pass because nothing blocks them yet.
+Expected: FAIL on 2 of the 5 cases this step originally added — the forward-skew rejection and the duplicate rejection have no guard yet. The "accepts inside tolerance", "older than 24 hours" and "ignores removed report" cases pass because nothing blocks them yet. The remaining five cases listed below were added by the fix round that followed, which introduced the `updatedAt` window, the `Number.isFinite` check, and the boundary pins.
 
 - [ ] **Step 3: Add the guards to the mutation**
 
