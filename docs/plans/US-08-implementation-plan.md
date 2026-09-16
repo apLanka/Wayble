@@ -145,7 +145,11 @@ export function canAdvance(draft: ReportDraft): boolean;
 
 // components/report/report-errors.ts
 export type ReportErrorKind =
-  "duplicate" | "unauthenticated" | "summaryTooLong" | "generic";
+  | "duplicate"
+  | "unauthenticated"
+  | "summaryTooLong"
+  | "observationTime"
+  | "generic";
 export function classifyReportError(error: unknown): ReportErrorKind;
 export function reportErrorMessage(kind: ReportErrorKind): string;
 ```
@@ -1436,7 +1440,11 @@ import { MAX_SUMMARY_LENGTH } from "@packages/backend/convex/reportLimits";
  */
 
 export type ReportErrorKind =
-  "duplicate" | "unauthenticated" | "summaryTooLong" | "generic";
+  | "duplicate"
+  | "unauthenticated"
+  | "summaryTooLong"
+  | "observationTime"
+  | "generic";
 
 export function classifyReportError(error: unknown): ReportErrorKind {
   const message = error instanceof Error ? error.message : String(error ?? "");
