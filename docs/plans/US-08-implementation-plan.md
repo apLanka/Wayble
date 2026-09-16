@@ -981,10 +981,15 @@ describe("reportReducer", () => {
   });
 
   test("setSummary preserves a trailing space so words can be separated", () => {
-    let draft = reportReducer(emptyDraft, { type: "setSummary", summary: "hello" });
-    draft = reportReducer(draft, { type: "setSummary", summary: "hello " });
+    let draft = reportReducer(emptyDraft, {
+      type: "setSummary",
+      summary: "hello",
+    });
+    draft = reportReducer(draft, {
+      type: "setSummary",
+      summary: "hello ",
+    });
     expect(draft.summary).toBe("hello ");
-  });
   });
 
   test("reset returns the empty draft", () => {
@@ -1321,7 +1326,7 @@ export function canAdvance(draft: ReportDraft): boolean {
 
 Run: `cd apps/mobile && bunx vitest run components/report/report-draft.test.ts`
 
-Expected: PASS, 22 tests.
+Expected: PASS, 23 tests.
 
 - [ ] **Step 6: Write the failing error-classification tests**
 
@@ -1459,7 +1464,7 @@ export function reportErrorMessage(kind: ReportErrorKind): string {
 
 Run: `cd apps/mobile && bunx vitest run`
 
-Expected: PASS, 31 tests.
+Expected: PASS, 32 tests.
 
 - [ ] **Step 10: Typecheck the backend, since `reportLimits.ts` is now imported across workspaces**
 
@@ -2747,7 +2752,7 @@ extended as stories land.
 
 | Story | Test coverage                    | Known gaps                                                                                            |
 | ----- | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| US-08 | 13 Convex cases, 31 mobile cases | No component test runner; the four wizard steps are covered by the manual checklist in the US-08 plan |
+| US-08 | 13 Convex cases, 32 mobile cases | No component test runner; the four wizard steps are covered by the manual checklist in the US-08 plan |
 ```
 
 - [ ] **Step 2: Run the full automated verification sweep**
