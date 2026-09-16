@@ -6,7 +6,7 @@
 
 **Architecture:** One new Convex mutation `api.reports.submitReport` writes a `reports` document, guarded by `getAuthUserId` plus seven validation rules including an indexed 24-hour duplicate check. One new Expo Router screen drives a four-step wizard held in a pure reducer; the final step fires one `useMutation().withOptimisticUpdate` that patches the already-cached `api.places.getPlace` so Convex's automatic revert provides rollback.
 
-**Tech Stack:** Convex 1.27 (`@convex-dev/auth` Password provider, `convex-test` 0.0.55), Expo SDK 57 / React Native 0.86 / expo-router 7 (`typedRoutes: true`, `reactCompiler: true`), TypeScript 5.8 with `noUncheckedIndexedAccess`, Bun 1.3 workspaces + Turborepo, Vitest 4.1.10, ESLint 9 + Prettier (80 col).
+**Tech Stack:** Convex 1.27 (`@convex-dev/auth` Password provider, `convex-test` 0.0.55), Expo SDK 57 / React Native 0.86 / expo-router 7 (`typedRoutes: true`, `reactCompiler: true`), TypeScript 5.8 (`noUncheckedIndexedAccess` in the backend only), Bun 1.3 workspaces + Turborepo, Vitest 4.1.10, ESLint 9 + Prettier (80 col).
 
 **Spec:** `docs/plans/US-08-submit-an-accessibility-report.md` — read it before starting; this plan implements it and cites its section numbers.
 
@@ -1562,7 +1562,7 @@ There is no component test runner, so the gate for this and the next two tasks i
 
 - [ ] **Step 1: Create the step indicator**
 
-Create `apps/mobile/components/report/StepIndicator.tsx`. `noUncheckedIndexedAccess` means `REPORT_STEPS[step]` is `ReportStep | undefined`, hence the `?? ""` fallback.
+Create `apps/mobile/components/report/StepIndicator.tsx`. The `?? ""` fallback on `REPORT_STEPS[step]` is defensive: `noUncheckedIndexedAccess` is not enabled for `apps/mobile` (see Global Constraints), but `step` is a plain `number` and a runtime `undefined` is still worth guarding.
 
 ```tsx
 import { StyleSheet, View } from "react-native";
