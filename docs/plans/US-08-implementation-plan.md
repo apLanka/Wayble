@@ -1277,7 +1277,11 @@ export function reportReducer(
     case "back":
       return { ...state, step: clampStep(state.step - 1) };
     case "reset":
-      return emptyDraft;
+      // A fresh object rather than the `emptyDraft` singleton: the
+      // singleton's `selected` and `notes` are module state, and one stray
+      // write by a consumer would corrupt every later reset for the life of
+      // the process.
+      return { ...emptyDraft, selected: {}, notes: {} };
   }
 }
 
@@ -1330,7 +1334,7 @@ export function canAdvance(draft: ReportDraft): boolean {
 
 Run: `cd apps/mobile && bunx vitest run components/report/report-draft.test.ts`
 
-Expected: PASS, 23 tests.
+Expected: PASS, 27 tests.
 
 - [ ] **Step 6: Write the failing error-classification tests**
 
@@ -1447,10 +1451,18 @@ export type ReportErrorKind =
   | "generic";
 
 export function classifyReportError(error: unknown): ReportErrorKind {
-  const message = error instanceof Error ? error.message : String(error ?? "");
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof (error as { message?: unknown } | null)?.message === "string"
+        ? (error as { message: string }).message
+        : String(error ?? "");
   if (message.includes("Duplicate report:")) return "duplicate";
   if (message.includes("Unauthenticated:")) return "unauthenticated";
   if (message.includes("Summary too long:")) return "summaryTooLong";
+  if (message.includes("Observation time is outside the allowed range")) {
+    return "observationTime";
+  }
   return "generic";
 }
 
@@ -1461,9 +1473,11 @@ export function reportErrorMessage(kind: ReportErrorKind): string {
     case "unauthenticated":
       return "Sign in to submit a report.";
     case "summaryTooLong":
-      return `Keep your summary under ${MAX_SUMMARY_LENGTH} characters.`;
+      return `Keep your summary to ${MAX_SUMMARY_LENGTH} characters or fewer.`;
+    case "observationTime":
+      return "Your device clock looks wrong. Turn on automatic date and time, then try again.";
     case "generic":
-      return "Couldn't submit your report. Check your connection and try again.";
+      return "We couldn't submit your report. Please try again.";
   }
 }
 ```
@@ -1472,7 +1486,7 @@ export function reportErrorMessage(kind: ReportErrorKind): string {
 
 Run: `cd apps/mobile && bunx vitest run`
 
-Expected: PASS, 32 tests.
+Expected: PASS, 40 tests.
 
 - [ ] **Step 10: Typecheck the backend, since `reportLimits.ts` is now imported across workspaces**
 
@@ -2760,7 +2774,7 @@ extended as stories land.
 
 | Story | Test coverage                    | Known gaps                                                                                            |
 | ----- | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| US-08 | 13 Convex cases, 32 mobile cases | No component test runner; the four wizard steps are covered by the manual checklist in the US-08 plan |
+| US-08 | 13 Convex cases, 40 mobile cases | No component test runner; the four wizard steps are covered by the manual checklist in the US-08 plan |
 ```
 
 - [ ] **Step 2: Run the full automated verification sweep**
