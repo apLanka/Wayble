@@ -1,6 +1,6 @@
 import React from "react";
 import { View, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 
 import { api } from "@packages/backend/convex/_generated/api";
@@ -26,6 +26,7 @@ type Attribute = {
 
 export default function PlaceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { appTheme } = useAppTheme();
 
   const place = useQuery(
@@ -163,9 +164,12 @@ export default function PlaceDetailScreen() {
           ) : (
             /* ── No Data State ─────────────────────────────── */
             <NoDataPrompt
-              onContribute={() => {
-                // Placeholder — will navigate to report submission in a future story
-              }}
+              onContribute={() =>
+                router.push({
+                  pathname: "/report/[placeId]",
+                  params: { placeId: id },
+                })
+              }
             />
           )}
         </ScrollView>

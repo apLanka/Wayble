@@ -48,6 +48,10 @@ export default function RootLayout() {
               name="place/[id]"
               options={{ title: "Place Details" }}
             />
+            <Stack.Screen
+              name="report/[placeId]"
+              options={{ title: "Report accessibility" }}
+            />
           </Stack>
         </ThemeProvider>
       </ConvexClientProvider>
