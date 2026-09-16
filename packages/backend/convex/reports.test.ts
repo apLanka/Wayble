@@ -7,9 +7,15 @@ const modules = import.meta.glob("./**/*.*s");
 
 async function seedAuthor(t: ReturnType<typeof convexTest>) {
   return await t.run(async (ctx) => {
-    const userId = await ctx.db.insert("users", {
+    const authorId = await ctx.db.insert("users", {
       email: "author@example.com",
       displayName: "Report Author",
+      role: "member",
+      updatedAt: 1,
+    });
+    const ownerId = await ctx.db.insert("users", {
+      email: "owner@example.com",
+      displayName: "Place Owner",
       role: "member",
       updatedAt: 1,
     });
@@ -18,10 +24,10 @@ async function seedAuthor(t: ReturnType<typeof convexTest>) {
       category: "education",
       address: "1 Main Street",
       location: { latitude: 6.9271, longitude: 79.8612 },
-      createdBy: userId,
+      createdBy: ownerId,
       updatedAt: 1,
     });
-    return { userId, placeId };
+    return { authorId, placeId };
   });
 }
 
@@ -42,11 +48,15 @@ describe("US-08 report submission", () => {
         observedAt: Date.now(),
       }),
     ).rejects.toThrow("Unauthenticated");
+
+    expect(
+      await t.run(async (ctx) => ctx.db.query("reports").collect()),
+    ).toHaveLength(0);
   });
 
   test("persists a report and derives the author from the session", async () => {
     const t = convexTest(schema, modules);
-    const { userId, placeId } = await seedAuthor(t);
+    const { authorId: userId, placeId } = await seedAuthor(t);
     const asUser = t.withIdentity({ subject: userId });
     const observedAt = Date.now();
 
@@ -60,6 +70,11 @@ describe("US-08 report submission", () => {
       observedAt,
     });
 
+    // The place's creator is a different user, so an authorId of
+    // place.createdBy would fail this assertion rather than pass by
+    // coincidence.
+    const placeRow = await t.run(async (ctx) => ctx.db.get(placeId));
+    expect(placeRow?.createdBy).not.toBe(userId);
     expect(created?.authorId).toBe(userId);
     expect(created?.placeId).toBe(placeId);
     expect(created?.taxonomyVersion).toBe(1);
