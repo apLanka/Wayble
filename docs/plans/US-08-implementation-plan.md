@@ -1540,7 +1540,7 @@ import, and report-errors.ts maps a thrown mutation error to plain-language
 copy. Both are testable with Vitest alone.
 
 Adds Vitest to apps/mobile. This covers pure logic only — there is still no
-component renderer, so the four step components remain untested and are
+component renderer, so the five report components (`StepIndicator`, `CategoryStep`, `AttributesStep`, `NotesStep`, `ConfirmStep`), the report route, and the report CTA added to `app/place/[id].tsx` remain untested and are
 covered by the manual checklist in the plan.
 
 Refs US-08"
@@ -2331,7 +2331,7 @@ Refs US-08"
 
 **Interfaces:**
 
-- Consumes: `api.reports.submitReport`, `api.places.getPlace`, `api.users.currentUser`; `emptyDraft`, `reportReducer`, `canAdvance`, `selectedAttributes`, `REPORT_STEPS` from `@/components/report/report-draft`; `classifyReportError`, `reportErrorMessage` from `@/components/report/report-errors`; the four step components from Tasks 5–7.
+- Consumes: `api.reports.submitReport`, `api.places.getPlace`, `api.users.currentUser`; `emptyDraft`, `reportReducer`, `canAdvance`, `selectedAttributes`, `REPORT_STEPS` from `@/components/report/report-draft`; `classifyReportError`, `reportErrorMessage` from `@/components/report/report-errors`; the five report components (`StepIndicator`, `CategoryStep`, `AttributesStep`, `NotesStep`, `ConfirmStep`), the report route, and the report CTA added to `app/place/[id].tsx` from Tasks 5–7.
 - Produces: the navigable `/report/[placeId]` route, which is the story's user-visible deliverable.
 
 - [ ] **Step 1: Create the route**
@@ -2893,7 +2893,7 @@ validation guards including a 24-hour duplicate check on a new
 - Full backend suite green, both workspaces typecheck, lint and format clean.
 
 ## Known gaps
-- No component test runner in \`apps/mobile\`, so the four step components
+- No component test runner in \`apps/mobile\`, so the five report components (`StepIndicator`, `CategoryStep`, `AttributesStep`, `NotesStep`, `ConfirmStep`), the report route, and the report CTA added to `app/place/[id].tsx`
   have no automated coverage. Manual checklist results are in the PR
   description.
 - The 24-hour guard relies on Convex's serializable transactions, which retry
