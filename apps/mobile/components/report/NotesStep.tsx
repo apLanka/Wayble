@@ -51,7 +51,7 @@ export function NotesStep({ draft, dispatch }: Props) {
           placeholderTextColor={colors.textMuted}
           maxLength={MAX_SUMMARY_LENGTH}
           multiline
-          accessibilityLabel="Report summary"
+          accessibilityLabel="Your summary"
           accessibilityLabelledBy="summary-label"
           accessibilityHint={`Optional. Up to ${MAX_SUMMARY_LENGTH} characters.`}
           style={[
@@ -65,12 +65,18 @@ export function NotesStep({ draft, dispatch }: Props) {
         />
       </View>
 
-      <AppText
-        variant="label"
-        style={[styles.counter, { color: colors.textMuted }]}
-      >
-        {remaining} characters remaining
-      </AppText>
+      {/* "N of 500 characters left" — the noun agrees with the total, so it is
+          grammatical at every value without a conditional, and a screen reader
+          hears the count change instead of only reading the cap from the hint.
+          The live region is honoured on Android only (see the report). */}
+      <View accessibilityLiveRegion="polite">
+        <AppText
+          variant="label"
+          style={[styles.counter, { color: colors.textMuted }]}
+        >
+          {remaining} of {MAX_SUMMARY_LENGTH} characters left
+        </AppText>
+      </View>
     </View>
   );
 }
