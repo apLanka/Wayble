@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 import {
   AccessibilityInfo,
+  ActivityIndicator,
   BackHandler,
   ScrollView,
   StyleSheet,
@@ -22,7 +23,7 @@ import { AttributesStep } from "@/components/report/AttributesStep";
 import { CategoryStep } from "@/components/report/CategoryStep";
 import { ConfirmStep } from "@/components/report/ConfirmStep";
 import { NotesStep } from "@/components/report/NotesStep";
-import { StepIndicator } from "@/components/report/StepIndicator";
+import { StepIndicator, STEP_TITLES } from "@/components/report/StepIndicator";
 import {
   REPORT_STEPS,
   canAdvance,
@@ -110,8 +111,11 @@ export default function ReportScreen() {
   });
 
   const goTo = useCallback((step: number) => {
+    // Any step change ends the previous submit attempt, so its banner must
+    // not follow the user to the next step still reading as a live failure.
+    setError(null);
     dispatch({ type: "goToStep", step });
-    const title = REPORT_STEPS[step];
+    const title = STEP_TITLES[REPORT_STEPS[step] ?? ""] ?? "";
     if (title) {
       AccessibilityInfo.announceForAccessibility(
         `Step ${step + 1} of ${REPORT_STEPS.length}: ${title}`,
@@ -130,9 +134,9 @@ export default function ReportScreen() {
       () => {
         if (draft.step === 0) return false;
         dispatch({ type: "back" });
-        const title = REPORT_STEPS[draft.step - 1];
+        const title = STEP_TITLES[REPORT_STEPS[draft.step - 1] ?? ""] ?? "";
         AccessibilityInfo.announceForAccessibility(
-          `Step ${draft.step} of ${REPORT_STEPS.length}: ${title ?? ""}`,
+          `Step ${draft.step} of ${REPORT_STEPS.length}: ${title}`,
         );
         return true;
       },
@@ -180,6 +184,22 @@ export default function ReportScreen() {
   const safeDraft: ReportDraft =
     draft.category === null ? { ...draft, step: 0 } : draft;
   const step = safeDraft.step;
+
+  if (currentUser === undefined) {
+    return (
+      <>
+        <Stack.Screen options={{ title: "Report accessibility" }} />
+        <Screen>
+          <View style={styles.centered}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <AppText style={[styles.centeredText, { color: colors.textMuted }]}>
+              Checking your account…
+            </AppText>
+          </View>
+        </Screen>
+      </>
+    );
+  }
 
   if (currentUser === null) {
     return (
@@ -292,12 +312,15 @@ export default function ReportScreen() {
           ) : null}
         </ScrollView>
 
-        {/* No footer on the confirm step: `canAdvance` is false there by
-            design, so a Next button would only ever render disabled, and the
-            step's own submit button is the action. Steps 1 and 2 can always
-            be left forwards — `canAdvance` is true on step 2 — so this
-            cannot strand the user short of the submit. */}
-        {step < 3 ? (
+        {/* Back is shown on every step after the first, the confirm step
+            included: someone who spots one wrong value on the last screen
+            has to be able to correct it, and the header chevron would pop
+            the route and discard the whole draft. Next stops at the confirm
+            step, where `canAdvance` is false by design and the step's own
+            submit button is the action — so the wizard can never advance
+            past the submit. Steps 1 and 2 can always be left forwards, as
+            `canAdvance` is true on step 2. */}
+        {step > 0 ? (
           <View style={styles.footer}>
             <TouchTarget
               accessibilityRole="button"
@@ -316,35 +339,37 @@ export default function ReportScreen() {
                 Back
               </AppText>
             </TouchTarget>
-            <TouchTarget
-              accessibilityRole="button"
-              accessibilityLabel={`Continue to ${
-                REPORT_STEPS[step + 1] ?? "next step"
-              }`}
-              accessibilityState={{ disabled: !canAdvance(safeDraft) }}
-              disabled={!canAdvance(safeDraft)}
-              onPress={() => goTo(step + 1)}
-              style={[
-                styles.footerButton,
-                {
-                  backgroundColor: canAdvance(safeDraft)
-                    ? colors.primary
-                    : colors.surfaceElevated,
-                  borderColor: colors.border,
-                },
-              ]}
-            >
-              <AppText
-                variant="bodyStrong"
-                style={{
-                  color: canAdvance(safeDraft)
-                    ? colors.onPrimary
-                    : colors.textMuted,
-                }}
+            {step < 3 ? (
+              <TouchTarget
+                accessibilityRole="button"
+                accessibilityLabel={`Continue to ${
+                  REPORT_STEPS[step + 1] ?? "next step"
+                }`}
+                accessibilityState={{ disabled: !canAdvance(safeDraft) }}
+                disabled={!canAdvance(safeDraft)}
+                onPress={() => goTo(step + 1)}
+                style={[
+                  styles.footerButton,
+                  {
+                    backgroundColor: canAdvance(safeDraft)
+                      ? colors.primary
+                      : colors.surfaceElevated,
+                    borderColor: colors.border,
+                  },
+                ]}
               >
-                Next
-              </AppText>
-            </TouchTarget>
+                <AppText
+                  variant="bodyStrong"
+                  style={{
+                    color: canAdvance(safeDraft)
+                      ? colors.onPrimary
+                      : colors.textMuted,
+                  }}
+                >
+                  Next
+                </AppText>
+              </TouchTarget>
+            ) : null}
           </View>
         ) : null}
       </Screen>
