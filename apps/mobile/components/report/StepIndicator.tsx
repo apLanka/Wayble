@@ -5,7 +5,14 @@ import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { REPORT_STEPS } from "./report-draft";
 
-const STEP_TITLES: Record<string, string> = {
+/**
+ * The display name for each `REPORT_STEPS` entry.
+ *
+ * Exported so the wizard route announces the same words this indicator
+ * shows, rather than keeping a second copy of the map that could drift out
+ * of step with the labels on screen.
+ */
+export const STEP_TITLES: Record<string, string> = {
   category: "Category",
   attributes: "Attributes",
   notes: "Notes",
