@@ -77,9 +77,12 @@ fixed clock. `submitReport` deliberately does **not** take a `now` argument: a
 client-settable clock is a direct bypass of the 24-hour guard, which is an
 abuse-prevention control (`PRD:222`). The handler uses the real `Date.now()`.
 The guard remains fully testable because the test controls the _existing_
-report's `observedAt` by inserting it directly via `ctx.db.insert` — insert one
-at `Date.now() - 1000` and the guard fires; insert one at
-`Date.now() - 25h` and it does not.
+report's `updatedAt` by inserting it directly via `ctx.db.insert` — insert one
+with `updatedAt: Date.now() - 1000` and the guard fires; insert one with
+`updatedAt: Date.now() - 25h` and it does not. `observedAt` cannot drive that
+lever: the guard keys on the server-written `updatedAt` precisely because
+`observedAt` is client-supplied and the skew guard above accepts values up to a
+year old, so a caller could otherwise back-date its way out of the window.
 
 ## Architecture
 
@@ -134,16 +137,16 @@ There is deliberately **no** `authorId` argument. The author is taken only from
 
 Guard order — cheapest and most security-relevant first:
 
-| #   | Guard             | Rule                                          | Error string                                                                |
-| --- | ----------------- | --------------------------------------------- | --------------------------------------------------------------------------- |
-| 1   | Auth              | `getAuthUserId(ctx)` is non-null              | `Unauthenticated: must be logged in to submit a report`                     |
-| 2   | Place exists      | `ctx.db.get(args.placeId)`                    | `Unknown place: ${args.placeId}`                                            |
-| 3   | Non-empty         | `attributes.length > 0`                       | `Add at least one accessibility attribute`                                  |
-| 4   | No duplicate keys | see below                                     | `Duplicate accessibility attribute: ${key}`                                 |
-| 5   | Summary cap       | `summary.length <= 500`                       | `Summary too long: ${n} characters, maximum 500`                            |
-| 6   | Note cap          | each `attribute.note.length <= 280`           | `Note too long: ${n} characters, maximum 280`                               |
-| 7   | Clock skew        | `observedAt <= now + 5min` and `>= now - 1yr` | `Observation time is outside the allowed range`                             |
-| 8   | 24h duplicate     | indexed read, any `observedAt > now - 24h`    | `Duplicate report: you already reported on this place in the last 24 hours` |
+| #   | Guard             | Rule                                                           | Error string                                                                |
+| --- | ----------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 1   | Auth              | `getAuthUserId(ctx)` is non-null                               | `Unauthenticated: must be logged in to submit a report`                     |
+| 2   | Place exists      | `ctx.db.get(args.placeId)`                                     | `Unknown place: ${args.placeId}`                                            |
+| 3   | Non-empty         | `attributes.length > 0`                                        | `Add at least one accessibility attribute`                                  |
+| 4   | No duplicate keys | see below                                                      | `Duplicate accessibility attribute: ${key}`                                 |
+| 5   | Summary cap       | `summary.length <= 500`                                        | `Summary too long: ${n} characters, maximum 500`                            |
+| 6   | Note cap          | each `attribute.note.length <= 280`                            | `Note too long: ${n} characters, maximum 280`                               |
+| 7   | Clock skew        | `Number.isFinite(observedAt)`, `<= now + 5min`, `>= now - 1yr` | `Observation time is outside the allowed range`                             |
+| 8   | 24h duplicate     | indexed read, any `updatedAt > now - 24h`                      | `Duplicate report: you already reported on this place in the last 24 hours` |
 
 Guard 4 mirrors `assertNoDuplicateNeeds` in `convex/users.ts:67` — same
 `Set`-based shape, same error-string convention, since `S0-5:143` makes it an
@@ -162,13 +165,41 @@ const recent = await ctx.db
   .withIndex("by_place_and_author", (q) =>
     q.eq("placeId", args.placeId).eq("authorId", userId),
   )
-  .filter((r) => r.status === "active" && r.observedAt > cutoff)
+  .filter((q) =>
+    q.and(
+      q.eq(q.field("status"), "active"),
+      q.gt(q.field("updatedAt"), cutoff),
+    ),
+  )
   .first();
 if (recent) throw new Error(DUPLICATE_MESSAGE);
 ```
 
+Two things about the `.filter()` form itself are load-bearing rather than
+stylistic.
+
+`.filter()` hands its predicate a **`FilterBuilder`**, not a document. A
+document-shaped predicate — `.filter((r) => r.status === "active")` — does not
+degrade quietly: `r.status` on a `FilterBuilder` is a `TS2339` compile error, and
+because Vitest does not type-check, a test run would transpile it to a predicate
+that matches nothing and the guard would fail **open**, admitting every duplicate.
+The conditions are therefore built from the builder and returned.
+
+The window keys on `updatedAt`, the server clock value written at insert time,
+**not** `observedAt`. `observedAt` is client-supplied and guard 7 accepts it up
+to a year old, so a window keyed on it could be stepped over: a caller submits
+once with `observedAt: Date.now() - 25h` and then files again, and both land
+outside a 24-hour window measured on that field. `updatedAt` is required by the
+schema and written by this handler, so no argument can move it.
+
 Only `active` reports count toward the guard, so a removed or superseded report
 does not block a legitimate resubmission.
+
+The guard's atomicity is Convex's, not the schema's: mutations run in
+serializable transactions that retry automatically on conflict, so a submission
+that loses the race re-reads and is rejected. Convex has no unique indexes, so
+nothing in `schema.ts` enforces this — splitting the guard into its own function,
+or moving it onto `by_author`, would lose the protection silently.
 
 The inserted document:
 

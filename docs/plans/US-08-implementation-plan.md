@@ -675,7 +675,7 @@ Refs US-08"
 
 - [ ] **Step 1: Write the failing tests**
 
-The 24-hour guard reads the real server clock — there is deliberately no `now` argument, because a client-settable clock would be a bypass of the abuse control (spec §"One deliberate deviation"). Tests therefore control the _existing_ report's `observedAt` by inserting it directly.
+The 24-hour guard reads the real server clock — there is deliberately no `now` argument, because a client-settable clock would be a bypass of the abuse control (spec §"One deliberate deviation"). Tests therefore control the _existing_ report's `updatedAt` by inserting it directly, because `updatedAt` is what the window keys on: `observedAt` is client-supplied and guard 7 accepts it up to a year old, so a window keyed on it could be back-dated out of by the caller.
 
 Append inside the `describe` block in `packages/backend/convex/reports.test.ts`:
 
@@ -743,7 +743,7 @@ test("allows a new report once the previous one is older than 24 hours", async (
       evidence: [],
       observedAt: Date.now() - 25 * 60 * 60 * 1000,
       status: "active",
-      updatedAt: 1,
+      updatedAt: Date.now() - 25 * 60 * 60 * 1000,
     });
   });
 
@@ -761,6 +761,7 @@ test("ignores a removed prior report when applying the 24 hour guard", async () 
   const { userId, placeId } = await seedAuthor(t);
   const asUser = t.withIdentity({ subject: userId });
 
+  // Filed a minute ago, so only the status filter can let this through.
   await t.run(async (ctx) => {
     await ctx.db.insert("reports", {
       placeId,
@@ -770,7 +771,7 @@ test("ignores a removed prior report when applying the 24 hour guard", async () 
       evidence: [],
       observedAt: Date.now() - 60 * 1000,
       status: "removed",
-      updatedAt: 1,
+      updatedAt: Date.now() - 60 * 1000,
     });
   });
 
@@ -782,13 +783,59 @@ test("ignores a removed prior report when applying the 24 hour guard", async () 
 
   expect(created).not.toBeNull();
 });
+
+test("rejects a repeat report even when the prior one back-dates observedAt", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, placeId } = await seedAuthor(t);
+  const asUser = t.withIdentity({ subject: userId });
+
+  // The prior report claims to have been observed 25 hours ago, but it was
+  // FILED a minute ago. Keying the duplicate window on observedAt would let
+  // this through; keying it on updatedAt does not.
+  await t.run(async (ctx) => {
+    await ctx.db.insert("reports", {
+      placeId,
+      authorId: userId,
+      taxonomyVersion: 1,
+      attributes: [validAttribute],
+      evidence: [],
+      observedAt: Date.now() - 25 * 60 * 60 * 1000,
+      status: "active",
+      updatedAt: Date.now() - 60 * 1000,
+    });
+  });
+
+  await expect(
+    asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [{ key: "mobility.elevator", value: "yes" }],
+      observedAt: Date.now(),
+    }),
+  ).rejects.toThrow("Duplicate report:");
+});
+
+test("rejects a NaN observedAt", async () => {
+  const t = convexTest(schema, modules);
+  const { userId, placeId } = await seedAuthor(t);
+  const asUser = t.withIdentity({ subject: userId });
+
+  // Both range comparisons are false for NaN, so without an explicit
+  // finiteness check this value would pass guard 7 and be stored.
+  await expect(
+    asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [validAttribute],
+      observedAt: Number.NaN,
+    }),
+  ).rejects.toThrow("Observation time is outside the allowed range");
+});
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
 Run: `cd packages/backend && bunx vitest run reports.test.ts`
 
-Expected: FAIL on 3 of the 5 new cases — the forward-skew rejection and both duplicate rejections have no guard yet. The "accepts inside tolerance" and "ignores removed report" cases will pass because nothing blocks them yet.
+Expected: FAIL on 5 of the 7 new cases — the forward-skew rejection, the NaN rejection and all three duplicate rejections have no guard yet. The "accepts inside tolerance", "older than 24 hours" and "ignores removed report" cases will pass because nothing blocks them yet.
 
 - [ ] **Step 3: Add the guards to the mutation**
 
@@ -809,7 +856,10 @@ Insert both guards after the note-length loop and before `ctx.db.insert`:
 ```ts
 const now = Date.now();
 
+// `Number.isFinite` first: both range comparisons are false for NaN, so
+// without it a NaN `observedAt` would pass guard 7 and be stored.
 if (
+  !Number.isFinite(args.observedAt) ||
   args.observedAt > now + MAX_CLOCK_SKEW_MS ||
   args.observedAt < now - MAX_OBSERVATION_AGE_MS
 ) {
@@ -822,7 +872,20 @@ const recent = await ctx.db
   .withIndex("by_place_and_author", (q) =>
     q.eq("placeId", args.placeId).eq("authorId", userId),
   )
-  .filter((report) => report.status === "active" && report.observedAt > cutoff)
+  // The predicate receives a `FilterBuilder`, not a document, so the
+  // conditions are built from that builder and returned. A document-shaped
+  // predicate is a TS2339 compile error which, because Vitest does not
+  // type-check, transpiles into something matching nothing — a guard that
+  // fails open.
+  //
+  // The window keys on `updatedAt`, the server clock value written at insert
+  // time, so a caller cannot back-date `observedAt` past it and escape.
+  .filter((q) =>
+    q.and(
+      q.eq(q.field("status"), "active"),
+      q.gt(q.field("updatedAt"), cutoff),
+    ),
+  )
   .first();
 if (recent) {
   throw new Error(
@@ -837,7 +900,7 @@ Then change the insert's `updatedAt: Date.now()` to `updatedAt: now` so the docu
 
 Run: `cd packages/backend && bunx vitest run reports.test.ts`
 
-Expected: PASS, 18 tests.
+Expected: PASS — the 7 cases this task appends, and every case from Tasks 1 and 2 still green.
 
 - [ ] **Step 5: Run the full backend suite**
 
@@ -853,13 +916,15 @@ GIT_AUTHOR_DATE="2026-09-18T12:30:00+05:30" GIT_COMMITTER_DATE="2026-09-18T12:30
   git commit -m "feat(us-08): guard report timestamp and 24h duplicate window
 
 Rejects an observedAt beyond a five-minute forward clock-skew tolerance or
-older than a year, and rejects a second active report from the same user on
-the same place inside 24 hours via the by_place_and_author index.
+older than a year, a non-finite one, and a second active report from the same
+user on the same place inside 24 hours via the by_place_and_author index. The
+duplicate window keys on the server-written updatedAt, not on the
+client-supplied observedAt, so a caller cannot back-date past it.
 
 The handler reads the real clock rather than accepting a `now` argument the
 way notifications.sweep does: a client-settable clock would be a direct
 bypass of the duplicate guard, which is an abuse control. Tests stay
-deterministic by controlling the prior report's observedAt directly.
+deterministic by controlling the prior report's updatedAt directly.
 
 The guard's atomicity rests on Convex's serializable transactions, which
 retry automatically on conflict, so a losing submission re-reads and is
@@ -2882,7 +2947,8 @@ validation guards including a 24-hour duplicate check on a new
   mean an unbounded scan of one user's reports.
 - **No \`now\` argument, unlike \`notifications.sweep\`.** A client-settable
   clock would bypass the 24-hour guard. Tests control the prior report's
-  \`observedAt\` directly instead.
+  \`updatedAt\` directly instead — the field the window keys on, since
+  \`observedAt\` is client-supplied and would itself be a bypass.
 - **The \`partial\`-needs-a-note rule is enforced in the UI, not the
   mutation.** Rejecting a whole report over a skipped text box would discard
   the user's other valid observations.
