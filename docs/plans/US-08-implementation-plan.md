@@ -1588,9 +1588,11 @@ type Props = {
  * "Step 2 of 4 — Attributes" plus a four-segment bar.
  *
  * Exposed as a single `progressbar` element so a screen reader announces
- * "step 2 of 4" once, rather than reading four disconnected segments. The
- * visible text carries the same information, so the bar is never the only
- * signal.
+ * the position once, rather than reading four disconnected segments. The
+ * label carries the position and the accessibility value carries the step
+ * title; putting both in the value would announce the position twice on
+ * iOS. The visible text carries the same information, so the bar is never
+ * the only signal.
  */
 export function StepIndicator({ step }: Props) {
   const { appTheme } = useAppTheme();
@@ -1602,11 +1604,15 @@ export function StepIndicator({ step }: Props) {
     <View
       accessible
       accessibilityRole="progressbar"
+      // Label carries the position, value carries the title. With no explicit
+      // label, iOS derives one from the child AppText and then appends
+      // accessibilityValue.text, announcing the position twice.
+      accessibilityLabel={`Step ${position} of ${REPORT_STEPS.length}`}
       accessibilityValue={{
         min: 1,
         max: REPORT_STEPS.length,
         now: position,
-        text: `Step ${position} of ${REPORT_STEPS.length}, ${title}`,
+        text: title,
       }}
       style={styles.container}
     >
@@ -1702,8 +1708,14 @@ export function CategoryStep({ selected, onSelect }: Props) {
         accessibilityLabel="Accessibility group"
         style={styles.list}
       >
-        {CATEGORY_DISPLAY_ORDER.map((category) => {
+        {CATEGORY_DISPLAY_ORDER.filter(
+          (category) => (ATTRIBUTE_KEYS_BY_CATEGORY[category]?.length ?? 0) > 0,
+        ).map((category) => {
           const count = ATTRIBUTE_KEYS_BY_CATEGORY[category]?.length ?? 0;
+          // One string for the spoken hint and the visible text, so the two
+          // cannot disagree on pluralisation. Communication has exactly one
+          // attribute, so a hardcoded "attributes" announced "1 attributes".
+          const countLabel = `${count} attribute${count === 1 ? "" : "s"}`;
           const isSelected = selected === category;
           return (
             <TouchTarget
@@ -1711,7 +1723,7 @@ export function CategoryStep({ selected, onSelect }: Props) {
               accessibilityRole="radio"
               accessibilityState={{ checked: isSelected }}
               accessibilityLabel={category}
-              accessibilityHint={`${count} attributes. Double tap to report on ${category.toLowerCase()}.`}
+              accessibilityHint={`${countLabel}. Double tap to report on ${category.toLowerCase()}.`}
               onPress={() => onSelect(category)}
               style={[
                 styles.pill,
@@ -1736,7 +1748,7 @@ export function CategoryStep({ selected, onSelect }: Props) {
                   color: isSelected ? colors.onPrimary : colors.textMuted,
                 }}
               >
-                {count} attribute{count === 1 ? "" : "s"}
+                {countLabel}
               </AppText>
             </TouchTarget>
           );
