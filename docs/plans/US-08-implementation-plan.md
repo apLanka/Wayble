@@ -861,9 +861,11 @@ way notifications.sweep does: a client-settable clock would be a direct
 bypass of the duplicate guard, which is an abuse control. Tests stay
 deterministic by controlling the prior report's observedAt directly.
 
-Known limitation: the guard is a read-then-write, so two submissions racing
-in separate transactions can both pass. Convex has no unique indexes, so
-this is a deterrent rather than a hard invariant.
+The guard's atomicity rests on Convex's serializable transactions, which
+retry automatically on conflict, so a losing submission re-reads and is
+rejected. Convex has no unique indexes, so nothing in the schema enforces
+that: rewriting this guard onto by_author, or splitting it into a separate
+function, would lose the protection silently.
 
 Refs US-08"
 ```
@@ -2894,9 +2896,10 @@ validation guards including a 24-hour duplicate check on a new
 - No component test runner in \`apps/mobile\`, so the four step components
   have no automated coverage. Manual checklist results are in the PR
   description.
-- The 24-hour guard is read-then-write, so two racing submissions can both
-  pass. Convex has no unique indexes; this is a deterrent, not a hard
-  invariant.
+- The 24-hour guard relies on Convex's serializable transactions, which retry
+  automatically on conflict. Convex has no unique indexes, so the guarantee is
+  behavioural rather than declarative, and a future rewrite of the guard would
+  lose it with no test failing.
 
 Manual checklist: [paste results]
 

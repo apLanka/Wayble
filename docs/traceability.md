@@ -3,9 +3,9 @@
 Story-to-test mapping for Wayble. Seeded from the PRD §9 starter table and
 extended as stories land.
 
-| Story | Feature       | Convex function | Screen / file              | Test                                | Owner |
-| ----- | ------------- | --------------- | -------------------------- | ----------------------------------- | ----- |
-| US-08 | Submit report | `submitReport`  | `app/report/[placeId].tsx` | `convex/reports.test.ts` (18 cases) | M1    |
+| Story | Feature       | Convex function | Screen / file                                           | Test                                                                                           | Owner |
+| ----- | ------------- | --------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----- |
+| US-08 | Submit report | `submitReport`  | `app/report/[placeId].tsx`, CTA in `app/place/[id].tsx` | `convex/reports.test.ts` (18 cases), `report-draft.test.ts` (29), `report-errors.test.ts` (15) | M1    |
 
 ## Index notes
 
@@ -16,9 +16,9 @@ extended as stories land.
 
 ## Status
 
-| Story | Test coverage                                | Known gaps                                                                                                                                 |
-| ----- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| US-08 | 18 Convex cases, 44 mobile cases (151 total) | No component test runner; the six React components and the route have no automated coverage, so verification is the manual checklist below |
+| Story | Test coverage                                                   | Known gaps                                                                                                                                                                                   |
+| ----- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US-08 | 18 Convex cases, 44 mobile cases (151 in the two vitest suites) | No component test runner; the five report components, the report route, and the report CTA in `app/place/[id].tsx` have no automated coverage, so verification is the manual checklist below |
 
 ## Where the numbers come from
 
@@ -36,7 +36,11 @@ $ cd apps/mobile && bunx vitest run
   the pre-existing suites, unchanged by US-08.
 - The 44 mobile tests split 29 in `report-draft.test.ts` and 15 in
   `report-errors.test.ts`. Both files test pure logic only.
-- `turbo run test` runs both workspaces and reports 151 passing tests.
+- `turbo run test` runs both vitest workspaces and reports 151 passing tests.
+- **That is not the repo total.** A third suite, `scripts/lib/env-file.test.ts`
+  (17 `bun:test` cases), runs under the root `bun run test`. `scripts/` is not a
+  turbo workspace, so `turbo run test` excludes it. Repo-wide there are 168
+  tests across three runners, not 151.
 
 ## Known gaps
 
@@ -44,7 +48,25 @@ $ cd apps/mobile && bunx vitest run
   React renderer configured, so it covers `report-draft.ts` and
   `report-errors.ts` only. `CategoryStep`, `AttributesStep`, `NotesStep`,
   `ConfirmStep`, `StepIndicator` and the `report/[placeId]` route have zero
-  automated coverage.
+  automated coverage, as is the report CTA added to
+  `app/place/[id].tsx`.
+- **`bun run test` at the repo root runs none of US-08's tests.** It executes
+  `bun test scripts/` and exits green having run zero US-08 assertions. Use
+  `turbo run test`, or the per-workspace commands above.
+- **A step-id rename would silently disable the step announcements.**
+  `report/[placeId].tsx` gates the forward transition on `if (title)`, and
+  `STEP_TITLES` is `Record<string, string>` rather than a union keyed by
+  `ReportStep`, so a renamed id makes the lookup miss and the announcement
+  never fire. The back handler and `StepIndicator` are ungated and would
+  announce a truncated "Step 2 of 4: ". `STEP_TITLES` has no test. A one-line
+  assertion that every `REPORT_STEPS` entry has a title would turn a silent
+  accessibility regression into a red test.
+- **`turbo run test` caches results.** A `FULL TURBO` line means the suites were
+  not re-executed; pass `--force` to actually run them. This is safe while the
+  suites are hermetic — `convex-test` and the pure mobile tests are in-memory —
+  and would stop being safe if a test reached the network or a shared database.
+  `packages/backend`'s `test` script is also bare `vitest`, so `bun run test`
+  inside that workspace starts a watcher in a terminal rather than a single run.
 - **Lint asserts nothing about accessibility props.** The repo has no
   `eslint-plugin-jsx-a11y`; a missing `accessibilityLabel` or
   `accessibilityLiveRegion` will not fail `bun run lint`.
@@ -52,9 +74,16 @@ $ cd apps/mobile && bunx vitest run
   jobs — `lint`, `format`, `typecheck` — and no `test` job. A green CI badge
   is not evidence of test coverage. `turbo run test` now works repo-wide; a
   required status check for it is a separate change.
-- **The 24-hour duplicate guard is read-then-write.** Convex has no unique
-  indexes, so two submissions racing in separate transactions can both pass
-  the guard. It is a deterrent, not a hard invariant.
+- **The duplicate guard's atomicity rests on Convex's serializable transactions,
+  not on a schema constraint.** Convex has no unique indexes, so nothing in
+  `schema.ts` prevents two reports for the same place and author; the guarantee
+  comes from the mutation being a serializable transaction that automatically
+  retries on conflict, so a losing submission re-reads, sees the winner's
+  insert, and is rejected. The risk is therefore not the guard failing today but
+  it failing silently later: rewriting the guard onto `by_author` (an unbounded
+  scan) or splitting it into a separate function would remove that protection
+  with no test failing. A regression test pinning the compound index is the
+  cheap guard.
 - **The optimistic patch can transiently disagree with the server.** The route
   sends the device clock as `observedAt`; the server accepts values up to 365
   days old (`MAX_OBSERVATION_AGE_MS`); and `places.getPlace` keeps the
