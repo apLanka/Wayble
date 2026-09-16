@@ -2,8 +2,8 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { GeospatialIndex, point } from "@convex-dev/geospatial";
 import { v } from "convex/values";
 import { components } from "./_generated/api";
-import { Id } from "./_generated/dataModel";
-import { mutation, query } from "./_generated/server";
+import { Doc, Id } from "./_generated/dataModel";
+import { mutation, query, type QueryCtx } from "./_generated/server";
 import {
   accessibilityCategoryValidator,
   placeCategoryValidator,
@@ -19,6 +19,27 @@ export const geo = new GeospatialIndex<Id<"places">, { category: string }>(
   components.geospatial,
 );
 
+/**
+ * US-16 — a place with its current accessibility attributes, so a results
+ * list can be ranked against the user's needs without a `getPlace` per row.
+ *
+ * One `by_place` read per place, so `nearest` and `search` cost up to `limit`
+ * extra index reads a call, and re-run whenever any listed place's reports
+ * change. That is the same per-place read `getPlace` makes, and fine at this
+ * data size; if it grows, the aggregate belongs on the `places` row, updated
+ * by `submitReport`, rather than recomputed per list.
+ */
+async function withAttributes<T extends Doc<"places">>(
+  ctx: QueryCtx,
+  place: T,
+) {
+  const reports = await ctx.db
+    .query("reports")
+    .withIndex("by_place", (q) => q.eq("placeId", place._id))
+    .collect();
+  return { ...place, attributes: aggregateAttributes(reports) };
+}
+
 export const nearest = query({
   args: {
     point,
@@ -33,13 +54,20 @@ export const nearest = query({
     });
     const places = await Promise.all(
       hits.map(async (hit) => {
+        let place: Doc<"places"> | null;
         try {
-          const place = await ctx.db.get(hit.key);
-          return place && { ...place, distance: hit.distance };
+          place = await ctx.db.get(hit.key);
         } catch {
           // Ignore invalid IDs from stale/corrupted index entries
           return null;
         }
+        if (!place) return null;
+        // Outside the try on purpose: it exists for bad index IDs, and a
+        // failed reports read should fail the query, not silently drop a row.
+        return {
+          ...(await withAttributes(ctx, place)),
+          distance: hit.distance,
+        };
       }),
     );
     return places.filter((p) => p !== null);
@@ -52,10 +80,11 @@ export const search = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const places = await ctx.db
       .query("places")
       .withSearchIndex("search_name", (q) => q.search("name", args.query))
       .take(args.limit ?? 10);
+    return await Promise.all(places.map((p) => withAttributes(ctx, p)));
   },
 });
 
