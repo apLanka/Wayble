@@ -116,7 +116,15 @@ export function reportReducer(
     case "back":
       return { ...state, step: clampStep(state.step - 1) };
     case "reset":
-      return emptyDraft;
+      // A fresh object rather than the `emptyDraft` singleton: the
+      // singleton's `selected` and `notes` are module state, and one stray
+      // write by a consumer would corrupt every later reset for the life of
+      // the process.
+      // A fresh object rather than the `emptyDraft` singleton: the
+      // singleton's `selected` and `notes` are module state, and one stray
+      // write by a consumer would corrupt every later reset for the life of
+      // the process.
+      return { ...emptyDraft, selected: {}, notes: {} };
   }
 }
 
