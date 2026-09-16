@@ -35,7 +35,11 @@ export function CategoryStep({ selected, onSelect }: Props) {
         Pick a group. You will confirm the exact details in the next step.
       </AppText>
 
-      <View style={styles.list}>
+      <View
+        accessibilityRole="radiogroup"
+        accessibilityLabel="Accessibility group"
+        style={styles.list}
+      >
         {CATEGORY_DISPLAY_ORDER.map((category) => {
           const count = ATTRIBUTE_KEYS_BY_CATEGORY[category]?.length ?? 0;
           const isSelected = selected === category;
@@ -43,7 +47,7 @@ export function CategoryStep({ selected, onSelect }: Props) {
             <TouchTarget
               key={category}
               accessibilityRole="radio"
-              accessibilityState={{ selected: isSelected }}
+              accessibilityState={{ checked: isSelected }}
               accessibilityLabel={category}
               accessibilityHint={`${count} attributes. Double tap to report on ${category.toLowerCase()}.`}
               onPress={() => onSelect(category)}
