@@ -43,6 +43,18 @@ export function AttributesStep({ category, draft, dispatch }: Props) {
     [category],
   );
   const missing = useMemo(() => missingRequiredNotes(draft), [draft]);
+  // `missingRequiredNotes` spans all nineteen taxonomy keys, but this step
+  // renders only the current group, so a partial left without a note in a
+  // group the user has since navigated away from would disable Next with
+  // nothing on screen saying why and the blocking attribute never rendered.
+  const outstandingElsewhere = useMemo(
+    () => missing.filter((key) => !keys.includes(key)),
+    [missing, keys],
+  );
+  const elsewhereMessage = useMemo(
+    () => describeOutstanding(outstandingElsewhere),
+    [outstandingElsewhere],
+  );
 
   return (
     <View style={styles.container}>
@@ -52,6 +64,18 @@ export function AttributesStep({ category, draft, dispatch }: Props) {
       <AppText style={{ color: colors.textMuted }}>
         Set a value for each one. Leave anything you did not check blank.
       </AppText>
+
+      {outstandingElsewhere.length > 0 ? (
+        <AppText
+          accessibilityRole="alert"
+          style={[
+            styles.banner,
+            { color: colors.danger, borderColor: colors.danger },
+          ]}
+        >
+          {elsewhereMessage}
+        </AppText>
+      ) : null}
 
       <View style={styles.list}>
         {keys.map((key) => (
@@ -66,6 +90,29 @@ export function AttributesStep({ category, draft, dispatch }: Props) {
       </View>
     </View>
   );
+}
+
+/**
+ * The banner's copy. It names the groups as well as the count, because the
+ * blocking attribute is not rendered on this step, so the banner is the only
+ * route the user has to the cause of the disabled Next button.
+ */
+function describeOutstanding(outstanding: AccessibilityAttributeKey[]): string {
+  // Unreachable while the banner is gated on a non-empty list, but this
+  // string is spoken aloud, so it must not be able to produce "undefined"
+  // if a later edit renders it unconditionally.
+  if (outstanding.length === 0) return "";
+  // `missingRequiredNotes` walks the taxonomy in order, so the distinct
+  // groups come out in a stable order without needing a sort.
+  const groups = [
+    ...new Set(outstanding.map((key) => ATTRIBUTE_METADATA[key].category)),
+  ];
+  const one = outstanding.length === 1;
+  const list =
+    groups.length === 1
+      ? groups[0]
+      : `${groups.slice(0, -1).join(", ")} and ${groups[groups.length - 1]}`;
+  return `A note is still required for ${outstanding.length} attribute${one ? "" : "s"} in ${list}. Go back and choose ${list} to add ${one ? "it" : "them"}.`;
 }
 
 type EditorProps = {
@@ -117,7 +164,9 @@ function AttributeEditor({
               accessibilityRole="radio"
               accessibilityState={{ checked: isSelected }}
               accessibilityLabel={`${meta.label}: ${VALUE_LABELS[value] ?? value}`}
-              accessibilityHint="Double tap to set this value."
+              accessibilityHint={`${VALUE_LABELS[value] ?? value}. Double tap to ${
+                isSelected ? "clear this value" : "set this value"
+              }.`}
               onPress={() =>
                 dispatch(
                   isSelected
@@ -190,6 +239,11 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: spacing.md,
+  },
+  banner: {
+    borderRadius: radii.md,
+    borderWidth: 1,
+    padding: spacing.md,
   },
   card: {
     borderRadius: radii.md,
