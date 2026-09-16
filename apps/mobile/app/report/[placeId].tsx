@@ -168,10 +168,24 @@ export default function ReportScreen() {
           draft.summary.trim().length > 0 ? draft.summary.trim() : undefined,
         observedAt: Date.now(),
       });
+      // The place screen, not `router.back()`: this route is registered in
+      // the root Stack and so can be opened by deep link, where there is no
+      // history to pop and the wizard would simply sit there completed.
+      // `dismissTo` pops to the place screen the wizard was pushed from when
+      // there is one, and replaces the wizard with it when there is not, so
+      // the outcome does not depend on how the route was entered. Because
+      // the submit patched that place's cached query, whichever screen the
+      // user lands on already shows the new attributes — that is the visible
+      // confirmation, and it is why nothing else has to report success.
+      // Announced after the navigation, since a view-controller transition
+      // commonly drops an announcement queued in the same tick as it.
+      router.dismissTo({
+        pathname: "/place/[id]",
+        params: { id: placeIdArg },
+      });
       AccessibilityInfo.announceForAccessibility(
         "Report submitted. Thank you.",
       );
-      router.back();
     } catch (caught) {
       // Convex reverts the optimistic patch on failure; all that is left is
       // to tell the user in plain language rather than raw server jargon.
