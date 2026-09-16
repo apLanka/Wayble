@@ -82,11 +82,14 @@ export const submitReport = mutation({
 
 /**
  * The validator guarantees every key is a known attribute, but not that the
- * list is a set. A repeated key would double-count in the last-write-wins
- * aggregation `places.getPlace` performs, so reject it at the boundary.
+ * list is a set. Two attributes sharing a key are contradictory, and the
+ * last-write-wins aggregation in `places.getPlace` silently keeps only the
+ * first — so the report would display something the author never asserted.
+ * Reject it at the boundary.
  *
  * This mirrors `assertNoDuplicateNeeds` in `users.ts`, which enforces the
- * same invariant for the profile's accessibility needs.
+ * same invariant for the profile's accessibility needs. The two guard
+ * different tables and are not worth sharing a helper for.
  */
 function assertNoDuplicateKeys(attributes: AccessibilityAttribute[]) {
   const seen = new Set<AccessibilityAttributeKey>();

@@ -123,7 +123,9 @@ describe("US-08 report submission", () => {
         ],
         observedAt: Date.now(),
       }),
-    ).rejects.toThrow("Duplicate accessibility attribute");
+    ).rejects.toThrow(
+      "Duplicate accessibility attribute: mobility.step_free_entrance",
+    );
   });
 
   test("rejects a summary over the cap", async () => {
@@ -138,7 +140,7 @@ describe("US-08 report submission", () => {
         summary: "x".repeat(501),
         observedAt: Date.now(),
       }),
-    ).rejects.toThrow("Summary too long");
+    ).rejects.toThrow("Summary too long: 501 characters, maximum 500");
   });
 
   test("accepts a summary exactly at the cap", async () => {
@@ -166,11 +168,16 @@ describe("US-08 report submission", () => {
       asUser.mutation(api.reports.submitReport, {
         placeId,
         attributes: [
-          { key: "mobility.elevator", value: "partial", note: "x".repeat(281) },
+          validAttribute,
+          {
+            key: "mobility.elevator",
+            value: "partial",
+            note: "x".repeat(281),
+          },
         ],
         observedAt: Date.now(),
       }),
-    ).rejects.toThrow("Note too long");
+    ).rejects.toThrow("Note too long: 281 characters, maximum 280");
   });
 
   test("rejects a place that does not exist", async () => {
