@@ -1003,6 +1003,34 @@ describe("reportReducer", () => {
     });
     expect(reportReducer(dirty, { type: "reset" })).toEqual(emptyDraft);
   });
+
+  // The assertion above compares the returned object against the very object
+  // `reset` returns, so it cannot detect aliasing. These can.
+  test("goToStep clamps below the first step", () => {
+    expect(reportReducer(emptyDraft, { type: "goToStep", step: -1 }).step).toBe(
+      0,
+    );
+  });
+
+  test("goToStep clamps above the last step", () => {
+    const atFirst = reportReducer(emptyDraft, { type: "goToStep", step: 0 });
+    expect(reportReducer(atFirst, { type: "goToStep", step: 99 }).step).toBe(3);
+  });
+
+  test("back steps back from the last step", () => {
+    const atConfirm = reportReducer(emptyDraft, { type: "goToStep", step: 3 });
+    expect(reportReducer(atConfirm, { type: "back" }).step).toBe(2);
+  });
+
+  test("reset does not alias the emptyDraft singleton", () => {
+    const dirty = reportReducer(emptyDraft, {
+      type: "setSummary",
+      summary: "x",
+    });
+    const reset = reportReducer(dirty, { type: "reset" });
+    expect(reset.selected).not.toBe(emptyDraft.selected);
+    expect(reset.notes).not.toBe(emptyDraft.notes);
+  });
 });
 
 describe("selectedAttributes", () => {
