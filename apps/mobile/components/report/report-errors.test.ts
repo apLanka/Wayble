@@ -133,11 +133,10 @@ describe("reportErrorMessage", () => {
     expect(message).not.toMatch(/\bunder\b/i);
   });
 
-  test("the observation-time case names the clock the user can fix", () => {
-    expect(reportErrorMessage("observationTime")).toMatch(/clock/i);
-  });
-
-  test("the observation-time message tells the user what to change", () => {
+  test("the observation-time message names the cause and the remedy", () => {
+    // Both halves are asserted together on purpose: "clock" alone is a
+    // subset of the pair, so an earlier version of this test that pinned only
+    // /clock/i could not fail wherever this one passes.
     const message = reportErrorMessage("observationTime");
     expect(message).toMatch(/clock/i);
     expect(message).toMatch(/date and time/i);

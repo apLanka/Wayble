@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  REPORT_ATTRIBUTE_VALUES,
   canAdvance,
   emptyDraft,
   missingRequiredNotes,
@@ -109,6 +110,42 @@ describe("reportReducer", () => {
     expect(next.notes["mobility.elevator"]).toBe(
       "Ramp only at the side entrance.",
     );
+  });
+
+  test("setValue drops the note for exactly the values with no note field", () => {
+    // Driven off REPORT_ATTRIBUTE_VALUES rather than a hand-written pair, so
+    // a value added to the picker later cannot join without this case saying
+    // what happens to its note. `yes` is the one value AttributesStep renders
+    // without a note field; every other value shows the field, so dropping
+    // its note would hide text the user can still see and that
+    // `selectedAttributes` would still submit to the server. Pinning only
+    // `no` and `partial` left a mutant that also dropped {yes, unknown} —
+    // exactly the class of bug a previous review round fixed — free to pass.
+    for (const value of REPORT_ATTRIBUTE_VALUES) {
+      const withNote = reportReducer(emptyDraft, {
+        type: "setNote",
+        key: "mobility.elevator",
+        note: "Keypad is tall.",
+      });
+      const next = reportReducer(withNote, {
+        type: "setValue",
+        key: "mobility.elevator",
+        value,
+      });
+      expect(next.selected["mobility.elevator"], `selected for ${value}`).toBe(
+        value,
+      );
+      if (value === "yes") {
+        expect(
+          next.notes["mobility.elevator"],
+          `note for ${value}`,
+        ).toBeUndefined();
+      } else {
+        expect(next.notes["mobility.elevator"], `note for ${value}`).toBe(
+          "Keypad is tall.",
+        );
+      }
+    }
   });
 
   test("clearValue removes both the value and its note", () => {
