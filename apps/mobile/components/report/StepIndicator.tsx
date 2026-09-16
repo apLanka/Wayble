@@ -24,6 +24,15 @@ type Props = {
  * "step 2 of 4" once, rather than reading four disconnected segments. The
  * visible text carries the same information, so the bar is never the only
  * signal.
+ *
+ * `accessibilityLabel` states the position and `accessibilityValue.text`
+ * carries only the step title, deliberately. With no explicit label, iOS
+ * derives one recursively from the child text — which is already
+ * "Step 2 of 4 — Attributes" — and then appends the value, so VoiceOver
+ * would speak the position twice in two different punctuations. Splitting
+ * them means each fact is spoken once: "Step 2 of 4, progress bar,
+ * Attributes". This mirrors `AttributeRow`, which also composes an explicit
+ * label rather than relying on derivation.
  */
 export function StepIndicator({ step }: Props) {
   const { appTheme } = useAppTheme();
@@ -35,11 +44,12 @@ export function StepIndicator({ step }: Props) {
     <View
       accessible
       accessibilityRole="progressbar"
+      accessibilityLabel={`Step ${position} of ${REPORT_STEPS.length}`}
       accessibilityValue={{
         min: 1,
         max: REPORT_STEPS.length,
         now: position,
-        text: `Step ${position} of ${REPORT_STEPS.length}, ${title}`,
+        text: title,
       }}
       style={styles.container}
     >

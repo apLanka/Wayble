@@ -40,8 +40,11 @@ export function CategoryStep({ selected, onSelect }: Props) {
         accessibilityLabel="Accessibility group"
         style={styles.list}
       >
-        {CATEGORY_DISPLAY_ORDER.map((category) => {
+        {CATEGORY_DISPLAY_ORDER.filter(
+          (category) => (ATTRIBUTE_KEYS_BY_CATEGORY[category]?.length ?? 0) > 0,
+        ).map((category) => {
           const count = ATTRIBUTE_KEYS_BY_CATEGORY[category]?.length ?? 0;
+          const countLabel = `${count} attribute${count === 1 ? "" : "s"}`;
           const isSelected = selected === category;
           return (
             <TouchTarget
@@ -49,7 +52,7 @@ export function CategoryStep({ selected, onSelect }: Props) {
               accessibilityRole="radio"
               accessibilityState={{ checked: isSelected }}
               accessibilityLabel={category}
-              accessibilityHint={`${count} attributes. Double tap to report on ${category.toLowerCase()}.`}
+              accessibilityHint={`${countLabel}. Double tap to report on ${category.toLowerCase()}.`}
               onPress={() => onSelect(category)}
               style={[
                 styles.pill,
@@ -74,7 +77,7 @@ export function CategoryStep({ selected, onSelect }: Props) {
                   color: isSelected ? colors.onPrimary : colors.textMuted,
                 }}
               >
-                {count} attribute{count === 1 ? "" : "s"}
+                {countLabel}
               </AppText>
             </TouchTarget>
           );
