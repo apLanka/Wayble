@@ -969,12 +969,22 @@ describe("reportReducer", () => {
     expect(cleared.notes["mobility.elevator"]).toBeUndefined();
   });
 
-  test("setSummary trims and stores the report summary", () => {
+  test("setSummary stores the report summary verbatim", () => {
+    // Deliberately NOT trimmed: this value feeds a controlled TextInput, so
+    // trimming here would strip a space as soon as it was typed and the user
+    // could never enter two words. Trimming belongs at submit, not per keystroke.
     const next = reportReducer(emptyDraft, {
       type: "setSummary",
-      summary: "  step free  ",
+      summary: "  step free entrance  ",
     });
-    expect(next.summary).toBe("step free");
+    expect(next.summary).toBe("  step free entrance  ");
+  });
+
+  test("setSummary preserves a trailing space so words can be separated", () => {
+    let draft = reportReducer(emptyDraft, { type: "setSummary", summary: "hello" });
+    draft = reportReducer(draft, { type: "setSummary", summary: "hello " });
+    expect(draft.summary).toBe("hello ");
+  });
   });
 
   test("reset returns the empty draft", () => {
@@ -1246,7 +1256,11 @@ export function reportReducer(
         notes: { ...state.notes, [action.key]: action.note },
       };
     case "setSummary":
-      return { ...state, summary: action.summary.trim() };
+      // Stored verbatim, NOT trimmed. This feeds a controlled TextInput, so
+      // trimming on every keystroke would strip a space the moment it was
+      // typed and the user could never enter two words. Trimming happens
+      // once, at submit.
+      return { ...state, summary: action.summary };
     case "goToStep":
       return { ...state, step: clampStep(action.step) };
     case "next":
@@ -2151,7 +2165,7 @@ export function ConfirmStep({ draft, isSubmitting, onSubmit }: Props) {
         ))}
       </View>
 
-      {draft.summary.length > 0 ? (
+      {draft.summary.trim().length > 0 ? (
         <View style={styles.summaryBlock}>
           <AppText variant="label" style={{ color: colors.textMuted }}>
             Your note
@@ -2376,7 +2390,10 @@ export default function ReportScreen() {
       await submitReport({
         placeId: placeIdArg,
         attributes: selectedAttributes(draft),
-        summary: draft.summary.length > 0 ? draft.summary : undefined,
+        // Trimmed here, at the boundary, rather than on every keystroke —
+        // see the setSummary reducer for why the draft keeps the raw text.
+        summary:
+          draft.summary.trim().length > 0 ? draft.summary.trim() : undefined,
         observedAt: Date.now(),
       });
       AccessibilityInfo.announceForAccessibility(
