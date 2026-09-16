@@ -41,6 +41,7 @@ export function PlaceListItem({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={a11yLabel}
+      accessibilityHint="Opens this place's accessibility details"
       style={[
         styles.container,
         {
@@ -55,12 +56,11 @@ export function PlaceListItem({
           importantForAccessibility="no"
         />
         <View style={styles.textContainer}>
-          <AppText style={styles.name} numberOfLines={1}>
-            {name}
-          </AppText>
+          {/* Name and category wrap rather than truncate (WCAG 1.4.4): at
+              large text sizes a one-line cap cuts the place's own name. */}
+          <AppText style={styles.name}>{name}</AppText>
           <AppText
             style={[styles.category, { color: appTheme.colors.textMuted }]}
-            numberOfLines={1}
           >
             {category}
           </AppText>
