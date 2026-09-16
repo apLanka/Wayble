@@ -81,15 +81,17 @@ export function reportReducer(
     case "chooseCategory":
       return { ...state, category: action.category };
     case "setValue": {
-      // Changing a value invalidates any note explaining the old one, so
-      // drop it rather than leaving a stale explanation attached.
-      const notes = { ...state.notes };
-      delete notes[action.key];
-      return {
-        ...state,
-        selected: { ...state.selected, [action.key]: action.value },
-        notes,
-      };
+      // The note is dropped only when the new value is `yes`, because that is
+      // the one value with no note field. Keeping it anywhere else would
+      // preserve work the user can still see; dropping it here would hide a
+      // note that `selectedAttributes` would still submit to the server.
+      const selected = { ...state.selected, [action.key]: action.value };
+      if (action.value === "yes") {
+        const notes = { ...state.notes };
+        delete notes[action.key];
+        return { ...state, selected, notes };
+      }
+      return { ...state, selected };
     }
     case "clearValue": {
       const selected = { ...state.selected };

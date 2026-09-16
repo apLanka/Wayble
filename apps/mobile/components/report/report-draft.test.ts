@@ -50,7 +50,31 @@ describe("reportReducer", () => {
     expect(reportReducer(atConfirm, { type: "back" }).step).toBe(2);
   });
 
-  test("setValue records a value and clears any stale note", () => {
+  test("setValue keeps the note when the new value still shows the field", () => {
+    // partial -> no. Both values render the note field, so a typed
+    // explanation must survive the change rather than vanishing silently.
+    let draft = reportReducer(emptyDraft, {
+      type: "setValue",
+      key: "mobility.elevator",
+      value: "partial",
+    });
+    draft = reportReducer(draft, {
+      type: "setNote",
+      key: "mobility.elevator",
+      note: "Keypad is tall.",
+    });
+    const next = reportReducer(draft, {
+      type: "setValue",
+      key: "mobility.elevator",
+      value: "no",
+    });
+    expect(next.selected["mobility.elevator"]).toBe("no");
+    expect(next.notes["mobility.elevator"]).toBe("Keypad is tall.");
+  });
+
+  test("setValue drops the note when the new value is yes", () => {
+    // `yes` is the one value with no note field, and `selectedAttributes`
+    // would otherwise submit a note the user can no longer see or edit.
     const withNote = reportReducer(emptyDraft, {
       type: "setNote",
       key: "mobility.elevator",
@@ -63,6 +87,28 @@ describe("reportReducer", () => {
     });
     expect(next.selected["mobility.elevator"]).toBe("yes");
     expect(next.notes["mobility.elevator"]).toBeUndefined();
+  });
+
+  test("setValue from no to partial keeps the existing note", () => {
+    let draft = reportReducer(emptyDraft, {
+      type: "setValue",
+      key: "mobility.elevator",
+      value: "no",
+    });
+    draft = reportReducer(draft, {
+      type: "setNote",
+      key: "mobility.elevator",
+      note: "Ramp only at the side entrance.",
+    });
+    const next = reportReducer(draft, {
+      type: "setValue",
+      key: "mobility.elevator",
+      value: "partial",
+    });
+    expect(next.selected["mobility.elevator"]).toBe("partial");
+    expect(next.notes["mobility.elevator"]).toBe(
+      "Ramp only at the side entrance.",
+    );
   });
 
   test("clearValue removes both the value and its note", () => {
