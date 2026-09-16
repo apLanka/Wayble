@@ -6,11 +6,14 @@ import { useAppTheme } from "@/hooks/use-app-theme";
 import { CATEGORY_COLORS } from "./CategoryFilter";
 import { formatDistance } from "@/utils/format-distance";
 import { radii, spacing } from "@/constants/theme";
+import type { MatchExplanation } from "@/utils/rank-places";
 
 interface PlaceListItemProps {
   name: string;
   category: string;
   distance?: number;
+  /** US-16: why this row sits where it does. Omitted when not ranking. */
+  matchExplanation?: MatchExplanation | null;
   onPress: () => void;
 }
 
@@ -18,6 +21,7 @@ export function PlaceListItem({
   name,
   category,
   distance,
+  matchExplanation,
   onPress,
 }: PlaceListItemProps) {
   const { appTheme } = useAppTheme();
@@ -27,8 +31,10 @@ export function PlaceListItem({
     appTheme.colors.primary;
   const distanceStr = distance !== undefined ? formatDistance(distance) : "";
 
-  // Combine into a single label so screen readers read it continuously.
-  const a11yLabel = `${name}, ${category}${distanceStr ? `, ${distanceStr} away` : ""}`;
+  // Combine into a single label so screen readers read it continuously. The
+  // match reason is appended rather than given its own node, so the row stays
+  // one stop for a screen reader and the reason is heard with the place.
+  const a11yLabel = `${name}, ${category}${distanceStr ? `, ${distanceStr} away` : ""}${matchExplanation ? `. ${matchExplanation.accessibilityLabel}` : ""}`;
 
   return (
     <TouchTarget
@@ -58,6 +64,20 @@ export function PlaceListItem({
           >
             {category}
           </AppText>
+          {matchExplanation ? (
+            <View
+              style={[
+                styles.matchChip,
+                { backgroundColor: appTheme.colors.surfaceElevated },
+              ]}
+            >
+              <AppText
+                style={[styles.matchText, { color: appTheme.colors.text }]}
+              >
+                {matchExplanation.short}
+              </AppText>
+            </View>
+          ) : null}
         </View>
       </View>
       {distanceStr ? (
@@ -105,5 +125,15 @@ const styles = StyleSheet.create({
   },
   distance: {
     fontSize: 14,
+  },
+  matchChip: {
+    alignSelf: "flex-start",
+    borderRadius: radii.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    marginTop: spacing.xs,
+  },
+  matchText: {
+    fontSize: 13,
   },
 });

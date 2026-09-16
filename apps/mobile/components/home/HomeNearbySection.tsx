@@ -8,9 +8,10 @@ import { TouchTarget } from "@/components/ui/touch-target";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { NearbyPlace } from "@/hooks/use-nearby-places";
+import { matchExplanation, type Ranked } from "@/utils/rank-places";
 
 interface HomeNearbySectionProps {
-  places: NearbyPlace[];
+  places: Ranked<NearbyPlace>[];
   isLoading: boolean;
   status: PermissionStatus | null;
   onRequestPermission: () => void;
@@ -140,6 +141,7 @@ export function HomeNearbySection({
             name={place.name}
             category={place.category}
             distance={place.distance}
+            matchExplanation={matchExplanation(place.match)}
             onPress={() => onPlacePress(place)}
           />
         </View>
