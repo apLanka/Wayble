@@ -73,6 +73,7 @@ export const submitReport = mutation({
     const now = Date.now();
 
     if (
+      !Number.isFinite(args.observedAt) ||
       args.observedAt > now + MAX_CLOCK_SKEW_MS ||
       args.observedAt < now - MAX_OBSERVATION_AGE_MS
     ) {
@@ -85,10 +86,17 @@ export const submitReport = mutation({
       .withIndex("by_place_and_author", (q) =>
         q.eq("placeId", args.placeId).eq("authorId", userId),
       )
+      // This is the only Convex query filter in the backend, and its
+      // predicate is a FilterBuilder expression rather than a document
+      // callback: `filter` is handed a builder, so the conditions have to
+      // be built from it and returned. `sweep.test.ts:70` is the in-repo
+      // precedent. The window keys on `updatedAt`, the server clock value
+      // written at insert time, so a caller cannot back-date `observedAt`
+      // past the window to escape the check.
       .filter((q) =>
         q.and(
           q.eq(q.field("status"), "active"),
-          q.gt(q.field("observedAt"), cutoff),
+          q.gt(q.field("updatedAt"), cutoff),
         ),
       )
       .first();

@@ -275,20 +275,125 @@ describe("US-08 report submission", () => {
         evidence: [],
         observedAt: Date.now() - 25 * 60 * 60 * 1000,
         status: "active",
-        updatedAt: 1,
+        updatedAt: Date.now() - 25 * 60 * 60 * 1000,
       });
     });
 
-    const created = await asUser.mutation(api.reports.submitReport, {
+    await asUser.mutation(api.reports.submitReport, {
       placeId,
       attributes: [{ key: "mobility.elevator", value: "yes" }],
       observedAt: Date.now(),
     });
 
-    expect(created).not.toBeNull();
+    expect(
+      await t.run(async (ctx) => ctx.db.query("reports").collect()),
+    ).toHaveLength(2);
   });
 
   test("ignores a removed prior report when applying the 24 hour guard", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    // Filed a minute ago, so only the status filter can let this through.
+    await t.run(async (ctx) => {
+      await ctx.db.insert("reports", {
+        placeId,
+        authorId: userId,
+        taxonomyVersion: 1,
+        attributes: [validAttribute],
+        evidence: [],
+        observedAt: Date.now() - 60 * 1000,
+        status: "removed",
+        updatedAt: Date.now() - 60 * 1000,
+      });
+    });
+
+    await asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [{ key: "mobility.elevator", value: "yes" }],
+      observedAt: Date.now(),
+    });
+
+    expect(
+      await t.run(async (ctx) => ctx.db.query("reports").collect()),
+    ).toHaveLength(2);
+  });
+
+  test("rejects a repeat report even when the prior one back-dates observedAt", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    // The prior report claims to have been observed 25 hours ago, but it was
+    // FILED a minute ago. Keying the duplicate window on observedAt would let
+    // this through; keying it on updatedAt does not.
+    await t.run(async (ctx) => {
+      await ctx.db.insert("reports", {
+        placeId,
+        authorId: userId,
+        taxonomyVersion: 1,
+        attributes: [validAttribute],
+        evidence: [],
+        observedAt: Date.now() - 25 * 60 * 60 * 1000,
+        status: "active",
+        updatedAt: Date.now() - 60 * 1000,
+      });
+    });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [{ key: "mobility.elevator", value: "yes" }],
+        observedAt: Date.now(),
+      }),
+    ).rejects.toThrow("Duplicate report:");
+  });
+
+  test("rejects a NaN observedAt", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Number.NaN,
+      }),
+    ).rejects.toThrow("Observation time is outside the allowed range");
+  });
+
+  test("rejects an observedAt older than the maximum observation age", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Date.now() - 366 * 24 * 60 * 60 * 1000,
+      }),
+    ).rejects.toThrow("Observation time is outside the allowed range");
+  });
+
+  test("accepts an observedAt exactly at the forward clock-skew tolerance", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const observedAt = Date.now() + 5 * 60 * 1000;
+
+    const created = await asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [validAttribute],
+      observedAt,
+    });
+
+    expect(created?.observedAt).toBe(observedAt);
+  });
+
+  test("allows a new report once the prior one is exactly 24 hours old", async () => {
     const t = convexTest(schema, modules);
     const { authorId: userId, placeId } = await seedAuthor(t);
     const asUser = t.withIdentity({ subject: userId });
@@ -300,18 +405,20 @@ describe("US-08 report submission", () => {
         taxonomyVersion: 1,
         attributes: [validAttribute],
         evidence: [],
-        observedAt: Date.now() - 60 * 1000,
-        status: "removed",
-        updatedAt: 1,
+        observedAt: Date.now() - 24 * 60 * 60 * 1000,
+        status: "active",
+        updatedAt: Date.now() - 24 * 60 * 60 * 1000,
       });
     });
 
-    const created = await asUser.mutation(api.reports.submitReport, {
+    await asUser.mutation(api.reports.submitReport, {
       placeId,
       attributes: [{ key: "mobility.elevator", value: "yes" }],
       observedAt: Date.now(),
     });
 
-    expect(created).not.toBeNull();
+    expect(
+      await t.run(async (ctx) => ctx.db.query("reports").collect()),
+    ).toHaveLength(2);
   });
 });
