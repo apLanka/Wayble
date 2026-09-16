@@ -33,7 +33,7 @@
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/backend/convex/reportLimits.ts` | Pure numeric limits shared by the mutation and the mobile UI. No imports, no I/O — mirrors the existing `notificationPolicy.ts` / `verificationNeed.ts` pure-lib pattern. |
 | `packages/backend/convex/reports.ts`      | The `submitReport` mutation and its private `assertNoDuplicateKeys` helper. Nothing else.                                                                                 |
-| `packages/backend/convex/reports.test.ts` | 11 `convex-test` cases covering every guard.                                                                                                                              |
+| `packages/backend/convex/reports.test.ts` | 18 `convex-test` cases covering every guard. 13 landed in Tasks 1–3; the later fix wave added 5. The spec's §Changes 3 list of 11 is a subset.                            |
 
 **Backend — modified**
 
@@ -900,7 +900,7 @@ Then change the insert's `updatedAt: Date.now()` to `updatedAt: now` so the docu
 
 Run: `cd packages/backend && bunx vitest run reports.test.ts`
 
-Expected: PASS — the 7 cases this task appends, and every case from Tasks 1 and 2 still green.
+Expected: PASS, 18 tests in `reports.test.ts`.
 
 - [ ] **Step 5: Run the full backend suite**
 
@@ -2876,7 +2876,7 @@ extended as stories land.
 
 | Story | Feature       | Convex function | Screen / file              | Test                                | Owner |
 | ----- | ------------- | --------------- | -------------------------- | ----------------------------------- | ----- |
-| US-08 | Submit report | `submitReport`  | `app/report/[placeId].tsx` | `convex/reports.test.ts` (13 cases) | M1    |
+| US-08 | Submit report | `submitReport`  | `app/report/[placeId].tsx` | `convex/reports.test.ts` (18 cases) | M1    |
 
 ## Index notes
 
@@ -2954,7 +2954,7 @@ validation guards including a 24-hour duplicate check on a new
   the user's other valid observations.
 
 ## Testing
-- \`convex/reports.test.ts\`: 13 cases, one per guard plus the happy path.
+- \`convex/reports.test.ts\`: 18 cases. Thirteen landed in Tasks 1–3; the later fix wave added 5 more — a back-dated-window bypass, a NaN \`observedAt\`, the previously untested 365-day branch, and both exact boundaries.
 - \`report-draft.test.ts\` + \`report-errors.test.ts\`: 31 cases.
 - Full backend suite green, both workspaces typecheck, lint and format clean.
 
@@ -2980,21 +2980,21 @@ CI runs on `pull_request` and checks lint, format, and typecheck. It does **not*
 
 **1. Spec coverage.** Every section of `docs/plans/US-08-submit-an-accessibility-report.md` maps to a task:
 
-| Spec section                                | Task                                              |
-| ------------------------------------------- | ------------------------------------------------- |
-| §Changes 1 — schema index                   | Task 1, Step 1                                    |
-| §Changes 2 — `submitReport`, guards 1–6     | Task 1 Steps 4–7, Task 2                          |
-| §Changes 2 — guard 7, 8 (skew, 24h)         | Task 3                                            |
-| §Changes 2 — `reportLimits` sharing         | Task 1 Step 3, consumed in Tasks 2, 4, 6, 7       |
-| §Changes 3 — 11 test cases                  | Tasks 1–3 (13 cases; the spec's list is a subset) |
-| §Changes 4 — mobile file table              | Tasks 4–8                                         |
-| §Changes 5 — wiring the stub                | Task 8, Step 3                                    |
-| §Changes 6 — optimistic update and rollback | Task 8, Step 1                                    |
-| §Changes 7 — error surfacing                | Task 4 Steps 6–8, Task 8 Step 1                   |
-| §Verification Automated                     | Task 9 Step 2                                     |
-| §Verification Manual                        | Task 9 Step 3                                     |
-| §File Summary                               | Task 9 Step 1                                     |
-| §Deliberately out of scope                  | Nothing implements these — verified absent        |
+| Spec section                                | Task                                                                                |
+| ------------------------------------------- | ----------------------------------------------------------------------------------- |
+| §Changes 1 — schema index                   | Task 1, Step 1                                                                      |
+| §Changes 2 — `submitReport`, guards 1–6     | Task 1 Steps 4–7, Task 2                                                            |
+| §Changes 2 — guard 7, 8 (skew, 24h)         | Task 3                                                                              |
+| §Changes 2 — `reportLimits` sharing         | Task 1 Step 3, consumed in Tasks 2, 4, 6, 7                                         |
+| §Changes 3 — 11 test cases                  | Tasks 1–3 landed 13; the fix wave took the suite to 18. The spec's list is a subset |
+| §Changes 4 — mobile file table              | Tasks 4–8                                                                           |
+| §Changes 5 — wiring the stub                | Task 8, Step 3                                                                      |
+| §Changes 6 — optimistic update and rollback | Task 8, Step 1                                                                      |
+| §Changes 7 — error surfacing                | Task 4 Steps 6–8, Task 8 Step 1                                                     |
+| §Verification Automated                     | Task 9 Step 2                                                                       |
+| §Verification Manual                        | Task 9 Step 3                                                                       |
+| §File Summary                               | Task 9 Step 1                                                                       |
+| §Deliberately out of scope                  | Nothing implements these — verified absent                                          |
 
 **2. Placeholder scan.** No `TBD`, no "add appropriate error handling", no "similar to Task N". Every code step contains literal, final code — no step instructs an executor to write something and then correct it.
 
