@@ -69,11 +69,25 @@ export default function ReportScreen() {
 
   /**
    * Optimistically splice the new report into the cached place detail, so
-   * the screen behind this form already shows it when `router.back()`
-   * returns. `getPlace` aggregates last-write-wins on `observedAt`, and this
-   * report is the newest by construction, so a straight overwrite of each
-   * key matches what the server will compute. Convex reverts the patch
-   * automatically if the mutation throws.
+   * the place screen the user lands on already shows it. Convex reverts the
+   * patch automatically if the mutation throws.
+   *
+   * `getPlace` keeps, per key, the attribute from the report with the
+   * greatest `observedAt`, and this overwrites every key the new report
+   * mentions. That matches what the server computes *provided* the new
+   * `observedAt` is at least as great as every existing report's — which
+   * holds only while the submitting device's clock is ahead of them all.
+   * `observedAt` is the device's clock at submit, and the server accepts
+   * anything from a year old to five minutes ahead, so a device sitting
+   * behind the existing reports makes the server keep their older value
+   * instead. The stored report is correct either way; the optimistic display
+   * is briefly wrong and corrects itself on the next sync.
+   *
+   * `getPlace` flattens its aggregate to a bare `AccessibilityAttribute[]`,
+   * discarding the per-key timestamps, so the client cannot detect that case
+   * and cannot do better than patch optimistically. Resolving it means
+   * changing the shape of a query other screens already consume, which is a
+   * follow-up rather than this task.
    */
   const submitReport = useMutation(
     api.reports.submitReport,
@@ -83,14 +97,10 @@ export default function ReportScreen() {
     });
     if (!cached) return;
 
-    // The new report is the newest one, so a key it sets overwrites the
-    // cached value and a key it omits keeps it. `reportCount` counts
-    // reports rather than attributes, which is why it goes up by exactly
-    // one. Both match the aggregate `getPlace` will recompute.
-    //
-    // A concurrent report written at a clock-skewed `observedAt` in the
-    // future is the one input that would make the server keep its value
-    // instead, and the next sync of the query corrects the difference.
+    // A key the new report sets overwrites the cached value and a key it
+    // omits keeps it, which is what the server's aggregate does too. And
+    // `reportCount` counts reports rather than attributes, which is why it
+    // goes up by exactly one.
     const merged = new Map<AccessibilityAttributeKey, AccessibilityAttribute>(
       cached.attributes.map((a) => [a.key, a]),
     );
@@ -262,6 +272,7 @@ export default function ReportScreen() {
         </View>
 
         <ScrollView
+          style={{ flex: 1 }}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -286,7 +297,10 @@ export default function ReportScreen() {
               selected={draft.category}
               onSelect={(category) => {
                 dispatch({ type: "chooseCategory", category });
-                dispatch({ type: "goToStep", step: 1 });
+                // Through the helper, not two raw dispatches: the most-used
+                // forward transition in the wizard has to announce the step
+                // it lands on like every other one does.
+                goTo(1);
               }}
             />
           ) : null}
@@ -322,10 +336,14 @@ export default function ReportScreen() {
             `canAdvance` is true on step 2. */}
         {step > 0 ? (
           <View style={styles.footer}>
+            {/* `step > 0` gates this footer and `step === 0` is its exact
+                complement, so that half of the guard below is unreachable
+                today; kept so the two cannot disagree if the gate is ever
+                relaxed. The `isSubmitting` half is the live one. */}
             <TouchTarget
               accessibilityRole="button"
               accessibilityLabel="Go back a step"
-              disabled={step === 0}
+              disabled={isSubmitting || step === 0}
               onPress={() => goTo(step - 1)}
               style={[
                 styles.footerButton,
@@ -343,7 +361,7 @@ export default function ReportScreen() {
               <TouchTarget
                 accessibilityRole="button"
                 accessibilityLabel={`Continue to ${
-                  REPORT_STEPS[step + 1] ?? "next step"
+                  STEP_TITLES[REPORT_STEPS[step + 1] ?? ""] ?? "next step"
                 }`}
                 accessibilityState={{ disabled: !canAdvance(safeDraft) }}
                 disabled={!canAdvance(safeDraft)}
