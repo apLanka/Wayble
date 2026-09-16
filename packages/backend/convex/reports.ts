@@ -4,7 +4,10 @@ import { mutation } from "./_generated/server";
 import {
   ACCESSIBILITY_TAXONOMY_VERSION,
   accessibilityAttributeValidator,
+  type AccessibilityAttribute,
+  type AccessibilityAttributeKey,
 } from "./accessibility";
+import { MAX_NOTE_LENGTH, MAX_SUMMARY_LENGTH } from "./reportLimits";
 
 /**
  * US-08 — submit an accessibility report for a place.
@@ -35,6 +38,32 @@ export const submitReport = mutation({
       throw new Error(`Unknown place: ${args.placeId}`);
     }
 
+    if (args.attributes.length === 0) {
+      throw new Error("Add at least one accessibility attribute");
+    }
+
+    assertNoDuplicateKeys(args.attributes);
+
+    if (
+      args.summary !== undefined &&
+      args.summary.length > MAX_SUMMARY_LENGTH
+    ) {
+      throw new Error(
+        `Summary too long: ${args.summary.length} characters, maximum ${MAX_SUMMARY_LENGTH}`,
+      );
+    }
+
+    for (const attribute of args.attributes) {
+      if (
+        attribute.note !== undefined &&
+        attribute.note.length > MAX_NOTE_LENGTH
+      ) {
+        throw new Error(
+          `Note too long: ${attribute.note.length} characters, maximum ${MAX_NOTE_LENGTH}`,
+        );
+      }
+    }
+
     const reportId = await ctx.db.insert("reports", {
       placeId: args.placeId,
       authorId: userId,
@@ -50,3 +79,21 @@ export const submitReport = mutation({
     return await ctx.db.get(reportId);
   },
 });
+
+/**
+ * The validator guarantees every key is a known attribute, but not that the
+ * list is a set. A repeated key would double-count in the last-write-wins
+ * aggregation `places.getPlace` performs, so reject it at the boundary.
+ *
+ * This mirrors `assertNoDuplicateNeeds` in `users.ts`, which enforces the
+ * same invariant for the profile's accessibility needs.
+ */
+function assertNoDuplicateKeys(attributes: AccessibilityAttribute[]) {
+  const seen = new Set<AccessibilityAttributeKey>();
+  for (const attribute of attributes) {
+    if (seen.has(attribute.key)) {
+      throw new Error(`Duplicate accessibility attribute: ${attribute.key}`);
+    }
+    seen.add(attribute.key);
+  }
+}

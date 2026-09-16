@@ -94,4 +94,112 @@ describe("US-08 report submission", () => {
     );
     expect(stored).toHaveLength(1);
   });
+
+  test("rejects an empty attributes array", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [],
+        observedAt: Date.now(),
+      }),
+    ).rejects.toThrow("Add at least one accessibility attribute");
+  });
+
+  test("rejects duplicate attribute keys", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [
+          validAttribute,
+          { key: "mobility.step_free_entrance", value: "no" },
+        ],
+        observedAt: Date.now(),
+      }),
+    ).rejects.toThrow("Duplicate accessibility attribute");
+  });
+
+  test("rejects a summary over the cap", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        summary: "x".repeat(501),
+        observedAt: Date.now(),
+      }),
+    ).rejects.toThrow("Summary too long");
+  });
+
+  test("accepts a summary exactly at the cap", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const summary = "x".repeat(500);
+
+    const created = await asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [validAttribute],
+      summary,
+      observedAt: Date.now(),
+    });
+
+    expect(created?.summary).toBe(summary);
+  });
+
+  test("rejects a per-attribute note over the cap", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [
+          { key: "mobility.elevator", value: "partial", note: "x".repeat(281) },
+        ],
+        observedAt: Date.now(),
+      }),
+    ).rejects.toThrow("Note too long");
+  });
+
+  test("rejects a place that does not exist", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    // Convex validates `v.id("places")` as a well-formed id, not as a row
+    // that still exists, so a deleted row is the only way to reach the
+    // handler's existence check.
+    const ghostPlaceId = await t.run(async (ctx) => {
+      const ghost = await ctx.db.insert("places", {
+        name: "Ghost Place",
+        category: "other",
+        address: "Nowhere",
+        location: { latitude: 6.9, longitude: 79.8 },
+        createdBy: userId,
+        updatedAt: 1,
+      });
+      await ctx.db.delete(ghost);
+      return ghost;
+    });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId: ghostPlaceId,
+        attributes: [validAttribute],
+        observedAt: Date.now(),
+      }),
+    ).rejects.toThrow("Unknown place");
+  });
 });
