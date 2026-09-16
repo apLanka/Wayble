@@ -3,6 +3,13 @@
 Story-to-test mapping for Wayble. Seeded from the PRD §9 starter table and
 extended as stories land.
 
+Only the US-08 row is seeded so far. The PRD's §9 starter table has 14 rows
+(US-01 … US-23) and the other 13 are outstanding — several of which already
+have shipped tests (US-01 `auth.test.ts`, US-02 `users.test.ts`, US-05
+`places.test.ts`, US-06 `schema.test.ts`). Their absence from this table is
+not evidence that they are untested. The PRD itself is not tracked, so the
+seed row cannot be re-verified from a fresh clone.
+
 | Story | Feature       | Convex function | Screen / file                                           | Test                                                                                           | Owner |
 | ----- | ------------- | --------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----- |
 | US-08 | Submit report | `submitReport`  | `app/report/[placeId].tsx`, CTA in `app/place/[id].tsx` | `convex/reports.test.ts` (18 cases), `report-draft.test.ts` (29), `report-errors.test.ts` (15) | M1    |
@@ -33,7 +40,9 @@ $ cd apps/mobile && bunx vitest run
 ```
 
 - 18 of the 107 backend tests are in `convex/reports.test.ts`; the other 89 are
-  the pre-existing suites, unchanged by US-08.
+  the pre-existing suites, untouched by US-08 (`git diff main...HEAD -- '*test*'`
+  returns only the three files this story added or created). They were not
+  re-verified against `main` in this task.
 - The 44 mobile tests split 29 in `report-draft.test.ts` and 15 in
   `report-errors.test.ts`. Both files test pure logic only.
 - `turbo run test` runs both vitest workspaces and reports 151 passing tests.
