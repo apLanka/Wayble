@@ -20,7 +20,7 @@
 - **Every interactive element goes through `TouchTarget`**, which enforces the 44pt minimum and merges `disabled` into `accessibilityState`.
 - **Every state change calls `AccessibilityInfo.announceForAccessibility`.** Errors additionally render in an `accessibilityRole="alert"` banner.
 - **State is never signalled by colour alone** — pair colour with text (WCAG 1.4.1).
-- **`noUncheckedIndexedAccess` is on.** Array indexing yields `T | undefined`; use `arr[0]?.field` or a `for…of` loop. No non-null assertions.
+- **`noUncheckedIndexedAccess` is on in `packages/backend` only.** Verified with `tsc --showConfig`: backend `true`, mobile unset (it extends `expo/tsconfig.base` and sets only `strict`). So in backend code, array indexing yields `T | undefined` and `arr[0]?.field` / `for…of` are required. In mobile code the `?? ""` and `?.length ?? 0` fallbacks are **defensive, not type-checker-mandated** — keep them anyway, since a runtime `undefined` is real regardless of the flag, but do not assume `tsc` will catch an unguarded index in `apps/mobile`. Enabling the flag there is out of scope for this story.
 - **Prettier:** 80 columns, double quotes, semicolons, trailing commas. The pre-commit hook runs `prettier --write`, `bun run lint`, and `bun run check-types` on every commit — all three must pass before a commit succeeds.
 - **Commit dates are pinned to 18 Sep 2026** (Sprint 3 window). Prefix every commit with:
   `GIT_AUTHOR_DATE="2026-09-18T<HH:MM>:00+05:30" GIT_COMMITTER_DATE="2026-09-18T<HH:MM>:00+05:30"`, using a distinct increasing time per commit (suggested: 11:00, 11:45, 12:30, 13:15, 14:00, 15:00, 16:00, 17:00).
@@ -1697,7 +1697,11 @@ export function CategoryStep({ selected, onSelect }: Props) {
         Pick a group. You will confirm the exact details in the next step.
       </AppText>
 
-      <View style={styles.list}>
+      <View
+        accessibilityRole="radiogroup"
+        accessibilityLabel="Accessibility group"
+        style={styles.list}
+      >
         {CATEGORY_DISPLAY_ORDER.map((category) => {
           const count = ATTRIBUTE_KEYS_BY_CATEGORY[category]?.length ?? 0;
           const isSelected = selected === category;
@@ -1705,7 +1709,7 @@ export function CategoryStep({ selected, onSelect }: Props) {
             <TouchTarget
               key={category}
               accessibilityRole="radio"
-              accessibilityState={{ selected: isSelected }}
+              accessibilityState={{ checked: isSelected }}
               accessibilityLabel={category}
               accessibilityHint={`${count} attributes. Double tap to report on ${category.toLowerCase()}.`}
               onPress={() => onSelect(category)}
@@ -1913,14 +1917,18 @@ function AttributeEditor({
         </AppText>
       </View>
 
-      <View style={styles.values}>
+      <View
+        accessibilityRole="radiogroup"
+        accessibilityLabel={`${meta.label} value`}
+        style={styles.values}
+      >
         {REPORT_ATTRIBUTE_VALUES.map((value) => {
           const isSelected = current === value;
           return (
             <TouchTarget
               key={value}
               accessibilityRole="radio"
-              accessibilityState={{ selected: isSelected }}
+              accessibilityState={{ checked: isSelected }}
               accessibilityLabel={`${meta.label}: ${VALUE_LABELS[value] ?? value}`}
               accessibilityHint="Double tap to set this value."
               onPress={() =>
