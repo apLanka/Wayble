@@ -86,13 +86,15 @@ export const submitReport = mutation({
       .withIndex("by_place_and_author", (q) =>
         q.eq("placeId", args.placeId).eq("authorId", userId),
       )
-      // This is the only Convex query filter in the backend, and its
-      // predicate is a FilterBuilder expression rather than a document
-      // callback: `filter` is handed a builder, so the conditions have to
-      // be built from it and returned. `sweep.test.ts:70` is the in-repo
-      // precedent. The window keys on `updatedAt`, the server clock value
-      // written at insert time, so a caller cannot back-date `observedAt`
-      // past the window to escape the check.
+      // `.filter()` is handed a FilterBuilder rather than a document, so
+      // the conditions are built from that builder and returned; see
+      // places.ts:109 for the same form in production, and
+      // sweep.test.ts:70 for a test-side example. This site composes two
+      // conditions with `q.and(...)` rather than a lone `q.eq`.
+      //
+      // The window keys on `updatedAt`, the server clock value written at
+      // insert time, so a caller cannot back-date `observedAt` past it and
+      // escape the check.
       .filter((q) =>
         q.and(
           q.eq(q.field("status"), "active"),
