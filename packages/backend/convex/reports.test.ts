@@ -209,4 +209,109 @@ describe("US-08 report submission", () => {
       }),
     ).rejects.toThrow("Unknown place");
   });
+
+  test("rejects an observedAt beyond the forward clock-skew tolerance", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Date.now() + 10 * 60 * 1000,
+      }),
+    ).rejects.toThrow("Observation time is outside the allowed range");
+  });
+
+  test("accepts an observedAt inside the forward clock-skew tolerance", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const observedAt = Date.now() + 60 * 1000;
+
+    const created = await asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [validAttribute],
+      observedAt,
+    });
+
+    expect(created?.observedAt).toBe(observedAt);
+  });
+
+  test("rejects a second report on the same place within 24 hours", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    await asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [validAttribute],
+      observedAt: Date.now() - 60 * 1000,
+    });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [{ key: "mobility.elevator", value: "yes" }],
+        observedAt: Date.now(),
+      }),
+    ).rejects.toThrow(
+      "Duplicate report: you already reported on this place in the last 24 hours",
+    );
+  });
+
+  test("allows a new report once the previous one is older than 24 hours", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    await t.run(async (ctx) => {
+      await ctx.db.insert("reports", {
+        placeId,
+        authorId: userId,
+        taxonomyVersion: 1,
+        attributes: [validAttribute],
+        evidence: [],
+        observedAt: Date.now() - 25 * 60 * 60 * 1000,
+        status: "active",
+        updatedAt: 1,
+      });
+    });
+
+    const created = await asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [{ key: "mobility.elevator", value: "yes" }],
+      observedAt: Date.now(),
+    });
+
+    expect(created).not.toBeNull();
+  });
+
+  test("ignores a removed prior report when applying the 24 hour guard", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    await t.run(async (ctx) => {
+      await ctx.db.insert("reports", {
+        placeId,
+        authorId: userId,
+        taxonomyVersion: 1,
+        attributes: [validAttribute],
+        evidence: [],
+        observedAt: Date.now() - 60 * 1000,
+        status: "removed",
+        updatedAt: 1,
+      });
+    });
+
+    const created = await asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [{ key: "mobility.elevator", value: "yes" }],
+      observedAt: Date.now(),
+    });
+
+    expect(created).not.toBeNull();
+  });
 });

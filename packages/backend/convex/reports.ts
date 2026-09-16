@@ -7,7 +7,13 @@ import {
   type AccessibilityAttribute,
   type AccessibilityAttributeKey,
 } from "./accessibility";
-import { MAX_NOTE_LENGTH, MAX_SUMMARY_LENGTH } from "./reportLimits";
+import {
+  DUPLICATE_WINDOW_MS,
+  MAX_CLOCK_SKEW_MS,
+  MAX_NOTE_LENGTH,
+  MAX_OBSERVATION_AGE_MS,
+  MAX_SUMMARY_LENGTH,
+} from "./reportLimits";
 
 /**
  * US-08 — submit an accessibility report for a place.
@@ -64,6 +70,34 @@ export const submitReport = mutation({
       }
     }
 
+    const now = Date.now();
+
+    if (
+      args.observedAt > now + MAX_CLOCK_SKEW_MS ||
+      args.observedAt < now - MAX_OBSERVATION_AGE_MS
+    ) {
+      throw new Error("Observation time is outside the allowed range");
+    }
+
+    const cutoff = now - DUPLICATE_WINDOW_MS;
+    const recent = await ctx.db
+      .query("reports")
+      .withIndex("by_place_and_author", (q) =>
+        q.eq("placeId", args.placeId).eq("authorId", userId),
+      )
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("status"), "active"),
+          q.gt(q.field("observedAt"), cutoff),
+        ),
+      )
+      .first();
+    if (recent) {
+      throw new Error(
+        "Duplicate report: you already reported on this place in the last 24 hours",
+      );
+    }
+
     const reportId = await ctx.db.insert("reports", {
       placeId: args.placeId,
       authorId: userId,
@@ -73,7 +107,7 @@ export const submitReport = mutation({
       evidence: [],
       observedAt: args.observedAt,
       status: "active",
-      updatedAt: Date.now(),
+      updatedAt: now,
     });
 
     return await ctx.db.get(reportId);
