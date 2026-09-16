@@ -837,7 +837,7 @@ Then change the insert's `updatedAt: Date.now()` to `updatedAt: now` so the docu
 
 Run: `cd packages/backend && bunx vitest run reports.test.ts`
 
-Expected: PASS, 13 tests.
+Expected: PASS, 18 tests.
 
 - [ ] **Step 5: Run the full backend suite**
 
@@ -1362,7 +1362,7 @@ export function canAdvance(draft: ReportDraft): boolean {
 
 Run: `cd apps/mobile && bunx vitest run components/report/report-draft.test.ts`
 
-Expected: PASS, 27 tests.
+Expected: PASS, 29 tests.
 
 - [ ] **Step 6: Write the failing error-classification tests**
 
@@ -1514,7 +1514,7 @@ export function reportErrorMessage(kind: ReportErrorKind): string {
 
 Run: `cd apps/mobile && bunx vitest run`
 
-Expected: PASS, 40 tests.
+Expected: PASS, 44 tests.
 
 - [ ] **Step 10: Typecheck the backend, since `reportLimits.ts` is now imported across workspaces**
 
@@ -2822,7 +2822,7 @@ extended as stories land.
 
 | Story | Test coverage                    | Known gaps                                                                                            |
 | ----- | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| US-08 | 13 Convex cases, 40 mobile cases | No component test runner; the four wizard steps are covered by the manual checklist in the US-08 plan |
+| US-08 | 18 Convex cases, 44 mobile cases | No component test runner; the four wizard steps are covered by the manual checklist in the US-08 plan |
 ```
 
 - [ ] **Step 2: Run the full automated verification sweep**
@@ -2836,7 +2836,7 @@ bun run lint
 bun run format:check
 ```
 
-Expected: every command passes. Concretely: 13 tests in `reports.test.ts`, the pre-existing backend suites still green, 31 mobile tests, both workspaces typecheck, lint clean, format clean.
+Expected: every command passes. Concretely: 18 tests in `reports.test.ts`, the pre-existing backend suites still green (107 across 12 files), 44 mobile tests (29 draft + 15 error), both workspaces typecheck, lint clean, format clean. `turbo run test` reports 151 across the repo.
 
 - [ ] **Step 3: Work the manual checklist**
 
