@@ -137,6 +137,19 @@ describe("reportErrorMessage", () => {
     expect(reportErrorMessage("observationTime")).toMatch(/clock/i);
   });
 
+  test("the observation-time message tells the user what to change", () => {
+    const message = reportErrorMessage("observationTime");
+    expect(message).toMatch(/clock/i);
+    expect(message).toMatch(/date and time/i);
+  });
+
+  test("the generic message does not blame the connection", () => {
+    // The generic case covers failures whose cause is genuinely unknown, so
+    // telling the user to check their connection sends them down a dead end
+    // when the real cause is something else entirely.
+    expect(reportErrorMessage("generic")).not.toMatch(/connection/i);
+  });
+
   test("gives the duplicate case a next action", () => {
     expect(reportErrorMessage("duplicate")).toMatch(/tomorrow/i);
   });
