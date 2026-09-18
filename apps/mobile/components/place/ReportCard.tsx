@@ -87,15 +87,18 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
         <AppText variant="bodyStrong" style={{ color: colors.text }}>
           {own ? "Your report" : report.authorDisplayName}
         </AppText>
-        {/* "just now" alone gives a screen-reader user nothing to anchor it
-            to, so the node says what the time is about. */}
-        <AppText
-          variant="label"
-          style={{ color: colors.textMuted }}
-          accessibilityLabel={`Reported ${observed}`}
-        >
-          {observed}
-        </AppText>
+        <View style={styles.headerRight}>
+          {/* "just now" alone gives a screen-reader user nothing to anchor it
+              to, so the node says what the time is about. */}
+          <AppText
+            variant="label"
+            style={{ color: colors.textMuted }}
+            accessibilityLabel={`Reported ${observed}`}
+          >
+            {observed}
+          </AppText>
+          <ReportCardMenu reportId={report._id} disabled={own} />
+        </View>
       </View>
 
       {report.summary ? (
@@ -182,12 +185,6 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
         disabledReason={`You can't verify your own report · ${tallySummary(tally)}`}
         onVote={onVote}
       />
-
-      <ReportCardMenu
-        reportId={report._id}
-        disabled={own}
-        disabledReason="You can't flag your own report"
-      />
     </View>
   );
 }
@@ -202,6 +199,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  headerRight: {
+    flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
   },

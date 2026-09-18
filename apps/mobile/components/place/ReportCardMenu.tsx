@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  AccessibilityInfo,
   ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
@@ -15,6 +16,7 @@ import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { api } from "@packages/backend/convex/_generated/api";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
+import { classifyFlagError, flagErrorMessage } from "./flag-errors";
 
 type FlagReason =
   "inaccurate" | "spam" | "abusive" | "privacy" | "duplicate" | "other";
@@ -31,10 +33,9 @@ const REASONS: { reason: FlagReason; label: string }[] = [
 type Props = {
   reportId: string;
   disabled: boolean;
-  disabledReason: string;
 };
 
-export function ReportCardMenu({ reportId, disabled, disabledReason }: Props) {
+export function ReportCardMenu({ reportId, disabled }: Props) {
   const { appTheme } = useAppTheme();
   const { colors } = appTheme;
   const flagReport = useMutation(api.flags.flagReport);
@@ -70,18 +71,22 @@ export function ReportCardMenu({ reportId, disabled, disabledReason }: Props) {
       });
       setIsSubmitting(false);
       setPendingReason(null);
+      // Modal is already gone by the time this fires, so a sighted user has
+      // no visible confirmation left on screen — the announcement is the
+      // only feedback they get that the flag landed.
+      AccessibilityInfo.announceForAccessibility("Report flagged.");
     } catch (caught) {
       setIsSubmitting(false);
-      setError(
-        caught instanceof Error ? caught.message : "Failed to flag report",
-      );
+      const message = flagErrorMessage(classifyFlagError(caught));
+      setError(message);
+      AccessibilityInfo.announceForAccessibility(message);
     }
   };
 
   const pendingLabel = REASONS.find((r) => r.reason === pendingReason)?.label;
 
   return (
-    <View>
+    <>
       <TouchTarget
         accessibilityRole="button"
         accessibilityLabel="Report options"
@@ -90,24 +95,10 @@ export function ReportCardMenu({ reportId, disabled, disabledReason }: Props) {
         onPress={openPicker}
         style={[styles.kebab, { opacity: disabled ? 0.5 : 1 }]}
       >
-        <AppText variant="bodyStrong" style={{ color: colors.text }}>
+        <AppText style={[styles.kebabText, { color: colors.primary }]}>
           ⋮
         </AppText>
       </TouchTarget>
-      {disabled ? (
-        <AppText variant="label" style={{ color: colors.textMuted }}>
-          {disabledReason}
-        </AppText>
-      ) : null}
-      {error ? (
-        <AppText
-          accessibilityRole="alert"
-          variant="label"
-          style={{ color: colors.danger }}
-        >
-          {error}
-        </AppText>
-      ) : null}
 
       <Modal
         visible={pickerVisible}
@@ -128,7 +119,7 @@ export function ReportCardMenu({ reportId, disabled, disabledReason }: Props) {
               { backgroundColor: colors.surface, borderColor: colors.border },
             ]}
           >
-            <AppText variant="title" accessibilityRole="header">
+            <AppText variant="bodyStrong" accessibilityRole="header">
               Report this report as…
             </AppText>
             {REASONS.map(({ reason, label }) => (
@@ -170,9 +161,18 @@ export function ReportCardMenu({ reportId, disabled, disabledReason }: Props) {
               { backgroundColor: colors.surface, borderColor: colors.border },
             ]}
           >
-            <AppText variant="title" accessibilityRole="header">
+            <AppText variant="bodyStrong" accessibilityRole="header">
               Flag this report as {pendingLabel}?
             </AppText>
+            {error ? (
+              <AppText
+                accessibilityRole="alert"
+                variant="label"
+                style={{ color: colors.danger }}
+              >
+                {error}
+              </AppText>
+            ) : null}
             <View style={styles.actions}>
               <TouchTarget
                 accessibilityRole="button"
@@ -214,7 +214,7 @@ export function ReportCardMenu({ reportId, disabled, disabledReason }: Props) {
           </View>
         </KeyboardAvoidingView>
       </Modal>
-    </View>
+    </>
   );
 }
 
@@ -222,6 +222,13 @@ const styles = StyleSheet.create({
   kebab: {
     alignItems: "center",
     justifyContent: "center",
+    width: 44,
+    height: 44,
+  },
+  kebabText: {
+    fontSize: 28,
+    lineHeight: 28,
+    fontWeight: "400",
   },
   overlay: { flex: 1, justifyContent: "center", padding: spacing.lg },
   backdrop: {
