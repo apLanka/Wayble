@@ -47,7 +47,7 @@ export default function PlaceDetailScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Loading…" }} />
-        <Screen>
+        <Screen edges={["left", "right", "bottom"]}>
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={appTheme.colors.primary} />
             <AppText
@@ -66,7 +66,7 @@ export default function PlaceDetailScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Not Found" }} />
-        <Screen>
+        <Screen edges={["left", "right", "bottom"]}>
           <View style={styles.centered}>
             <AppText variant="title" style={{ color: appTheme.colors.text }}>
               Place not found
@@ -102,7 +102,7 @@ export default function PlaceDetailScreen() {
   return (
     <>
       <Stack.Screen options={{ title: place.name, headerBackTitle: "Back" }} />
-      <Screen>
+      <Screen edges={["left", "right", "bottom"]}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -127,6 +127,12 @@ export default function PlaceDetailScreen() {
               >
                 {place.category.replace(/_/g, " ")}
               </AppText>
+            </View>
+            <View style={{ alignItems: "flex-start", marginTop: spacing.xs }}>
+              <ConfidenceBadge
+                tier={place.confidence.tier}
+                isStale={place.confidence.isStale}
+              />
             </View>
           </View>
 
@@ -221,12 +227,8 @@ export default function PlaceDetailScreen() {
                   24.22:1. The badge has one visual state, so there is
                   nothing to make the ring conditional on. */}
               <View style={styles.headerBadges}>
-                <ConfidenceBadge
-                  tier={place.confidence.tier}
-                  isStale={place.confidence.isStale}
-                />
                 <TouchTarget
-                  accessibilityRole="link"
+                  accessibilityRole="button"
                   accessibilityLabel={`${place.reportCount} ${
                     place.reportCount === 1 ? "report" : "reports"
                   } on this place`}
@@ -237,18 +239,29 @@ export default function PlaceDetailScreen() {
                       params: { id: place._id },
                     })
                   }
-                  style={[
-                    styles.countBadge,
-                    { backgroundColor: appTheme.colors.primary + "20" },
-                  ]}
+                  style={styles.countBadgeTouch}
                 >
-                  <AppText
-                    variant="label"
-                    style={{ color: appTheme.colors.primary, fontSize: 12 }}
+                  <View
+                    style={[
+                      styles.countBadge,
+                      {
+                        backgroundColor: appTheme.colors.primary + "15",
+                        borderColor: appTheme.colors.primary + "30",
+                      },
+                    ]}
                   >
-                    {place.reportCount}{" "}
-                    {place.reportCount === 1 ? "report" : "reports"}
-                  </AppText>
+                    <AppText
+                      variant="label"
+                      style={{
+                        color: appTheme.colors.primary,
+                        fontSize: 13,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {place.reportCount}{" "}
+                      {place.reportCount === 1 ? "report" : "reports"}
+                    </AppText>
+                  </View>
                 </TouchTarget>
               </View>
             </View>
@@ -405,10 +418,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: spacing.sm,
   },
+  countBadgeTouch: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
   countBadge: {
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    borderRadius: radii.pill ?? 16,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerBadges: {
     flexDirection: "row",
@@ -424,20 +444,19 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   accessibilityTile: {
-    width: 84,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
+    gap: spacing.xs,
     borderWidth: 1,
     borderRadius: radii.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
   },
   accessibilityEmoji: {
-    fontSize: 24,
+    fontSize: 16,
   },
   accessibilityTileText: {
-    fontSize: 11,
-    textAlign: "center",
+    fontSize: 13,
     textTransform: "capitalize",
   },
   addReportButton: {
