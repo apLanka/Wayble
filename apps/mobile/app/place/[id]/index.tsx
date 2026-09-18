@@ -9,6 +9,7 @@ import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { ConfidenceBadge } from "@/components/place/ConfidenceBadge";
 import { AttributeGroup } from "@/components/place/AttributeGroup";
+import { CATEGORY_LABELS } from "@/components/map/CategoryFilter";
 import {
   ATTRIBUTE_METADATA,
   CATEGORY_DISPLAY_ORDER,
@@ -22,6 +23,13 @@ type Attribute = {
   key: AccessibilityAttributeKey;
   value: string;
   note?: string;
+};
+
+const ACCESSIBILITY_EMOJIS = {
+  wheelchair: "♿️",
+  elevator: "🛗",
+  bathroom: "🚻",
+  multi: "🌟",
 };
 
 export default function PlaceDetailScreen() {
@@ -93,7 +101,7 @@ export default function PlaceDetailScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Place Details" }} />
+      <Stack.Screen options={{ title: place.name, headerBackTitle: "Back" }} />
       <Screen>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
@@ -157,45 +165,41 @@ export default function PlaceDetailScreen() {
                   >
                     Accessibility Profile
                   </AppText>
-                  {/* No `focusColor`, so `TouchTarget` falls back to
-                      `colors.focus`. The badge sits on `primary + "20"`,
-                      which is a translucent tint over `background` and not
-                      solid `primary`, so the `onPrimary` ring this state
-                      would otherwise want measures 1.24:1 light and 1.86:1
-                      dark against that background — under the 3:1 of WCAG
-                      1.4.11. The default `focus` token measures 7.41:1 and
-                      24.22:1. The badge has one visual state, so there is
-                      nothing to make the ring conditional on. */}
-                  <View style={styles.headerBadges}>
-                    <ConfidenceBadge
-                      tier={place.confidence.tier}
-                      isStale={place.confidence.isStale}
-                    />
-                    <TouchTarget
-                      accessibilityRole="link"
-                      accessibilityLabel={`${place.reportCount} ${
-                        place.reportCount === 1 ? "report" : "reports"
-                      } on this place`}
-                      accessibilityHint="Opens the list of reports so you can confirm or dispute them"
-                      onPress={() =>
-                        router.push({
-                          pathname: "/place/[id]/reports",
-                          params: { id: place._id },
-                        })
-                      }
-                      style={[
-                        styles.countBadge,
-                        { backgroundColor: appTheme.colors.primary + "20" },
-                      ]}
-                    >
-                      <AppText
-                        variant="label"
-                        style={{ color: appTheme.colors.primary, fontSize: 12 }}
-                      >
-                        {place.reportCount}{" "}
-                        {place.reportCount === 1 ? "report" : "reports"}
-                      </AppText>
-                    </TouchTarget>
+                  <View style={styles.accessibilityRow}>
+                    {place.accessibilityCategories.map((cat: string) => {
+                      const label =
+                        CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ||
+                        `${cat} accessible`;
+                      return (
+                        <View
+                          key={cat}
+                          style={[
+                            styles.accessibilityTile,
+                            {
+                              backgroundColor: appTheme.colors.surface,
+                              borderColor: appTheme.colors.border,
+                            },
+                          ]}
+                          accessible
+                          accessibilityRole="text"
+                          accessibilityLabel={label}
+                        >
+                          <AppText style={styles.accessibilityEmoji}>
+                            {ACCESSIBILITY_EMOJIS[
+                              cat as keyof typeof ACCESSIBILITY_EMOJIS
+                            ] || "✓"}
+                          </AppText>
+                          <AppText
+                            style={[
+                              styles.accessibilityTileText,
+                              { color: appTheme.colors.text },
+                            ]}
+                          >
+                            {cat}
+                          </AppText>
+                        </View>
+                      );
+                    })}
                   </View>
                 </View>
               )}
@@ -207,7 +211,20 @@ export default function PlaceDetailScreen() {
               >
                 Verified Features
               </AppText>
-              {hasAttributes && (
+              {/* No `focusColor`, so `TouchTarget` falls back to
+                  `colors.focus`. The badge sits on `primary + "20"`,
+                  which is a translucent tint over `background` and not
+                  solid `primary`, so the `onPrimary` ring this state
+                  would otherwise want measures 1.24:1 light and 1.86:1
+                  dark against that background — under the 3:1 of WCAG
+                  1.4.11. The default `focus` token measures 7.41:1 and
+                  24.22:1. The badge has one visual state, so there is
+                  nothing to make the ring conditional on. */}
+              <View style={styles.headerBadges}>
+                <ConfidenceBadge
+                  tier={place.confidence.tier}
+                  isStale={place.confidence.isStale}
+                />
                 <TouchTarget
                   accessibilityRole="link"
                   accessibilityLabel={`${place.reportCount} ${
@@ -233,7 +250,7 @@ export default function PlaceDetailScreen() {
                     {place.reportCount === 1 ? "report" : "reports"}
                   </AppText>
                 </TouchTarget>
-              )}
+              </View>
             </View>
 
             {hasAttributes ? (
@@ -400,6 +417,28 @@ const styles = StyleSheet.create({
   },
   featuresList: {
     gap: spacing.sm,
+  },
+  accessibilityRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  accessibilityTile: {
+    width: 84,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    borderWidth: 1,
+    borderRadius: radii.md,
+    paddingVertical: spacing.sm,
+  },
+  accessibilityEmoji: {
+    fontSize: 24,
+  },
+  accessibilityTileText: {
+    fontSize: 11,
+    textAlign: "center",
+    textTransform: "capitalize",
   },
   addReportButton: {
     borderRadius: radii.md,
