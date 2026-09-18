@@ -59,7 +59,9 @@ export function computeConfidenceScore(
 ): number {
   if (input.totalVotes === 0) return 0;
   const decay = computeAgeDecay(input.reportAgeDays, opts);
-  return (input.agreeCount / input.totalVotes) * input.distinctVerifiers * decay;
+  return (
+    (input.agreeCount / input.totalVotes) * input.distinctVerifiers * decay
+  );
 }
 
 export function scoreToTier(
@@ -92,7 +94,11 @@ export function computeConfidence(
   // unverified regardless of totalVotes, distinct from scoreToTier(0)'s own
   // "low" threshold semantics used when score is genuinely positive.
   const tier = score <= 0 ? "unverified" : scoreToTier(score, opts);
-  return { score, tier, isStale: isStale(input.lastVerifiedAt, input.now, opts) };
+  return {
+    score,
+    tier,
+    isStale: isStale(input.lastVerifiedAt, input.now, opts),
+  };
 }
 
 /** Days for the first month, whole months after that. */
