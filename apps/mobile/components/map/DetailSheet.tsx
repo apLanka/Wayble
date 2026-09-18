@@ -68,26 +68,10 @@ export function DetailSheet({
   const handleViewDetails = useCallback(() => {
     const targetId = placeId ?? location?.id;
     if (!targetId || !location) return;
-    // Same route as list-mode's handlePlacePress (mapbox/index.tsx) —
-    // params-based legacy screen, kept consistent across both entry points.
+    // Use main global place details screen
     router.push({
-      pathname: "/mapbox/place/[id]",
-      params: {
-        id: targetId,
-        name: location.name,
-        category: location.category,
-        address: location.address || "",
-        features: location.features ? JSON.stringify(location.features) : "",
-        accessibilityCategories: (
-          location as AccessibleLocation & { accessibilityCategories?: string[] }
-        ).accessibilityCategories
-          ? JSON.stringify(
-              (location as AccessibleLocation & { accessibilityCategories?: string[] })
-                .accessibilityCategories,
-            )
-          : "",
-        distance: "",
-      },
+      pathname: "/place/[id]",
+      params: { id: targetId },
     });
   }, [placeId, location, router]);
 
@@ -111,7 +95,10 @@ export function DetailSheet({
       <BottomSheetScrollView
         contentContainerStyle={[
           styles.content,
-          { backgroundColor: appTheme.colors.surface, paddingBottom: TAB_BAR_INSET },
+          {
+            backgroundColor: appTheme.colors.surface,
+            paddingBottom: TAB_BAR_INSET,
+          },
         ]}
       >
         {location && (
