@@ -79,11 +79,16 @@ export function DetailSheet({
         address: location.address || "",
         features: location.features ? JSON.stringify(location.features) : "",
         accessibilityCategories: (
-          location as AccessibleLocation & { accessibilityCategories?: string[] }
+          location as AccessibleLocation & {
+            accessibilityCategories?: string[];
+          }
         ).accessibilityCategories
           ? JSON.stringify(
-              (location as AccessibleLocation & { accessibilityCategories?: string[] })
-                .accessibilityCategories,
+              (
+                location as AccessibleLocation & {
+                  accessibilityCategories?: string[];
+                }
+              ).accessibilityCategories,
             )
           : "",
         distance: "",
@@ -111,7 +116,10 @@ export function DetailSheet({
       <BottomSheetScrollView
         contentContainerStyle={[
           styles.content,
-          { backgroundColor: appTheme.colors.surface, paddingBottom: TAB_BAR_INSET },
+          {
+            backgroundColor: appTheme.colors.surface,
+            paddingBottom: TAB_BAR_INSET,
+          },
         ]}
       >
         {location && (
