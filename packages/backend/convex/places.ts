@@ -211,6 +211,7 @@ export const getPlace = query({
       category: place.category,
       address: place.address,
       location: place.location,
+      accessibilityCategories: place.accessibilityCategories,
       attributes,
       reportCount: activeReports.length,
       lastReportedAt,
