@@ -15,6 +15,7 @@ import type * as crons from "../crons.js";
 import type * as flags from "../flags.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
+import type * as moderation from "../moderation.js";
 import type * as notificationCopy from "../notificationCopy.js";
 import type * as notificationPolicy from "../notificationPolicy.js";
 import type * as notifications from "../notifications.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   flags: typeof flags;
   health: typeof health;
   http: typeof http;
+  moderation: typeof moderation;
   notificationCopy: typeof notificationCopy;
   notificationPolicy: typeof notificationPolicy;
   notifications: typeof notifications;
