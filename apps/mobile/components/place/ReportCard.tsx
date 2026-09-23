@@ -161,13 +161,11 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
                     {label}: {valueLabel}
                   </AppText>
                 </View>
+                {/* No `numberOfLines`: a cap hides more of the note the larger
+                    the user's text is, which is when they need it most
+                    (WCAG 1.4.4). Notes are capped at 280 characters. */}
                 {note ? (
-                  <AppText
-                    style={{ color: colors.textMuted }}
-                    numberOfLines={2}
-                  >
-                    {note}
-                  </AppText>
+                  <AppText style={{ color: colors.textMuted }}>{note}</AppText>
                 ) : null}
               </View>
             );

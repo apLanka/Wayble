@@ -105,12 +105,12 @@ No `hitSlop` tricks and no pressable outside `TouchTarget` except the two full-s
 `AppText` keeps `allowFontScaling` on and React Native scales `lineHeight` with the font, so fixed
 line heights alone are not a problem. These are:
 
-| #   | Where                                  | Problem                                                                                                                                                       |
-| --- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| F1  | `ReportCardMenu` Cancel / Flag buttons | `height: 44` (fixed). At 200 % the 16 pt label needs ~48 pt of line height, so the text clips.                                                                |
-| F2  | `ReportCardMenu` ⋮ button              | Fixed `width/height: 44` around a 28 pt glyph with `lineHeight: 28`; at 200 % the glyph overflows the box.                                                    |
-| F3  | `ReportCard` attribute note            | `numberOfLines={2}` truncates the note. Larger text means more lines, so more of the note is lost exactly when the user needs it bigger.                      |
-| F4  | `AttributeRow` label and note          | `numberOfLines={2}` (label) and `{3}` (note) truncate the same way; rendered by `ConfirmStep`, so the user cannot read back their own note before submitting. |
+| #   | Where                                  | Problem                                                                                                                                                                                                                                                                       |
+| --- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F1  | `ReportCardMenu` Cancel / Flag buttons | `height: 44` (fixed). At 200 % the 16 pt label needs ~48 pt of line height, so the text clips.                                                                                                                                                                                |
+| F2  | `ReportCardMenu` ⋮ button              | Fixed `width/height: 44` around a 28 pt glyph with `lineHeight: 28`; at 200 % the glyph overflows the box.                                                                                                                                                                    |
+| F3  | `ReportCard` attribute note            | `numberOfLines={2}` truncates the note. Larger text means more lines, so more of the note is lost exactly when the user needs it bigger.                                                                                                                                      |
+| F4  | `AttributeRow` label and note          | `numberOfLines={2}` (label) and `{3}` (note) truncate the same way; rendered by `ConfirmStep`, so the user cannot read back their own note before submitting. Found while fixing: the emoji sits in a fixed 32 × 32 box with a 20 pt line height, which it outgrows at 200 %. |
 
 ## Single-tap operation — ✅ Pass
 
@@ -121,14 +121,14 @@ the labelled backdrop, an explicit Cancel (confirm sheet), or the Android back b
 
 ## Fixes
 
-| #   | Fix                                                         | Status |
-| --- | ----------------------------------------------------------- | ------ |
-| F1  | Flag sheet buttons: `height` → `minHeight`                  | Open   |
-| F2  | ⋮ button: fixed box → `minWidth`/`minHeight`                | Open   |
-| F3  | `ReportCard` note: drop `numberOfLines`                     | Open   |
-| F4  | `AttributeRow` label and note: drop `numberOfLines`         | Open   |
-| F5  | Add `accessibilityHint` to the 13 elements without one      | Open   |
-| F6  | `AttributesStep` hints describe the result, not the gesture | Open   |
+| #   | Fix                                                                      | Status |
+| --- | ------------------------------------------------------------------------ | ------ |
+| F1  | Flag sheet buttons: `height` → `minHeight`                               | Fixed  |
+| F2  | ⋮ button: fixed box → `minWidth`/`minHeight`                             | Fixed  |
+| F3  | `ReportCard` note: drop `numberOfLines`                                  | Fixed  |
+| F4  | `AttributeRow` label and note: drop `numberOfLines`; icon box → minimums | Fixed  |
+| F5  | Add `accessibilityHint` to the 13 elements without one                   | Open   |
+| F6  | `AttributesStep` hints describe the result, not the gesture              | Open   |
 
 ## On-device checklist (not yet run)
 
