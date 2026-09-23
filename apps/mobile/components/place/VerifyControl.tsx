@@ -55,6 +55,8 @@ export function VerifyControl({
               // The label names the outcome, not the control, so a screen
               // reader user hears what tapping will do.
               accessibilityLabel={action}
+              // Votes are upserted (`verifyReport`), so a vote can be changed.
+              accessibilityHint="Records your vote. You can change it later."
               accessibilityState={{ selected, disabled }}
               disabled={disabled}
               // The two states sit on different backgrounds and need different

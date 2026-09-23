@@ -166,9 +166,11 @@ function AttributeEditor({
               accessibilityLabel={`${meta.label}: ${VALUE_LABELS[value] ?? value}`}
               // No value label here: the label above already ends in it, so
               // naming it again spoke every pill's value twice.
-              accessibilityHint={`Double tap to ${
-                isSelected ? "clear this value" : "set this value"
-              }.`}
+              // The result, not the gesture: VoiceOver and TalkBack announce
+              // how to activate on their own (WCAG audit S4-3, F6).
+              accessibilityHint={
+                isSelected ? "Clears this value." : "Sets this value."
+              }
               onPress={() =>
                 dispatch(
                   isSelected
@@ -219,6 +221,9 @@ function AttributeEditor({
             maxLength={MAX_NOTE_LENGTH}
             multiline
             accessibilityLabel={`Note for ${meta.label}`}
+            accessibilityHint={`${
+              needsNote ? "Required for Partial" : "Optional"
+            }. Up to ${MAX_NOTE_LENGTH} characters.`}
             accessibilityLabelledBy={`note-label-${attributeKey}`}
             style={[
               styles.input,

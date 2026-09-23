@@ -146,6 +146,7 @@ export default function PlaceReportsScreen() {
             <TouchTarget
               accessibilityRole="button"
               accessibilityLabel="Go to sign in"
+              accessibilityHint="Opens the sign-in screen. Signing in lets you confirm or dispute reports."
               onPress={() => router.replace("/sign-in")}
               style={[
                 styles.primaryButton,

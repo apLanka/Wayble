@@ -90,6 +90,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
       <TouchTarget
         accessibilityRole="button"
         accessibilityLabel="Report options"
+        accessibilityHint="Opens a menu to flag this report as inaccurate or inappropriate"
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={openPicker}
@@ -111,6 +112,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
             style={styles.backdrop}
             accessibilityRole="button"
             accessibilityLabel="Close report reason menu"
+            accessibilityHint="Closes the menu without flagging"
             onPress={() => setPickerVisible(false)}
           />
           <View
@@ -127,6 +129,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
                 key={reason}
                 accessibilityRole="button"
                 accessibilityLabel={`Report as ${label}`}
+                accessibilityHint="Asks you to confirm before the report is flagged"
                 onPress={() => pickReason(reason)}
                 style={styles.reasonRow}
               >
@@ -153,6 +156,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
             style={styles.backdrop}
             accessibilityRole="button"
             accessibilityLabel="Cancel flagging this report"
+            accessibilityHint="Closes without flagging the report"
             onPress={cancelConfirm}
           />
           <View
@@ -177,6 +181,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
               <TouchTarget
                 accessibilityRole="button"
                 accessibilityLabel="Cancel"
+                accessibilityHint="Closes without flagging the report"
                 disabled={isSubmitting}
                 onPress={cancelConfirm}
                 style={[
@@ -193,6 +198,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
               <TouchTarget
                 accessibilityRole="button"
                 accessibilityLabel="Confirm flagging this report"
+                accessibilityHint="Flags this report for review"
                 accessibilityState={{ disabled: isSubmitting }}
                 disabled={isSubmitting}
                 focusColor={colors.onPrimary}

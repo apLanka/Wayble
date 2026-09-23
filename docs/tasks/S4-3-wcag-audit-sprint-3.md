@@ -127,8 +127,15 @@ the labelled backdrop, an explicit Cancel (confirm sheet), or the Android back b
 | F2  | ⋮ button: fixed box → `minWidth`/`minHeight`                             | Fixed  |
 | F3  | `ReportCard` note: drop `numberOfLines`                                  | Fixed  |
 | F4  | `AttributeRow` label and note: drop `numberOfLines`; icon box → minimums | Fixed  |
-| F5  | Add `accessibilityHint` to the 13 elements without one                   | Open   |
-| F6  | `AttributesStep` hints describe the result, not the gesture              | Open   |
+| F5  | Add `accessibilityHint` to the 13 elements without one                   | Fixed  |
+| F6  | `AttributesStep` hints describe the result, not the gesture              | Fixed  |
+
+After F5 / F6: **20 / 20** interactive elements in scope carry an `accessibilityHint`, and no hint
+names a gesture. F6 also covered `CategoryStep` ("Double tap to report on …" → "Opens the …
+attributes to report on.").
+
+**Out of scope, logged for follow-up:** `components/profile/NeedsCategorySection.tsx` (US-02,
+Sprint 1) has the same "Double tap to …" hint wording.
 
 ## On-device checklist (not yet run)
 

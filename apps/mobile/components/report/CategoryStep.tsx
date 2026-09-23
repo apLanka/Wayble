@@ -62,7 +62,7 @@ export function CategoryStep({ selected, onSelect }: Props) {
               accessibilityRole="radio"
               accessibilityState={{ checked: isSelected }}
               accessibilityLabel={category}
-              accessibilityHint={`${countLabel}. Double tap to report on ${category.toLowerCase()}.`}
+              accessibilityHint={`${countLabel}. Opens the ${category.toLowerCase()} attributes to report on.`}
               onPress={() => onSelect(category)}
               style={[
                 styles.pill,

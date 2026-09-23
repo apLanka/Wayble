@@ -242,6 +242,7 @@ export default function ReportScreen() {
             <TouchTarget
               accessibilityRole="button"
               accessibilityLabel="Go to sign in"
+              accessibilityHint="Opens the sign-in screen. You can report on this place once you are signed in."
               onPress={() => router.replace("/sign-in")}
               style={[
                 styles.primaryButton,
@@ -361,6 +362,7 @@ export default function ReportScreen() {
             <TouchTarget
               accessibilityRole="button"
               accessibilityLabel="Go back a step"
+              accessibilityHint="Returns to the previous step. Your answers so far are kept."
               disabled={isSubmitting || step === 0}
               onPress={() => goTo(step - 1)}
               style={[
@@ -382,6 +384,7 @@ export default function ReportScreen() {
                   step + 1,
                   "next step",
                 )}`}
+                accessibilityHint="Moves to the next step. You can come back to change your answers."
                 accessibilityState={{ disabled: !canAdvance(safeDraft) }}
                 disabled={!canAdvance(safeDraft)}
                 onPress={() => goTo(step + 1)}
