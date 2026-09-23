@@ -19,8 +19,10 @@ Sprint 3 screens **merged to `main`** at the time of the audit:
 | US-13 | Flag flow in `ReportCardMenu` (reason picker + confirm sheet)                                                           |
 | —     | `AttributeRow` (US-05, Sprint 1) — included because `ConfirmStep` renders it                                            |
 
-**Not in this audit:** US-09 (photo evidence) and US-16 (needs ranking) are unmerged and are audited
-on their own branches; US-23 (live feed) is unmerged and not yet available.
+**Audited on their own branches:** US-09 (photo evidence) and US-16 (needs ranking) were unmerged
+at the time; their results and fixes are in [Unmerged Sprint 3 stories](#unmerged-sprint-3-stories)
+below, and the fixes live on those branches. **Not audited:** US-23 (live feed), unmerged and not
+yet available.
 
 ## Method
 
@@ -137,6 +139,49 @@ attributes to report on.").
 **Out of scope, logged for follow-up:** `components/profile/NeedsCategorySection.tsx` (US-02,
 Sprint 1) has the same "Double tap to …" hint wording.
 
+## Unmerged Sprint 3 stories
+
+Same method, run on each story's own branch. Fixes were committed there, so they reach `main` when
+the story merges. Fixes already made on `main` (F3, F5) are not repeated on those branches, to
+avoid merge conflicts; they arrive with the merge.
+
+### US-09 — Photo evidence (`feature/s3-2-attach-a-photo-as-evidence-US-09`)
+
+Screens: photo picker on the notes step (`PhotoEvidencePicker`), photo recap on `ConfirmStep`,
+thumbnail on `ReportCard`.
+
+| Criterion        | Result | Notes                                                                                                              |
+| ---------------- | ------ | ------------------------------------------------------------------------------------------------------------------ |
+| 1.4.3 Contrast   | ✅     | Error banner `danger` on `danger` + 10 %: 5.26:1 light, 8.84:1 dark. Disabled source buttons dim to 50 % (exempt). |
+| 2.5.8 Targets    | ✅     | All `TouchTarget`; source buttons 52 tall.                                                                         |
+| 4.1.2 Name, role | ✅     | Every photo is `role="image"` labelled by its caption (never unlabelled); caption input labelled and hinted.       |
+| Hints            | ⚠ → ✅ | 4 controls had none: Take photo, Choose from library, Remove photo, Open Settings. **Fixed (U9-1).**               |
+| 1.4.4 Resize     | ✅     | Source buttons wrap (`flexBasis: 140`); fixed sizes are on images only.                                            |
+| Single tap       | ✅     | None gesture-only.                                                                                                 |
+
+- **U9-1** (fixed on the US-09 branch): hints — "Opens the camera to photograph this place", "Opens
+  your photo library to pick a photo", "Takes the photo off this report. You can add another.",
+  "Opens Wayble's settings, where you can allow camera access".
+
+### US-16 — Needs ranking (`feature/s3-5-rank-results-by-access-needs-match-US-16`)
+
+Screens: the match chip on `PlaceListItem`, in the map tab list view and Home's nearby preview.
+
+| Criterion        | Result  | Notes                                                               |
+| ---------------- | ------- | ------------------------------------------------------------------- |
+| 1.4.3 Contrast   | ✅      | Chip `text` on `surfaceElevated`: 16.04:1 light, 12.80:1 dark.      |
+| 2.5.8 Targets    | ✅      | Row is a `TouchTarget`.                                             |
+| 4.1.2 Name, role | ✅      | Row stays one node; the full match reason is appended to its label. |
+| Hints            | ⚠ → ✅  | Row had none. **Fixed (U16-1).**                                    |
+| 1.4.4 Resize     | ❌ → ✅ | Place name and category capped at one line each. **Fixed (U16-2).** |
+| Single tap       | ✅      | None gesture-only.                                                  |
+
+- **U16-1** (fixed on the US-16 branch): row hint "Opens this place's accessibility details" (both
+  lists open `/place/[id]`).
+- **U16-2** (fixed on the US-16 branch): `numberOfLines={1}` removed from name and category, so
+  rows wrap. The cap dates from Sprint 1; it is fixed here because US-16 made this row the ranked
+  result list. Visible side effect: long names now wrap to two lines at default text size too.
+
 ## On-device checklist (not yet run)
 
 Static review cannot prove 1.4.4. These need a simulator or device, after the fixes land:
@@ -148,3 +193,5 @@ Static review cannot prove 1.4.4. These need a simulator or device, after the fi
 - [ ] Place screen: confidence badge and "N reports" badge wrap rather than clip.
 - [ ] VoiceOver and TalkBack: every hint added in F5 is read once, after the label.
 - [ ] Light and dark mode for each of the above.
+- [ ] US-09 branch: photo picker buttons, caption field and "Add a short description" message at 200 %; each thumbnail reads its caption.
+- [ ] US-16 branch: ranked rows with long names and chips at 200 %, in the map list view and on Home.
