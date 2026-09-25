@@ -113,6 +113,15 @@ export default function ProfileScreen() {
           onPress={() => router.push("/profile/accessibility-needs")}
         />
 
+        {!isGuest && currentUser.role === "moderator" ? (
+          <ProfileNavRow
+            title="Moderation queue"
+            subtitle="Review and dismiss flagged reports"
+            accessibilityHint="Opens the list of reports that users have flagged"
+            onPress={() => router.push("/moderator")}
+          />
+        ) : null}
+
         {isGuest ? (
           <GuestProfilePrompt />
         ) : (
