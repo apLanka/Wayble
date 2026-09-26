@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { api } from "../../_generated/api";
-import { actingAs, seedUser, setup } from "./helpers";
+import { actingAs, seedUser, setup } from "../../../test-utils/e2e-helpers";
 
 describe("Flow 2 — Discovery", () => {
   test("nearbyPlaces returns results > marker data and list view show the same places", async () => {

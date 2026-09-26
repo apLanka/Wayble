@@ -1,6 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { api } from "../../_generated/api";
-import { actingAs, createPlace, seedUser, setup, stepFree } from "./helpers";
+import {
+  actingAs,
+  createPlace,
+  seedUser,
+  setup,
+  stepFree,
+} from "../../../test-utils/e2e-helpers";
 
 describe("Flow 3 — Contribution", () => {
   test("submit report > duplicate guard fires within 24h > photo upload completes", async () => {

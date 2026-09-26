@@ -1,10 +1,10 @@
 import geospatialTest from "@convex-dev/geospatial/test";
 import { convexTest } from "convex-test";
-import { api } from "../../_generated/api";
-import type { Id } from "../../_generated/dataModel";
-import schema from "../../schema";
+import { api } from "../convex/_generated/api";
+import type { Id } from "../convex/_generated/dataModel";
+import schema from "../convex/schema";
 
-const modules = import.meta.glob("../../**/*.*s");
+const modules = import.meta.glob("../convex/**/*.*s");
 
 export function setup() {
   const t = convexTest(schema, modules);
