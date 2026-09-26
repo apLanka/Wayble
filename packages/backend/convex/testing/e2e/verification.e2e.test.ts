@@ -1,6 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { api } from "../../_generated/api";
-import { actingAs, createPlace, seedUser, setup, stepFree } from "./helpers";
+import {
+  actingAs,
+  createPlace,
+  seedUser,
+  setup,
+  stepFree,
+} from "../../../test-utils/e2e-helpers";
 
 describe("Flow 4 — Verification", () => {
   test("confirm > tally updates > self-verification rejected > vote is changeable", async () => {
