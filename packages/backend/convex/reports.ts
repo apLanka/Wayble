@@ -158,10 +158,12 @@ function assertNoDuplicateKeys(attributes: AccessibilityAttribute[]) {
  * two numbers on one screen that disagree are worse than either.
  *
  * Tallying is one pass over `verifications` keyed by report id rather than a
- * `by_report` read per report, which would be 155 index reads for a fully
- * seeded place. The scan is over the whole table, so it is bounded by
- * verifications rather than by this place's reports; that is the trade, and it
- * is the right one until the table outgrows a single read.
+ * `by_report` read per report. The scan is over the whole table, so it is
+ * bounded by verifications rather than by this place's reports; that is the
+ * trade, and on a small table the per-report reads would be the cheaper side
+ * of it. It is still the right trade: report volume grows without bound as
+ * users submit, while any single place accumulates only a few reports, so a
+ * place detail view should not get more expensive as the corpus grows.
  *
  * The author's `email` is never returned. A report is public, an address is
  * not, and this is a query any client can call.
@@ -171,6 +173,12 @@ export const listForPlace = query({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
 
+    // A placeId that is well-formed but no longer exists collects nothing and
+    // returns `[]`, which is deliberate and unlike `getPlace` (null) or
+    // `submitReport` (throws). A list has nothing to report, and throwing would
+    // push an error branch onto every caller for a condition the place detail
+    // screen shows as an empty state. The scan below is still paid; that is
+    // the cheaper end of the trade than an existence check on every list view.
     const reports = await ctx.db
       .query("reports")
       .withIndex("by_place", (q) => q.eq("placeId", args.placeId))

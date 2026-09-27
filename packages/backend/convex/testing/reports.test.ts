@@ -549,10 +549,29 @@ describe("reports.listForPlace", () => {
         updatedAt: 1,
       });
     });
-    const { placeId } = await seedReports(t, {
+    // A second voter on the same report, confirming rather than disputing, so
+    // the tally's confirm branch is covered here too. Seeding only disputes
+    // would leave `confirmCount` unproven by this file.
+    const confirmerId = await t.run(async (ctx) => {
+      return await ctx.db.insert("users", {
+        email: "confirmer@example.com",
+        displayName: "Confirmer",
+        role: "member",
+        updatedAt: 1,
+      });
+    });
+    const { placeId, reportIds } = await seedReports(t, {
       count: 2,
       voterId,
       verdict: "dispute",
+    });
+    await t.run(async (ctx) => {
+      await ctx.db.insert("verifications", {
+        reportId: reportIds[0]!,
+        authorId: confirmerId,
+        verdict: "confirm",
+        updatedAt: 1,
+      });
     });
 
     const reports = await t
@@ -560,10 +579,13 @@ describe("reports.listForPlace", () => {
       .query(api.reports.listForPlace, { placeId });
 
     // Newest first, so the unvoted report (observedAt 1001) leads and the
-    // disputed one (observedAt 1000) trails it.
+    // twice-voted one (observedAt 1000) trails it.
+    expect(reports[0]?.confirmCount).toBe(0);
     expect(reports[0]?.disputeCount).toBe(0);
     expect(reports[0]?.myVerdict).toBeNull();
+    expect(reports[1]?.confirmCount).toBe(1);
     expect(reports[1]?.disputeCount).toBe(1);
+    // The confirmer's row must not overwrite the caller's own verdict.
     expect(reports[1]?.myVerdict).toBe("dispute");
   });
 });
