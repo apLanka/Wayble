@@ -1,7 +1,7 @@
 # US-10 — Confirm or dispute an existing report
 
 **Sprint:** 3 (S3-3) · **Assignee:** Pasindu Lanka · **Estimate:** 5h (understated — see [Effort](#effort))
-**Status:** design approved, implementation plan not yet written
+**Status:** implemented; the automated suites are green and the manual checklist is not yet run
 **Related:** US-08 (submit a report) · US-11 confidence (S3-4) · US-23 live feed (S3-7) · US-14 moderator queue (S4-7)
 
 ---
@@ -125,16 +125,23 @@ args: { placeId: v.id("places") }
 
 Returns one entry per report, newest first by `observedAt`:
 
-| Field                          | Notes                                              |
-| ------------------------------ | -------------------------------------------------- |
-| `_id`                          |                                                    |
-| `authorId`                     | used only to decide whether to disable the control |
-| `authorDisplayName`            | `displayName` ?? `name` ?? `"A Wayble user"`       |
-| `summary`                      | optional                                           |
-| `attributes`                   | as stored                                          |
-| `observedAt`, `updatedAt`      |                                                    |
-| `confirmCount`, `disputeCount` | grouped from one pass over `verifications`         |
-| `myVerdict`                    | caller's own vote, or `null`                       |
+| Field                          | Notes                                                        |
+| ------------------------------ | ------------------------------------------------------------ |
+| `_id`                          |                                                              |
+| `authorId`                     | used only to decide whether to disable the control           |
+| `authorDisplayName`            | `displayName` or `name` if non-blank, else `"A Wayble user"` |
+| `summary`                      | optional                                                     |
+| `attributes`                   | as stored                                                    |
+| `observedAt`                   |                                                              |
+| `confirmCount`, `disputeCount` | grouped from one pass over `verifications`                   |
+| `myVerdict`                    | caller's own vote, or `null`                                 |
+
+`updatedAt` was in this table when the design was written and is **not** in the
+shipped query. Nothing reads it, so returning it would be surface with no
+consumer; it is removed here rather than added to the code. `authorDisplayName`
+treats an empty or whitespace-only string as absent — `updateProfile` stores a
+`displayName` with no emptiness check, so a blank byline is reachable and
+would otherwise be rendered to every other user.
 
 Three deliberate choices:
 
@@ -286,11 +293,16 @@ recorded here rather than resolved in the code.
 
 ## Definition of done
 
-- [ ] `verifyReport` and `forReport` on `main` with the backend suite green
-- [ ] `listForPlace` added, and the reports list length matches the `N reports` badge
-- [ ] A signed-in user can confirm and dispute any report that is not their own, and change their mind
-- [ ] Self-verification is impossible from the client, not merely hidden
-- [ ] A second user sees the first user's vote with no manual refresh
-- [ ] Author email is never present in any response
-- [ ] The control passes screen reader, 200% font scale, and 44×44 dp checks
-- [ ] `docs/traceability.md` gains a US-10 row linking story → function → screen → test
+Six of the eight are met by the code and the backend suite. The two that depend
+on a human with a simulator are **not** ticked, because
+`docs/traceability.md` still records the US-10 manual checklist as "Not yet
+run" and nothing here can substitute for it.
+
+- [x] `verifyReport` and `forReport` on `main` with the backend suite green
+- [x] `listForPlace` added, and the reports list length matches the `N reports` badge
+- [x] A signed-in user can confirm and dispute any report that is not their own, and change their mind
+- [x] Self-verification is impossible from the client, not merely hidden
+- [ ] A second user sees the first user's vote with no manual refresh — needs two clients; unticked
+- [x] Author email is never present in any response
+- [ ] The control passes screen reader, 200% font scale, and 44×44 dp checks — needs a device; unticked
+- [x] `docs/traceability.md` gains a US-10 row linking story → function → screen → test

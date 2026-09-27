@@ -157,13 +157,22 @@ function assertNoDuplicateKeys(attributes: AccessibilityAttribute[]) {
  * shows an `N reports` badge computed from active reports (see `getPlace`), and
  * two numbers on one screen that disagree are worse than either.
  *
- * Tallying is one pass over `verifications` keyed by report id rather than a
- * `by_report` read per report. The scan is over the whole table, so it is
- * bounded by verifications rather than by this place's reports; that is the
- * trade, and on a small table the per-report reads would be the cheaper side
- * of it. It is still the right trade: report volume grows without bound as
- * users submit, while any single place accumulates only a few reports, so a
- * place detail view should not get more expensive as the corpus grows.
+ * Tallying is one query rather than one `by_report` query per report. That is
+ * the unit Convex meters: a round trip costs queries and documents read, and N
+ * per-report reads means N queries before the place detail has rendered
+ * anything at all. It also bounds the failure mode. Each per-report read
+ * touches a single place's handful of documents, so no one query ever
+ * accumulates a large share of `verifications`; whereas a whole-table scan
+ * grows with the corpus and will eventually cross Convex's per-query document
+ * read ceiling, at which point the query fails outright rather than merely
+ * getting slower. A hard failure on the place detail screen is the worse
+ * outcome, so the option that cannot hit the ceiling is preferred.
+ *
+ * The honest cost of that choice is the one the scan pays instead: it reads
+ * verifications belonging to other places too, not just this place's. That is
+ * acceptable while the table is small relative to the ceiling above, which is
+ * what makes the ceiling rather than the corpus the thing to watch. When the
+ * table approaches it, the fix is an index or a per-place read, not a comment.
  *
  * The author's `email` is never returned. A report is public, an address is
  * not, and this is a query any client can call.
@@ -206,7 +215,15 @@ export const listForPlace = query({
     const authors = new Map<string, string>();
     for (const id of new Set(reports.map((r) => r.authorId))) {
       const author = await ctx.db.get(id);
-      authors.set(id, author?.displayName ?? author?.name ?? "A Wayble user");
+      // `updateProfile` accepts a `displayName` with no length or emptiness
+      // check, so `""` is a storable value and `??` would stop at it, putting a
+      // blank byline in front of every other user. `?.` covers the absent field
+      // and `||` the blank one, so both fall through; `name` is reasoned about
+      // the same way, since nothing validates it either.
+      authors.set(
+        id,
+        author?.displayName?.trim() || author?.name?.trim() || "A Wayble user",
+      );
     }
 
     return reports
