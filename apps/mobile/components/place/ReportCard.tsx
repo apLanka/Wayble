@@ -1,6 +1,10 @@
 import { StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
+import {
+  ATTRIBUTE_METADATA,
+  VALUE_LABELS,
+} from "@/constants/accessibility-metadata";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { formatRelativeTime } from "@/utils/format-relative-time";
@@ -80,23 +84,34 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
 
       {report.attributes.length > 0 ? (
         <View style={styles.chips}>
-          {report.attributes.map((attribute) => (
+          {report.attributes.map((attribute) => {
+            // The same lookup `AttributeRow` does, so a chip and a
+            // place-detail row can never disagree about what an attribute is
+            // called. `ATTRIBUTE_METADATA` is keyed by the *full* dotted key
+            // ("mobility.elevator"), so this reads `attribute.key` unshortened
+            // — a leaf would miss every entry and fall through to the raw key.
+            const label =
+              ATTRIBUTE_METADATA[attribute.key]?.label ?? attribute.key;
+            const valueLabel = VALUE_LABELS[attribute.value] ?? attribute.value;
             // `submitReport` rejects duplicate keys, so the key is unique
             // within one report and safe as a list key.
-            <View
-              key={attribute.key}
-              style={[styles.chip, { backgroundColor: colors.surfaceElevated }]}
-            >
-              {/* Keys are shortened to their leaf ("mobility.elevator" ->
-                  "elevator"): the four category groupings are already implied
-                  by the surrounding filter, and the full dotted key wraps
-                  badly at 200% font scale. */}
-              <AppText variant="label" style={{ color: colors.text }}>
-                {attribute.key.split(".").slice(1).join(".")}:{" "}
-                {attribute.value.replace(/_/g, " ")}
-              </AppText>
-            </View>
-          ))}
+            return (
+              <View
+                key={attribute.key}
+                style={[
+                  styles.chip,
+                  { backgroundColor: colors.surfaceElevated },
+                ]}
+                accessible
+                accessibilityRole="text"
+                accessibilityLabel={`${label}: ${valueLabel}`}
+              >
+                <AppText variant="label" style={{ color: colors.text }}>
+                  {label}: {valueLabel}
+                </AppText>
+              </View>
+            );
+          })}
         </View>
       ) : null}
 
