@@ -90,6 +90,16 @@ export default function PlaceReportsScreen() {
     // apart: only the newest attempt is allowed to write to the screen, so a
     // failure that arrives after a later vote has already succeeded is dropped
     // rather than pasted over a tally that is now correct.
+    //
+    // It is incremented at the *tap*, not when the mutation settles, so it
+    // orders attempts by intent: the newer tap is the one the user is waiting
+    // on, and an older attempt that settles late has been overtaken no matter
+    // how it settled. Both the success path and the `catch` below are gated on
+    // it, and they have to be gated together — the announcement is as much a
+    // write to the screen as the banner is, and a screen-reader user hears it
+    // in place of the banner. Gating only the `catch` would let a stale success
+    // announce "Report confirmed." on top of a live error saying the vote
+    // failed.
     const attempt = ++latestAttempt.current;
     try {
       // `ReportCard` widens the report id to `string` because it reads the id
@@ -97,6 +107,7 @@ export default function PlaceReportsScreen() {
       // here. The same cast `place/[id]/index.tsx` makes for a place id, and
       // the value is unchanged by it.
       await verifyReport({ reportId: reportId as Id<"reports">, verdict });
+      if (attempt !== latestAttempt.current) return;
       // After the await, not before: the optimistic patch is already visible
       // and the tally text is what changed, so that is what to announce.
       AccessibilityInfo.announceForAccessibility(
