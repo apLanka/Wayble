@@ -12,11 +12,20 @@ import { verificationVerdictValidator } from "./schema";
  * public endpoints, so a client-supplied authorId would let anyone vote as
  * anyone.
  *
- * One row per (report, user), enforced by the `by_report_and_author` index,
- * so changing a vote patches rather than inserting. `reports.submitReport`
- * keeps its author out of its arguments for the same reason and is the model
- * for the guard ordering here: auth, then existence, then the rule that is
- * specific to this feature, then cost.
+ * One row per (report, user), so changing a vote patches rather than
+ * inserting. That guarantee does not come from the `by_report_and_author`
+ * index — a Convex `.index()` is a lookup structure, not a uniqueness
+ * constraint, and would happily hold two rows for the same pair. It comes from
+ * the read-then-branch at the bottom of the handler together with the fact
+ * that a Convex mutation is a serializable transaction, so no other voter's
+ * write can interleave between the lookup and the insert. The index only
+ * narrows the lookup to the pair; the read is load-bearing, and deleting it
+ * would break the guarantee.
+ *
+ * `reports.submitReport` keeps its author out of its arguments for the same
+ * reason the voter is kept out of the arguments here, and is the model for
+ * the guard ordering: auth, then existence, then the rule that is specific to
+ * this feature, then cost.
  */
 export const verifyReport = mutation({
   args: {

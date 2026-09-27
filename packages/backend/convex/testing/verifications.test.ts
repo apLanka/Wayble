@@ -148,6 +148,45 @@ describe("verifications.verifyReport", () => {
     expect(rows[0]?.note).toBe("The lift is out of service.");
   });
 
+  test("two users voting on one report get a row each", async () => {
+    const t = setup();
+    const authorId = await seedUser(t, "author@example.com");
+    const firstId = await seedUser(t, "first@example.com");
+    const secondId = await seedUser(t, "second@example.com");
+    const reportId = await seedReport(t, authorId);
+    const asFirst = t.withIdentity({ subject: firstId });
+    const asSecond = t.withIdentity({ subject: secondId });
+
+    await asFirst.mutation(api.verifications.verifyReport, {
+      reportId,
+      verdict: "confirm",
+    });
+    await asSecond.mutation(api.verifications.verifyReport, {
+      reportId,
+      verdict: "dispute",
+    });
+
+    // This is what tells the two report indexes apart. A handler that looked
+    // the vote up on `by_report` instead of `by_report_and_author` would see the
+    // first voter's row here, take it for its own, and patch it — leaving one
+    // row instead of two — so the count and the two distinct author ids are
+    // both load-bearing.
+    const rows = await t.run(async (ctx) =>
+      ctx.db.query("verifications").collect(),
+    );
+    expect(rows).toHaveLength(2);
+    expect(rows.map((row) => row.authorId).sort()).toEqual(
+      [firstId, secondId].sort(),
+    );
+    // Each vote is stored under the user who cast it, not merely alongside it.
+    expect(rows.find((row) => row.authorId === firstId)?.verdict).toBe(
+      "confirm",
+    );
+    expect(rows.find((row) => row.authorId === secondId)?.verdict).toBe(
+      "dispute",
+    );
+  });
+
   test("rejects a note longer than the cap", async () => {
     const t = setup();
     const authorId = await seedUser(t, "author@example.com");
@@ -155,12 +194,21 @@ describe("verifications.verifyReport", () => {
     const reportId = await seedReport(t, authorId);
     const asOther = t.withIdentity({ subject: otherId });
 
+    // The note is sized from the constant so it stays just over the boundary,
+    // while the expected message is spelled out so a change to the cap fails
+    // here instead of passing silently. Same pairing as reports.test.ts:180.
     await expect(
       asOther.mutation(api.verifications.verifyReport, {
         reportId,
         verdict: "dispute",
         note: "x".repeat(MAX_NOTE_LENGTH + 1),
       }),
-    ).rejects.toThrow("Note too long");
+    ).rejects.toThrow("Note too long: 281 characters, maximum 280");
+
+    // This is the last check before the upsert, and the only guard a partial
+    // write could plausibly slip past, so nothing may reach the table.
+    expect(
+      await t.run(async (ctx) => ctx.db.query("verifications").collect()),
+    ).toHaveLength(0);
   });
 });
