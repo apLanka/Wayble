@@ -9,6 +9,7 @@ import {
 } from "react-native";
 
 import { AddPlaceForm } from "@/components/debug/AddPlaceForm";
+import { LoadAllPlacesButton } from "@/components/debug/LoadAllPlacesButton";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
@@ -71,6 +72,8 @@ export default function DebugScreen() {
           </TouchTarget>
 
           <AddPlaceForm />
+
+          <LoadAllPlacesButton />
         </ScrollView>
       </KeyboardAvoidingView>
     </Screen>
