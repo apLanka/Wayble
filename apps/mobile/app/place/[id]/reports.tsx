@@ -1,8 +1,14 @@
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Stack, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import { AccessibilityInfo, FlatList, StyleSheet, View } from "react-native";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useRef, useState } from "react";
+import {
+  AccessibilityInfo,
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  View,
+} from "react-native";
 
 import { ReportCard } from "@/components/place/ReportCard";
 import {
@@ -15,7 +21,8 @@ import {
 } from "@/components/place/verification-tally";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
-import { spacing } from "@/constants/theme";
+import { TouchTarget } from "@/components/ui/touch-target";
+import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
 
@@ -27,9 +34,12 @@ import type { Id } from "@packages/backend/convex/_generated/dataModel";
  */
 export default function PlaceReportsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { appTheme } = useAppTheme();
   const { colors } = appTheme;
   const [error, setError] = useState<string | null>(null);
+  // Counts vote attempts, and identifies which one a `catch` belongs to.
+  const latestAttempt = useRef(0);
 
   const placeId = id as Id<"places"> | undefined;
   const currentUser = useQuery(api.users.currentUser);
@@ -75,6 +85,12 @@ export default function PlaceReportsScreen() {
     // Cleared up front, so a failure that has since been superseded does not
     // sit next to a control the user has just used successfully.
     setError(null);
+    // `VerifyControl` has no in-flight guard, so two taps can be on the wire at
+    // once and they can settle out of order. This token is what tells the two
+    // apart: only the newest attempt is allowed to write to the screen, so a
+    // failure that arrives after a later vote has already succeeded is dropped
+    // rather than pasted over a tally that is now correct.
+    const attempt = ++latestAttempt.current;
     try {
       // `ReportCard` widens the report id to `string` because it reads the id
       // off its own data, so the branded id the mutation demands is restored
@@ -87,6 +103,7 @@ export default function PlaceReportsScreen() {
         verdict === "confirm" ? "Report confirmed." : "Report disputed.",
       );
     } catch (caught) {
+      if (attempt !== latestAttempt.current) return;
       const message = verificationErrorMessage(
         classifyVerificationError(caught),
       );
@@ -97,13 +114,51 @@ export default function PlaceReportsScreen() {
     }
   };
 
+  // Signed out, there is nothing this screen can do: the server rejects every
+  // vote, so offering the list would only hand the user a control that cannot
+  // work. The same shape the US-08 report form uses for the same reason, and
+  // checked ahead of the reports query so a signed-out visitor is offered the
+  // way out immediately rather than after a load they cannot benefit from.
+  if (currentUser === null) {
+    return (
+      <>
+        <Stack.Screen options={{ title: "Reports" }} />
+        <Screen>
+          <View style={styles.centered}>
+            <AppText variant="title" accessibilityRole="header">
+              Sign in to verify a report
+            </AppText>
+            <AppText style={[styles.centeredText, { color: colors.textMuted }]}>
+              Confirming or disputing a report is tied to your account, so
+              people know who agreed with what.
+            </AppText>
+            <TouchTarget
+              accessibilityRole="button"
+              accessibilityLabel="Go to sign in"
+              onPress={() => router.replace("/sign-in")}
+              style={[
+                styles.primaryButton,
+                { backgroundColor: colors.primary },
+              ]}
+            >
+              <AppText variant="bodyStrong" style={{ color: colors.onPrimary }}>
+                Sign in
+              </AppText>
+            </TouchTarget>
+          </View>
+        </Screen>
+      </>
+    );
+  }
+
   if (reports === undefined) {
     return (
       <>
         <Stack.Screen options={{ title: "Reports" }} />
         <Screen>
           <View style={styles.centered}>
-            <AppText style={{ color: colors.textMuted }}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <AppText style={[styles.centeredText, { color: colors.textMuted }]}>
               Loading reports…
             </AppText>
           </View>
@@ -167,6 +222,18 @@ const styles = StyleSheet.create({
   centered: {
     alignItems: "center",
     flex: 1,
+    gap: spacing.md,
     justifyContent: "center",
+    padding: spacing.xl,
+  },
+  centeredText: {
+    textAlign: "center",
+  },
+  primaryButton: {
+    minHeight: 52,
+    borderRadius: radii.md,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.xl,
   },
 });

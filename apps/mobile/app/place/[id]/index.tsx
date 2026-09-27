@@ -146,13 +146,21 @@ export default function PlaceDetailScreen() {
                   >
                     Accessibility Attributes
                   </AppText>
+                  {/* No `focusColor`, so `TouchTarget` falls back to
+                      `colors.focus`. The badge sits on `primary + "20"`,
+                      which is a translucent tint over `background` and not
+                      solid `primary`, so the `onPrimary` ring this state
+                      would otherwise want measures 1.24:1 light and 1.86:1
+                      dark against that background — under the 3:1 of WCAG
+                      1.4.11. The default `focus` token measures 7.41:1 and
+                      24.22:1. The badge has one visual state, so there is
+                      nothing to make the ring conditional on. */}
                   <TouchTarget
                     accessibilityRole="link"
                     accessibilityLabel={`${place.reportCount} ${
                       place.reportCount === 1 ? "report" : "reports"
                     } on this place`}
                     accessibilityHint="Opens the list of reports so you can confirm or dispute them"
-                    focusColor={appTheme.colors.onPrimary}
                     onPress={() =>
                       router.push({
                         pathname: "/place/[id]/reports",
