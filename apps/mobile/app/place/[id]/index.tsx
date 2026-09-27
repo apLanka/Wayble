@@ -146,7 +146,19 @@ export default function PlaceDetailScreen() {
                   >
                     Accessibility Attributes
                   </AppText>
-                  <View
+                  <TouchTarget
+                    accessibilityRole="link"
+                    accessibilityLabel={`${place.reportCount} ${
+                      place.reportCount === 1 ? "report" : "reports"
+                    } on this place`}
+                    accessibilityHint="Opens the list of reports so you can confirm or dispute them"
+                    focusColor={appTheme.colors.onPrimary}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/place/[id]/reports",
+                        params: { id: place._id },
+                      })
+                    }
                     style={[
                       styles.countBadge,
                       { backgroundColor: appTheme.colors.primary + "20" },
@@ -159,7 +171,7 @@ export default function PlaceDetailScreen() {
                       {place.reportCount}{" "}
                       {place.reportCount === 1 ? "report" : "reports"}
                     </AppText>
-                  </View>
+                  </TouchTarget>
                 </View>
 
                 {CATEGORY_DISPLAY_ORDER.map((categoryName) => {
