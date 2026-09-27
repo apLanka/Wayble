@@ -57,10 +57,12 @@ export function VerifyControl({
               accessibilityLabel={action}
               accessibilityState={{ selected, disabled }}
               disabled={disabled}
-              // No focusColor override: the unselected state sits on
-              // surfaceElevated, and onPrimary is white on a white surface —
-              // an invisible focus ring. TouchTarget's default `focus` token
-              // is the correct choice here, reading against both states.
+              // The two states sit on different backgrounds and need different
+              // ring colours: `focus` reads on surfaceElevated (5.98:1 light,
+              // 6.40:1 dark), `onPrimary` reads on primary (6.61:1 light, 9.98:1
+              // dark). Neither clears the 3:1 of WCAG 1.4.11 on the other's
+              // background, so the ring has to follow the state.
+              focusColor={selected ? colors.onPrimary : undefined}
               onPress={() => onVote(reportId, verdict)}
               style={[
                 styles.button,
