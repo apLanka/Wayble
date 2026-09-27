@@ -1086,10 +1086,11 @@ const MONTH = 30 * DAY;
  * `now` is a parameter rather than an implicit `Date.now()` so the thresholds
  * can be asserted exactly instead of against a moving clock.
  *
- * There is no `formatRelativeTime` in the repo yet — the place screens call
- * `toLocaleDateString` inline — but a verification is only meaningful
- * relative to now ("reported 2 hours ago" is the question a verifier is
- * asking), and the pure shape is directly testable.
+ * There is no relative-time helper in the repo today, but a verification is
+ * only meaningful relative to now ("reported 2 hours ago" is the question a
+ * verifier is asking), and the pure shape is directly testable. A past
+ * timestamp falls back to `toLocaleDateString`, which is where the existing
+ * screens would have reached had they formatted a date at all.
  */
 export function formatRelativeTime(
   timestamp: number,
