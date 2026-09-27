@@ -1,6 +1,6 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { MAX_NOTE_LENGTH } from "./reportLimits";
 import { verificationVerdictValidator } from "./schema";
 
@@ -80,5 +80,39 @@ export const verifyReport = mutation({
       updatedAt: Date.now(),
     });
     return await ctx.db.get(id);
+  },
+});
+
+/**
+ * The tally for one report, plus the caller's own verdict.
+ *
+ * This is the read shape US-11's confidence formula consumes
+ * (`agreeCount / totalVotes`), so it is deliberately explicit about the
+ * three numbers rather than leaving a consumer to derive them.
+ *
+ * `myVerdict` is null when unauthenticated and when the caller has not voted,
+ * which lets one component render both states without a second query.
+ */
+export const forReport = query({
+  args: { reportId: v.id("reports") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    const rows = await ctx.db
+      .query("verifications")
+      .withIndex("by_report", (q) => q.eq("reportId", args.reportId))
+      .collect();
+
+    let confirmCount = 0;
+    let disputeCount = 0;
+    let myVerdict: "confirm" | "dispute" | null = null;
+
+    for (const row of rows) {
+      if (row.verdict === "confirm") confirmCount += 1;
+      else disputeCount += 1;
+      if (row.authorId === userId) myVerdict = row.verdict;
+    }
+
+    return { confirmCount, disputeCount, totalVotes: rows.length, myVerdict };
   },
 });

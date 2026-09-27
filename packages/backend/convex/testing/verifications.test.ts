@@ -212,3 +212,109 @@ describe("verifications.verifyReport", () => {
     ).toHaveLength(0);
   });
 });
+
+describe("verifications.forReport", () => {
+  test("counts every user's verdict and reports the caller's own", async () => {
+    const t = setup();
+    const authorId = await seedUser(t, "author@example.com");
+    const aId = await seedUser(t, "a@example.com");
+    const bId = await seedUser(t, "b@example.com");
+    const cId = await seedUser(t, "c@example.com");
+    const reportId = await seedReport(t, authorId);
+
+    await t
+      .withIdentity({ subject: aId })
+      .mutation(api.verifications.verifyReport, {
+        reportId,
+        verdict: "confirm",
+      });
+    await t
+      .withIdentity({ subject: bId })
+      .mutation(api.verifications.verifyReport, {
+        reportId,
+        verdict: "confirm",
+      });
+    await t
+      .withIdentity({ subject: cId })
+      .mutation(api.verifications.verifyReport, {
+        reportId,
+        verdict: "dispute",
+      });
+
+    const tally = await t
+      .withIdentity({ subject: aId })
+      .query(api.verifications.forReport, { reportId });
+
+    expect(tally.confirmCount).toBe(2);
+    expect(tally.disputeCount).toBe(1);
+    expect(tally.totalVotes).toBe(3);
+    expect(tally.myVerdict).toBe("confirm");
+
+    // cId voted "dispute" while two rows holding "confirm" sit ahead of it, so
+    // a handler that answered with the first or the last matching row rather
+    // than the caller's own would say "confirm" here. This is what makes
+    // myVerdict the caller's verdict and not merely some row's verdict.
+    const disputeTally = await t
+      .withIdentity({ subject: cId })
+      .query(api.verifications.forReport, { reportId });
+    expect(disputeTally.myVerdict).toBe("dispute");
+  });
+
+  test("myVerdict is null for a user who has not voted", async () => {
+    const t = setup();
+    const authorId = await seedUser(t, "author@example.com");
+    const otherId = await seedUser(t, "other@example.com");
+    const reportId = await seedReport(t, authorId);
+
+    await t
+      .withIdentity({ subject: otherId })
+      .mutation(api.verifications.verifyReport, {
+        reportId,
+        verdict: "confirm",
+      });
+
+    const tally = await t
+      .withIdentity({ subject: authorId })
+      .query(api.verifications.forReport, { reportId });
+
+    expect(tally.totalVotes).toBe(1);
+    expect(tally.myVerdict).toBeNull();
+  });
+
+  test("myVerdict is null when unauthenticated", async () => {
+    const t = setup();
+    const authorId = await seedUser(t, "author@example.com");
+    const reportId = await seedReport(t, authorId);
+
+    const tally = await t.query(api.verifications.forReport, { reportId });
+
+    expect(tally.confirmCount).toBe(0);
+    expect(tally.disputeCount).toBe(0);
+    expect(tally.myVerdict).toBeNull();
+  });
+
+  test("a changed vote moves the tally rather than double counting", async () => {
+    const t = setup();
+    const authorId = await seedUser(t, "author@example.com");
+    const otherId = await seedUser(t, "other@example.com");
+    const reportId = await seedReport(t, authorId);
+    const asOther = t.withIdentity({ subject: otherId });
+
+    await asOther.mutation(api.verifications.verifyReport, {
+      reportId,
+      verdict: "confirm",
+    });
+    await asOther.mutation(api.verifications.verifyReport, {
+      reportId,
+      verdict: "dispute",
+    });
+
+    const tally = await asOther.query(api.verifications.forReport, {
+      reportId,
+    });
+
+    expect(tally.confirmCount).toBe(0);
+    expect(tally.disputeCount).toBe(1);
+    expect(tally.totalVotes).toBe(1);
+  });
+});
