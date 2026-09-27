@@ -3,16 +3,17 @@
 Story-to-test mapping for Wayble. Seeded from the PRD §9 starter table and
 extended as stories land.
 
-Only the US-08 row is seeded so far. The PRD's §9 starter table has 14 rows
-(US-01 … US-23) and the other 13 are outstanding — several of which already
+US-08 and US-10 are mapped so far. The PRD's §9 starter table has 14 rows
+(US-01 … US-23) and the other 12 are outstanding — several of which already
 have shipped tests (US-01 `auth.test.ts`, US-02 `users.test.ts`, US-05
 `places.test.ts`, US-06 `schema.test.ts`). Their absence from this table is
 not evidence that they are untested. The PRD itself is not tracked, so the
-seed row cannot be re-verified from a fresh clone.
+seeded rows cannot be re-verified from a fresh clone.
 
-| Story | Feature       | Convex function | Screen / file                                           | Test                                                                                           | Owner |
-| ----- | ------------- | --------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----- |
-| US-08 | Submit report | `submitReport`  | `app/report/[placeId].tsx`, CTA in `app/place/[id].tsx` | `convex/reports.test.ts` (18 cases), `report-draft.test.ts` (29), `report-errors.test.ts` (15) | M1    |
+| Story | Feature                     | Convex function                             | Screen / file                                                                                         | Test                                                                                                                                                                                                                                                                                                    | Owner |
+| ----- | --------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| US-08 | Submit report               | `submitReport`                              | `app/report/[placeId].tsx`, CTA in `app/place/[id].tsx`                                               | `convex/reports.test.ts` (18 cases), `report-draft.test.ts` (29), `report-errors.test.ts` (15)                                                                                                                                                                                                          | M1    |
+| US-10 | Confirm or dispute a report | `verifyReport`, `forReport`, `listForPlace` | `app/place/[id]/reports.tsx`, `components/place/VerifyControl.tsx`, `components/place/ReportCard.tsx` | `convex/verifications.test.ts` (11 cases), `convex/reports.test.ts` (5 `listForPlace`), `verification-tally.test.ts` (14), `verification-errors.test.ts` (6), `format-relative-time.test.ts` (9); `VerifyControl` and `ReportCard` have no automated coverage — `apps/mobile` has no component renderer | M1    |
 
 ## Index notes
 
