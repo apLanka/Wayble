@@ -12,7 +12,7 @@ seeded rows cannot be re-verified from a fresh clone.
 
 | Story | Feature                     | Convex function                             | Screen / file                                                                                         | Test                                                                                                                                                                                                                                                                                                    | Owner |
 | ----- | --------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| US-08 | Submit report               | `submitReport`                              | `app/report/[placeId].tsx`, CTA in `app/place/[id]/index.tsx`                                         | `convex/reports.test.ts` (18 cases), `report-draft.test.ts` (29), `report-errors.test.ts` (15)                                                                                                                                                                                                          | M1    |
+| US-08 | Submit report               | `submitReport`                              | `app/report/[placeId].tsx`, CTA in `app/place/[id]/index.tsx`                                         | `convex/reports.test.ts` (18 cases), `report-draft.test.ts` (30), `report-errors.test.ts` (14)                                                                                                                                                                                                          | M1    |
 | US-10 | Confirm or dispute a report | `verifyReport`, `forReport`, `listForPlace` | `app/place/[id]/reports.tsx`, `components/place/VerifyControl.tsx`, `components/place/ReportCard.tsx` | `convex/verifications.test.ts` (11 cases), `convex/reports.test.ts` (5 `listForPlace`), `verification-tally.test.ts` (14), `verification-errors.test.ts` (6), `format-relative-time.test.ts` (9); `VerifyControl` and `ReportCard` have no automated coverage — `apps/mobile` has no component renderer | M1    |
 
 ## Index notes
@@ -45,10 +45,12 @@ $ cd apps/mobile && bunx vitest run
   the pre-existing suites, untouched by US-08 (`git diff main...HEAD -- '*test*'`
   returns only the three files this story added or created). They were not
   re-verified against `main` in this task.
-- The 44 mobile tests split 29 in `report-draft.test.ts` and 15 in
-  `report-errors.test.ts`. Both files test pure logic only. The 15 is now
-  **14**; US-10 left both files untouched, so the drift is not accounted for
-  here.
+- The 44 mobile tests split 30 in `report-draft.test.ts` and 14 in
+  `report-errors.test.ts`. Both files test pure logic only. **Both** recorded
+  counts have since drifted — 29 → 30 and 15 → 14 — so the total of 44 stayed
+  right while the split did not. US-10 left both files untouched, so the drift
+  is not accounted for here; it was found by recounting the two files for the
+  US-10 row above.
 - `turbo run test` runs both vitest workspaces and reports 151 passing tests.
 - **That is not the repo total.** A third suite, `scripts/lib/env-file.test.ts`
   (17 `bun:test` cases), runs under the root `bun run test`. `scripts/` is not a

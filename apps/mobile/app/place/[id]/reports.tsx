@@ -162,7 +162,16 @@ export default function PlaceReportsScreen() {
     );
   }
 
-  if (reports === undefined) {
+  // `undefined` is "still loading" and `null` is "signed out", so the two have
+  // to stay distinguishable: the gate below waits on the session so no card
+  // renders before it is known, while the branch above answers a known-signed
+  // -out visitor immediately. Without the `currentUser` half of the gate, a card
+  // would render in the window before the session resolved with
+  // `currentUser?._id` undefined, which makes `isOwnReport` false for the
+  // caller's own report and shows them live controls on it — the server still
+  // rejects the vote, so there is no security hole, only a tap that is bound to
+  // fail and produce an error banner.
+  if (currentUser === undefined || reports === undefined) {
     return (
       <>
         <Stack.Screen options={{ title: "Reports" }} />
@@ -182,53 +191,62 @@ export default function PlaceReportsScreen() {
     <>
       <Stack.Screen options={{ title: "Reports" }} />
       <Screen>
-        <FlatList
-          data={reports}
-          keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.list}
-          ListHeaderComponent={
-            <View style={styles.header}>
-              {/* `alert` as well as the announcement in `handleVote`, so the
-                  failure is not only available to whoever happens to be
-                  looking at the top of the list. */}
-              {error ? (
-                <AppText
-                  accessibilityRole="alert"
-                  style={{ color: colors.danger }}
-                >
-                  {error}
-                </AppText>
-              ) : null}
+        {/* The banner is a sibling of the list, not part of its header. A vote
+            can fail on a card below the fold, and inside `ListHeaderComponent`
+            the message scrolls away with the list, so a sighted user gets no
+            failure feedback at all and only the screen-reader announcement
+            covers it. `accessibilityRole="alert"` stays, so the banner is still
+            announced when it appears without moving.
+            The wrapper takes the remaining height and the list flexes inside
+            it, so a long list scrolls instead of pushing the banner off-screen. */}
+        <View style={styles.body}>
+          {error ? (
+            <AppText accessibilityRole="alert" style={{ color: colors.danger }}>
+              {error}
+            </AppText>
+          ) : null}
+          <FlatList
+            style={styles.list}
+            data={reports}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={styles.listContent}
+            ListHeaderComponent={
               <AppText variant="title" accessibilityRole="header">
                 {reports.length} {reports.length === 1 ? "report" : "reports"}
               </AppText>
-            </View>
-          }
-          ListEmptyComponent={
-            <AppText style={{ color: colors.textMuted }}>
-              No reports on this place yet.
-            </AppText>
-          }
-          renderItem={({ item }) => (
-            <ReportCard
-              report={item}
-              currentUserId={currentUser?._id}
-              onVote={(reportId, verdict) => void handleVote(reportId, verdict)}
-            />
-          )}
-        />
+            }
+            ListEmptyComponent={
+              <AppText style={{ color: colors.textMuted }}>
+                No reports on this place yet.
+              </AppText>
+            }
+            renderItem={({ item }) => (
+              <ReportCard
+                report={item}
+                currentUserId={currentUser?._id}
+                onVote={(reportId, verdict) =>
+                  void handleVote(reportId, verdict)
+                }
+              />
+            )}
+          />
+        </View>
       </Screen>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  body: {
+    flex: 1,
+    gap: spacing.sm,
+  },
   list: {
+    flex: 1,
+  },
+  listContent: {
     gap: spacing.md,
     paddingVertical: spacing.lg,
-  },
-  header: {
-    gap: spacing.sm,
   },
   centered: {
     alignItems: "center",
