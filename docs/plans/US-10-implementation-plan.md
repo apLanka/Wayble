@@ -1795,7 +1795,10 @@ Two are intentional trip hazards. Correct them:
      ) : null;
    }
    ```
-2. `router` is destructured from `useRouter()` but never used. Remove `router` from the destructure and drop `useRouter` from the `expo-router` import, leaving `import { Stack, useLocalSearchParams } from "expo-router";`
+2. `router` is destructured from `useRouter()` but never used **in the brief's own snippet**. Remove
+   `router` from the destructure, keeping `useRouter` in the `expo-router` import — because the
+   signed-out branch added in Step 5 needs it for `router.replace("/sign-in")`. If you have already
+   added that branch, keep both the hook and the binding.
 
 - [ ] **Step 4: Link to it from the place detail**
 
