@@ -7,11 +7,13 @@ Comprehensive unit testing has been implemented and verified across all Convex b
 ## 1. Summary of Changes
 
 ### New Test Suites Created (under `convex/testing/`)
+
 - [convex/testing/accessibility.test.ts](file:///c:/Users/aaththika_i/Documents/Wayble/packages/backend/convex/testing/accessibility.test.ts): Tests taxonomy version, format, categories, and uniqueness of all 19 accessibility attribute keys, along with attribute validators.
 - [convex/testing/crons.test.ts](file:///c:/Users/aaththika_i/Documents/Wayble/packages/backend/convex/testing/crons.test.ts): Validates default export and structure of scheduled cron jobs (`verify-nearby-sweep` and `verify-nearby-retry-stalled`).
 - [convex/testing/http.test.ts](file:///c:/Users/aaththika_i/Documents/Wayble/packages/backend/convex/testing/http.test.ts): Validates HTTP router initialization and auth route registration.
 
 ### Enhanced Test Suites (under `convex/testing/`)
+
 - [convex/testing/places.test.ts](file:///c:/Users/aaththika_i/Documents/Wayble/packages/backend/convex/testing/places.test.ts):
   - **`getPlace`**: Tests aggregation of active reports with **last-write-wins** resolution per attribute key, exclusion of superseded/removed reports, `reportCount` accuracy, `lastReportedAt` computation, and non-existent place handling.
   - **`seedMockPlaces`**: Tests deduplication (skipping places already present), seeding new places with default `"other"` category, and authentication guards.
@@ -38,12 +40,15 @@ Comprehensive unit testing has been implemented and verified across all Convex b
 ## 2. Test Execution & Verification
 
 ### Test Results
+
 Command executed:
+
 ```bash
 npx vitest run
 ```
 
 Output:
+
 ```text
  ✓ convex/testing/notificationPolicy.test.ts (9 tests)
  ✓ convex/testing/verificationNeed.test.ts (9 tests)
@@ -66,10 +71,13 @@ Output:
 ```
 
 ### Type Checking Results
+
 Command executed:
+
 ```bash
 npm run check-types
 ```
+
 Result: 0 errors. All TypeScript types and schemas align.
 
 ---
@@ -77,6 +85,7 @@ Result: 0 errors. All TypeScript types and schemas align.
 ## 3. Testing Commands & Usage Guide
 
 ### A. Run All Backend Unit Tests (Single Run)
+
 ```bash
 # Inside packages/backend
 npm test -- --run
@@ -90,7 +99,9 @@ npm.cmd test -- --run
 ```
 
 ### B. Run Tests in Interactive / Watch Mode
+
 Automatically re-runs tests whenever changes are detected:
+
 ```bash
 # Inside packages/backend
 npm test
@@ -100,6 +111,7 @@ npx vitest
 ```
 
 ### C. Run Specific Test Files
+
 ```bash
 # Inside packages/backend
 
@@ -127,16 +139,17 @@ npx vitest run convex/testing/schema.test.ts
 ```
 
 ### D. Run TypeScript Type Checking
+
 Verify all schema types, query/mutation signatures, and validators without emitting files:
+
 ```bash
 # Inside packages/backend
 npm run check-types
 ```
 
 ### E. Run All Workspace Tests from Root
+
 ```bash
 # From workspace root
 npm test
 ```
-
-

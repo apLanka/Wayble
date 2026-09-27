@@ -158,7 +158,8 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_place", ["placeId"])
-    .index("by_author", ["authorId"]),
+    .index("by_author", ["authorId"])
+    .index("by_place_and_author", ["placeId", "authorId"]),
 
   verifications: defineTable({
     reportId: v.id("reports"),
