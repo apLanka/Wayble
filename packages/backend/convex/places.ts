@@ -177,3 +177,52 @@ export const getPlace = query({
     };
   },
 });
+
+/**
+ * Every place, with no location requirement.
+ *
+ * Exists for the debug screen, which has to stay useful when the device has
+ * no location fix — `nearest` needs a point and `search` needs a query
+ * string, so between them a simulator with no simulated location shows an
+ * empty list even when the table is full. This query is the escape hatch that
+ * proves the data is there.
+ *
+ * `reportCount` is grouped in JS from a single pass over the reports table
+ * rather than a `by_place` read per place: the debug view is the only caller,
+ * and 155 index reads would be a poor trade for a screen someone opens by
+ * hand. If this ever grows a real caller, that trade should be revisited.
+ */
+export const listAll = query({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const places = await ctx.db.query("places").collect();
+
+    // Counts only active reports, matching `getPlace`, so a card and the
+    // place detail it opens cannot disagree about the number.
+    const counts = new Map<string, number>();
+    for (const report of await ctx.db.query("reports").collect()) {
+      if (report.status !== "active") continue;
+      counts.set(report.placeId, (counts.get(report.placeId) ?? 0) + 1);
+    }
+
+    return (
+      places
+        .map((place) => ({
+          _id: place._id,
+          name: place.name,
+          category: place.category,
+          address: place.address,
+          location: place.location,
+          accessibilityCategories: place.accessibilityCategories ?? [],
+          reportCount: counts.get(place._id) ?? 0,
+        }))
+        // Alphabetical so the list does not reshuffle between reloads, which
+        // would make it impossible to tell "new row appeared" from "everything
+        // moved".
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .slice(0, args.limit ?? 200)
+    );
+  },
+});
