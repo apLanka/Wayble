@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import {
   applyVerdictChange,
@@ -12,6 +12,10 @@ const none: VerificationTally = {
   disputeCount: 0,
   myVerdict: null,
 };
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("tallySummary", () => {
   test("handles the singular case", () => {
@@ -77,6 +81,55 @@ describe("applyVerdictChange", () => {
     const input = { ...none };
     applyVerdictChange(input, "confirm");
     expect(input).toEqual(none);
+  });
+
+  // A tally whose `myVerdict` disagrees with its counts cannot come from
+  // `forReport` or `listForPlace`: both derive the counts and the verdict from
+  // the same rows, so `myVerdict === "confirm"` always implies `confirmCount >=
+  // 1`. It is a caller bug, not a user-visible condition. The clamp still holds
+  // the line on the rendered number, and the warn is what stops the bug from
+  // being silently absorbed.
+  test("an inconsistent tally never yields a negative count, and says so", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const after = applyVerdictChange(
+      { confirmCount: 0, disputeCount: 0, myVerdict: "confirm" },
+      "dispute",
+    );
+
+    // The raw arithmetic here is 0 - 1 = -1. The clamp is the only thing
+    // standing between that and a count on screen, so pin both halves: the
+    // clamped value, and that the violation was reported rather than hidden.
+    expect(after.confirmCount).toBe(0);
+    expect(after.confirmCount).not.toBe(-1);
+    expect(after.disputeCount).toBe(1);
+    expect(after.myVerdict).toBe("dispute");
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    const [message, detail] = warn.mock.calls[0] as [
+      string,
+      Record<string, unknown>,
+    ];
+    expect(message).toMatch(/inconsistent/i);
+    expect(detail).toMatchObject({
+      next: "dispute",
+      rawConfirmCount: -1,
+      rawDisputeCount: 1,
+    });
+  });
+
+  test("a consistent tally is silent", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    applyVerdictChange(none, "confirm");
+    applyVerdictChange(
+      { confirmCount: 1, disputeCount: 0, myVerdict: "confirm" },
+      "dispute",
+    );
+
+    // The warn is only worth reading if it is rare: a guard that fires on the
+    // ordinary path is noise, and noise is why real warnings get ignored.
+    expect(warn).not.toHaveBeenCalled();
   });
 });
 

@@ -31,6 +31,31 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(NOW - 14 * 86_400_000, NOW)).toBe("2 w ago");
   });
 
+  test("the week band still reads as weeks at its top", () => {
+    // 29 days is the last day inside the month cutoff, and 29 / 7 floors to 4.
+    // Without this the week band is pinned only in its middle, so a change
+    // that widened or narrowed it would pass every other case here.
+    expect(formatRelativeTime(NOW - 29 * 86_400_000, NOW)).toBe("4 w ago");
+  });
+
+  test("an exact boundary belongs to the band it opens, not the one it closes", () => {
+    // Each of these sits precisely on a `<` decision. Flipping any one of them
+    // to `<=` pushes the boundary down into the lower band while leaving every
+    // mid-band case above still passing, so each transition needs its own
+    // exact-boundary case to be pinned.
+    expect(formatRelativeTime(NOW - 60_000, NOW)).toBe("1 min ago");
+    expect(formatRelativeTime(NOW - 3_600_000, NOW)).toBe("1 h ago");
+    expect(formatRelativeTime(NOW - 86_400_000, NOW)).toBe("1 d ago");
+    expect(formatRelativeTime(NOW - 7 * 86_400_000, NOW)).toBe("1 w ago");
+  });
+
+  test("a month exactly has already fallen through to the absolute date", () => {
+    // The last boundary. Matched on the absence of "ago" rather than on a
+    // formatted date, since `toLocaleDateString` is locale-dependent and the
+    // case above it covers the shape.
+    expect(formatRelativeTime(NOW - 30 * 86_400_000, NOW)).not.toMatch(/ago/);
+  });
+
   test("falls back to an absolute date beyond a month", () => {
     const old = at("2026-01-15T09:00:00Z");
     const result = formatRelativeTime(old, NOW);

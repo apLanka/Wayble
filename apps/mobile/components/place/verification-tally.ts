@@ -8,6 +8,18 @@
 
 export type Verdict = "confirm" | "dispute";
 
+/**
+ * The patchable half of a report's tally.
+ *
+ * `totalVotes` is deliberately absent even though `forReport` returns it. That
+ * makes `VerificationTally` a structural subset of the query result, so
+ * `applyVerdictChange(forReportResult, verdict)` typechecks — and silently
+ * drops `totalVotes`, which is the denominator US-11's `agreeCount /
+ * totalVotes` confidence formula consumes. TypeScript will not catch that,
+ * because a wider object is assignable to a narrower type. A caller that needs
+ * the total must read it from the query result it already holds, not from the
+ * tally this module hands back.
+ */
 export type VerificationTally = {
   confirmCount: number;
   disputeCount: number;
@@ -50,9 +62,26 @@ export function applyVerdictChange(
   const disputeDelta =
     (next === "dispute" ? 1 : 0) - (tally.myVerdict === "dispute" ? 1 : 0);
 
+  const rawConfirmCount = tally.confirmCount + confirmDelta;
+  const rawDisputeCount = tally.disputeCount + disputeDelta;
+
+  // The server clamps nothing — `verifyReport` patches or inserts a row, and
+  // `forReport` counts rows — so a raw sum below zero cannot come from real
+  // votes. It means the tally handed to us disagrees with itself: `myVerdict`
+  // says one thing and the counts say another, which is a bug in the caller
+  // rather than anything the user did or can act on. Hence the wording of the
+  // warning. The clamp below still holds, so a buggy caller cannot render a
+  // negative count; the warn is here so it cannot do so *quietly* either.
+  if (rawConfirmCount < 0 || rawDisputeCount < 0) {
+    console.warn(
+      "applyVerdictChange: inconsistent tally — myVerdict disagrees with the counts. Clamping to 0.",
+      { tally, next, rawConfirmCount, rawDisputeCount },
+    );
+  }
+
   return {
-    confirmCount: Math.max(0, tally.confirmCount + confirmDelta),
-    disputeCount: Math.max(0, tally.disputeCount + disputeDelta),
+    confirmCount: Math.max(0, rawConfirmCount),
+    disputeCount: Math.max(0, rawDisputeCount),
     myVerdict: next,
   };
 }

@@ -4,8 +4,13 @@ import { MAX_NOTE_LENGTH } from "@packages/backend/convex/reportLimits";
  * US-10 — turns a failed `verifyReport` into copy a person can act on.
  *
  * The server's messages are asserted by `verifications.test.ts`, so matching
- * on them here keeps the two in sync: reword a server string and this file's
- * tests fail rather than the user seeing raw jargon. Mirrors
+ * on them here keeps the two in sync. Note how far that reach actually goes:
+ * three of the four patterns are matched as prefixes, so rewording the *tail*
+ * of `"Unknown report: …"` would still classify here while failing the backend
+ * test — only `"Cannot verify your own report"` is pinned whole, in both
+ * places. What this file guarantees is therefore narrow but real: a prefix
+ * this module recognises becomes copy a person can act on rather than raw
+ * jargon, and nothing else quietly becomes `generic`. Mirrors
  * `report-errors.ts`.
  */
 
