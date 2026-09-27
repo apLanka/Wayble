@@ -51,7 +51,7 @@ export function resolveConvexUrl(
   const override = env.CONVEX_URL_OVERRIDE?.trim();
   if (override) return { url: override, source: "override" };
 
-  const url = env.CONVEX_URL?.trim();
+  const url = env.CONVEX_URL?.trim() || env.VITE_CONVEX_URL?.trim();
   if (url) return { url, source: "convex-url" };
 
   return undefined;

@@ -86,6 +86,46 @@ export const create = mutation({
   },
 });
 
+// One-shot dev seed for the mobile map — no-op once places already exist.
+export const seedMockPlaces = mutation({
+  args: {
+    places: v.array(
+      v.object({
+        name: v.string(),
+        address: v.string(),
+        location: v.object({ latitude: v.number(), longitude: v.number() }),
+        accessibilityCategory: accessibilityCategoryValidator,
+        features: v.array(v.string()),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthenticated: must be logged in");
+
+    for (const p of args.places) {
+      const existing = await ctx.db
+        .query("places")
+        .filter((q) => q.eq(q.field("name"), p.name))
+        .first();
+
+      if (existing) continue;
+
+      const placeId = await ctx.db.insert("places", {
+        name: p.name,
+        category: "other",
+        address: p.address,
+        location: p.location,
+        accessibilityCategories: [p.accessibilityCategory],
+        features: p.features,
+        createdBy: userId,
+        updatedAt: Date.now(),
+      });
+      await geo.insert(ctx, placeId, p.location, { category: "other" });
+    }
+  },
+});
+
 export const update = mutation({
   args: {
     id: v.id("places"),

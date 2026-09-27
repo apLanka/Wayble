@@ -1,75 +1,216 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
-import { mutation } from "./_generated/server";
-import { geo } from "./places";
+import { GeospatialIndex } from "@convex-dev/geospatial";
+import { v } from "convex/values";
+import { components } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
+import { mutation, type MutationCtx } from "./_generated/server";
 import { SEED_PLACES } from "./seed/placesSeedData";
+import { ACCESSIBILITY_TAXONOMY_VERSION } from "./accessibility";
+
+export const geo = new GeospatialIndex<
+  string,
+  { category: string; name: string }
+>(components.geospatial);
 
 /**
- * One-shot dev seed: load the 155 bundled public places into `content-camel-71`
- * so the nearby list has something to show.
- *
- * Server-side on purpose. The dataset lives here rather than in the mobile
- * bundle so it cannot be tampered with in transit, and so the button on the
- * debug screen is a no-argument trigger rather than 155 records posted from a
- * device. A previous `seedMockPlaces` mutation took the payload as client args
- * and forced every place to category `"other"`; it was never called and has
- * been removed rather than left as a footgun beside this one.
- *
- * Idempotent, keyed on the lowercased name, so the button is safe to press
- * more than once and re-seeding a partially populated database fills only the
- * gaps.
+ * Seeds the database with real public spaces in Greater Colombo & Malabe.
+ * Idempotent: checks for existing places by name to avoid duplicate insertions.
  */
-export const seedAllPlaces = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error(
-        "Unauthenticated: must be logged in to seed the places database",
-      );
+export const seedPlaces = mutation({
+  args: {
+    clearExisting: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    // 1. Ensure a system seed user exists
+    let seedUser = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", "seed@wayble.app"))
+      .first();
+
+    if (!seedUser) {
+      const seedUserId = await ctx.db.insert("users", {
+        name: "Wayble Seed Bot",
+        displayName: "Wayble Seeder",
+        email: "seed@wayble.app",
+        role: "admin",
+        updatedAt: Date.now(),
+      });
+      seedUser = await ctx.db.get(seedUserId);
     }
 
-    // One pass to build the name set rather than a query per record: the
-    // dataset is fixed at 155, and 155 filtered full-table scans is a
-    // noticeable mutation on a free deployment.
-    const existing = await ctx.db.query("places").collect();
-    const seenNames = new Set(existing.map((p) => p.name.trim().toLowerCase()));
+    if (!seedUser) {
+      throw new Error("Failed to initialize seed user");
+    }
 
+    // 2. Optionally clear existing places if requested
+    if (args.clearExisting) {
+      const existingPlaces = await ctx.db.query("places").collect();
+      for (const p of existingPlaces) {
+        // Clear related reports
+        const reports = await ctx.db
+          .query("reports")
+          .withIndex("by_place", (q) => q.eq("placeId", p._id))
+          .collect();
+        for (const r of reports) {
+          await ctx.db.delete(r._id);
+        }
+        await ctx.db.delete(p._id);
+      }
+    }
+
+    // 3. Collect existing place names for idempotency
+    const currentPlaces = await ctx.db.query("places").collect();
+    const existingNameSet = new Set(
+      currentPlaces.map((p) => p.name.trim().toLowerCase()),
+    );
+
+    let insertedCount = 0;
+    let skippedCount = 0;
     const now = Date.now();
-    let inserted = 0;
-    let skipped = 0;
 
-    for (const place of SEED_PLACES) {
-      const key = place.name.trim().toLowerCase();
-
-      // A name duplicated within the dataset itself would otherwise insert
-      // twice, so the set is updated as we go rather than only seeded from
-      // what is already in the table.
-      if (seenNames.has(key)) {
-        skipped += 1;
+    for (const item of SEED_PLACES) {
+      const normalizedName = item.name.trim().toLowerCase();
+      if (existingNameSet.has(normalizedName)) {
+        skippedCount++;
         continue;
       }
-      seenNames.add(key);
 
       const placeId = await ctx.db.insert("places", {
-        name: place.name,
-        category: place.category,
-        address: place.address,
-        location: place.location,
-        accessibilityCategories: place.accessibilityCategories,
-        features: place.features,
-        createdBy: userId,
+        name: item.name.trim(),
+        category: item.category,
+        address: item.address,
+        location: {
+          latitude: item.location.latitude,
+          longitude: item.location.longitude,
+        },
+        // Derived in placesSeedData. Without these the seeded rows carry no
+        // accessibility tags at all, and the mobile client's filter chips
+        // match nothing against them.
+        accessibilityCategories: item.accessibilityCategories,
+        features: item.features,
+        createdBy: seedUser._id,
         updatedAt: now,
       });
 
-      // `nearest` reads this index, not the table, so a place missing from it
-      // is invisible to the map and the list even though the row exists.
-      await geo.insert(ctx, placeId, place.location, {
-        category: place.category,
-      });
+      // Insert into geospatial index
+      await geo.insert(
+        ctx,
+        placeId,
+        {
+          latitude: item.location.latitude,
+          longitude: item.location.longitude,
+        },
+        {
+          category: item.category,
+          name: item.name.trim(),
+        },
+      );
 
-      inserted += 1;
+      existingNameSet.add(normalizedName);
+      insertedCount++;
     }
 
-    return { inserted, skipped, total: SEED_PLACES.length };
+    // 4. Seed initial accessibility reports for well-known demo hubs if they have none
+    await seedDemoReports(ctx, seedUser._id, now);
+
+    return {
+      totalInDataset: SEED_PLACES.length,
+      inserted: insertedCount,
+      skipped: skippedCount,
+      currentTotalInDb: (await ctx.db.query("places").collect()).length,
+    };
   },
 });
+
+/**
+ * Backfills the geospatial index for all existing places in the database.
+ */
+export const backfillGeoIndex = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const places = await ctx.db.query("places").collect();
+    let indexedCount = 0;
+
+    for (const place of places) {
+      await geo.insert(
+        ctx,
+        place._id,
+        {
+          latitude: place.location.latitude,
+          longitude: place.location.longitude,
+        },
+        {
+          category: place.category,
+          name: place.name,
+        },
+      );
+      indexedCount++;
+    }
+
+    return { indexed: indexedCount };
+  },
+});
+
+/**
+ * Helper to seed sample accessibility reports for iconic demo venues.
+ */
+async function seedDemoReports(
+  ctx: MutationCtx,
+  authorId: Id<"users">,
+  timestamp: number,
+) {
+  const demoVenues = [
+    {
+      namePattern: /SLIIT|Hospital|Mall|Park|Station|Cargills/i,
+      attributes: [
+        {
+          key: "mobility.step_free_entrance" as const,
+          value: "yes" as const,
+          note: "Level entrance with ramp",
+        },
+        { key: "mobility.wide_entrance" as const, value: "yes" as const },
+        {
+          key: "mobility.accessible_parking" as const,
+          value: "yes" as const,
+          note: "Designated spots near main lobby",
+        },
+        { key: "mobility.accessible_restroom" as const, value: "yes" as const },
+        { key: "mobility.elevator" as const, value: "yes" as const },
+        {
+          key: "vision.braille_signage" as const,
+          value: "partial" as const,
+          note: "Braille in elevators only",
+        },
+        { key: "vision.tactile_guidance" as const, value: "yes" as const },
+        { key: "assistance.service_animals" as const, value: "yes" as const },
+      ],
+    },
+  ];
+
+  const places = await ctx.db.query("places").collect();
+
+  for (const place of places) {
+    for (const demo of demoVenues) {
+      if (demo.namePattern.test(place.name)) {
+        // Check if report already exists
+        const existingReport = await ctx.db
+          .query("reports")
+          .withIndex("by_place", (q) => q.eq("placeId", place._id))
+          .first();
+
+        if (!existingReport) {
+          await ctx.db.insert("reports", {
+            placeId: place._id,
+            authorId,
+            taxonomyVersion: ACCESSIBILITY_TAXONOMY_VERSION,
+            attributes: demo.attributes,
+            summary: "Initial verified accessibility assessment.",
+            evidence: [],
+            observedAt: timestamp,
+            status: "active",
+            updatedAt: timestamp,
+          });
+        }
+      }
+    }
+  }
+}

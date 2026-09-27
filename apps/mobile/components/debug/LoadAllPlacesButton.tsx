@@ -23,7 +23,7 @@ import { useAppTheme } from "@/hooks/use-app-theme";
 export function LoadAllPlacesButton() {
   const { appTheme } = useAppTheme();
   const { colors } = appTheme;
-  const seedAllPlaces = useMutation(api.seed.seedAllPlaces);
+  const seedPlaces = useMutation(api.seed.seedPlaces);
 
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,11 +33,14 @@ export function LoadAllPlacesButton() {
     setError(null);
     setIsSubmitting(true);
     try {
-      const { inserted, skipped, total } = await seedAllPlaces({});
+      const { inserted, skipped, totalInDataset, currentTotalInDb } =
+        await seedPlaces({ clearExisting: false });
       setResult(
         inserted === 0
-          ? `Nothing to do — all ${total} already loaded (${skipped} skipped).`
-          : `Loaded ${inserted} of ${total} places${skipped > 0 ? `, ${skipped} already existed` : ""}.`,
+          ? `Nothing to do — all ${totalInDataset} already loaded (${skipped} skipped).`
+          : `Loaded ${inserted} of ${totalInDataset} places${
+              skipped > 0 ? `, ${skipped} already existed` : ""
+            }. Database now holds ${currentTotalInDb}.`,
       );
     } catch (caught) {
       setResult(null);

@@ -1,53 +1,48 @@
-import type { Infer } from "convex/values";
-import { placeCategoryValidator } from "../schema";
+// Import the predefined public-place data from the JSON file.
 import placesJson from "./places.json";
 
-/** The literal union `places.category` accepts, derived from the schema so
- *  the two cannot drift. */
-export type PlaceCategory = Infer<typeof placeCategoryValidator>;
-
 /**
- * The raw dataset, as ported from `feature/seed-initial-places-data`.
- *
- * Each record is `{ name, category, address, location }` and nothing else —
- * notably no accessibility information, which is the whole reason the
- * derivation below exists rather than the seed inserting these fields
- * verbatim.
- *
- * `category` is cast rather than validated: the JSON has no type information,
- * so TypeScript cannot check it. The value is checked for real by the insert
- * in `seedAllPlaces`, which rejects any category outside the validator, and
- * the "preserves each place's real category" test inserts all 155 records —
- * so a bad value in the dataset fails the suite rather than reaching the
- * database.
+ * Defines the required structure of each place in the seed dataset.
  */
-export type RawSeedPlace = {
+export type SeedPlace = {
   name: string;
-  category: PlaceCategory;
+  // Category used to classify and filter the place.
+  category:
+    | "education"
+    | "food_and_drink"
+    | "government"
+    | "healthcare"
+    | "lodging"
+    | "outdoor"
+    | "retail"
+    | "transport"
+    | "workplace"
+    | "other";
   address: string;
-  location: { latitude: number; longitude: number };
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  // Derived below, not present in the JSON.
+  accessibilityCategories: AccessibilityCategory[];
+  features: string[];
 };
 
 /** The four values `accessibilityCategoryValidator` accepts. */
 export type AccessibilityCategory =
   "wheelchair" | "elevator" | "bathroom" | "multi";
 
-export type SeedPlace = RawSeedPlace & {
-  accessibilityCategories: AccessibilityCategory[];
-  features: string[];
-};
-
 /**
  * Which accessibility categories plausibly apply to each business type.
  *
- * This is a guess, and deliberately a labelled one: the source data records
- * what a place *is*, never how accessible it is. Seeding the dataset without
- * it would leave every `accessibilityCategories` empty, and the mobile client
- * filters on that field (`use-nearby-places.ts:104`) — so every filter chip
- * except "all" would return nothing and the seeded data would look broken.
+ * A guess, and deliberately a labelled one. The dataset records what a place
+ * *is* and carries no accessibility information whatsoever, but the mobile
+ * client filters the nearby list on `accessibilityCategories`
+ * (`use-nearby-places.ts`) — so seeding it verbatim leaves every filter chip
+ * except "all" returning nothing, and the seeded data looks broken.
  *
- * Anything produced from this table is fabricated. It exists so the filters,
- * the map marker colours and the report flow have rows to exercise, and must
+ * Anything this table produces is fabricated. It exists so the filters, the
+ * map marker colours and the report flow have rows to exercise, and must
  * never be presented as a real accessibility observation.
  */
 const BY_CATEGORY: Record<string, AccessibilityCategory[]> = {
@@ -63,12 +58,12 @@ const BY_CATEGORY: Record<string, AccessibilityCategory[]> = {
 };
 
 /**
- * Fills the gaps the per-category table cannot cover on its own.
+ * Fills the gaps the per-category table cannot cover.
  *
- * The table is a floor, not a ceiling: a hospital with no elevator category
- * would leave the "elevator" chip empty, so each record also takes the next
- * value in this rotation. That keeps all four chips populated without
- * pretending the rotation means anything about the individual place.
+ * The table is a floor, not a ceiling: with it alone, "multi" would have only
+ * the five lodging places and the remaining 150 records would leave that chip
+ * near-empty. Each record therefore also takes the next value in this
+ * rotation, which spreads 155 places roughly 39 per chip.
  */
 const ROTATION: AccessibilityCategory[] = [
   "wheelchair",
@@ -78,32 +73,24 @@ const ROTATION: AccessibilityCategory[] = [
 ];
 
 /**
- * Builds the seed set, guaranteeing every record ends up with at least one
- * accessibility category.
+ * Convert the imported JSON data into a typed array of seed places, deriving
+ * an accessibility tag for every record.
  *
- * The rotation is what keeps all four chips populated: the table alone leaves
- * `outdoor` with nothing and skews the rest, whereas adding the rotated value
- * to every record spreads 155 places roughly 39 per chip. That is enough for
- * the filters to behave like the real thing.
+ * The cast is unchecked because the JSON carries no type information; the
+ * `category` values themselves are validated for real by the insert in
+ * `seedPlaces`, which rejects anything outside `placeCategoryValidator`.
  */
-export const SEED_PLACES: SeedPlace[] = (placesJson as RawSeedPlace[]).map(
-  (place, index) => {
-    const fromCategory = BY_CATEGORY[place.category] ?? [];
-    const rotated = ROTATION[index % ROTATION.length]!;
+export const SEED_PLACES: SeedPlace[] = (
+  placesJson as Omit<SeedPlace, "accessibilityCategories" | "features">[]
+).map((place, index) => {
+  const merged = new Set<AccessibilityCategory>(
+    BY_CATEGORY[place.category] ?? [],
+  );
+  merged.add(ROTATION[index % ROTATION.length]!);
 
-    const merged = new Set<AccessibilityCategory>(fromCategory);
-    merged.add(rotated);
-
-    return {
-      name: place.name.trim(),
-      category: place.category,
-      address: place.address,
-      location: {
-        latitude: place.location.latitude,
-        longitude: place.location.longitude,
-      },
-      accessibilityCategories: Array.from(merged),
-      features: [],
-    };
-  },
-);
+  return {
+    ...place,
+    accessibilityCategories: Array.from(merged),
+    features: [],
+  };
+});

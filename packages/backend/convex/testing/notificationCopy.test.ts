@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { ACCESSIBILITY_ATTRIBUTE_KEYS } from "./accessibility";
+import { ACCESSIBILITY_ATTRIBUTE_KEYS } from "../accessibility";
 import {
   buildVerifyNearbyPush,
   PUSH_ATTRIBUTE_LABELS,
-} from "./notificationCopy";
+} from "../notificationCopy";
 
 describe("PUSH_ATTRIBUTE_LABELS", () => {
   test("covers every attribute key in the taxonomy", () => {

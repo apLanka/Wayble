@@ -3,7 +3,7 @@ import {
   DEFAULT_POLICY_OPTS,
   shouldNotify,
   type PolicyInput,
-} from "./notificationPolicy";
+} from "../notificationPolicy";
 
 const DAY = 24 * 60 * 60 * 1000;
 /** 2023-11-14T22:13:20Z — 22:13 UTC, so 14:13 local at UTC-8. */

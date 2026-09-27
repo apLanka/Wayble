@@ -1,8 +1,8 @@
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import schema from "./schema";
+import schema from "../schema";
 
-const modules = import.meta.glob("./**/*.*s");
+const modules = import.meta.glob("../**/*.*s");
 
 const validAttribute = {
   key: "mobility.step_free_entrance" as const,

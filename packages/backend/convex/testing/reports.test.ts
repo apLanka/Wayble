@@ -1,9 +1,9 @@
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import { api } from "./_generated/api";
-import schema from "./schema";
+import { api } from "../_generated/api";
+import schema from "../schema";
 
-const modules = import.meta.glob("./**/*.*s");
+const modules = import.meta.glob("../**/*.*s");
 
 async function seedAuthor(t: ReturnType<typeof convexTest>) {
   return await t.run(async (ctx) => {
