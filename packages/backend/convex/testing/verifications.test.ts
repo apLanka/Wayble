@@ -250,10 +250,12 @@ describe("verifications.forReport", () => {
     expect(tally.totalVotes).toBe(3);
     expect(tally.myVerdict).toBe("confirm");
 
-    // cId voted "dispute" while two rows holding "confirm" sit ahead of it, so
-    // a handler that answered with the first or the last matching row rather
-    // than the caller's own would say "confirm" here. This is what makes
-    // myVerdict the caller's verdict and not merely some row's verdict.
+    // The two myVerdict assertions in this test are what make it the caller's
+    // verdict rather than merely some row's. aId voted first, so a handler
+    // that answered with the last matching row would say "dispute" for aId and
+    // fail the assertion above; cId voted last, so a handler that answered
+    // with the first would say "confirm" and fail here. Neither assertion
+    // catches both mutations on its own.
     const disputeTally = await t
       .withIdentity({ subject: cId })
       .query(api.verifications.forReport, { reportId });
@@ -284,11 +286,26 @@ describe("verifications.forReport", () => {
   test("myVerdict is null when unauthenticated", async () => {
     const t = setup();
     const authorId = await seedUser(t, "author@example.com");
+    const otherId = await seedUser(t, "other@example.com");
     const reportId = await seedReport(t, authorId);
+
+    // Another user's vote has to be on the table first. With no rows at all,
+    // `myVerdict` is null for *any* implementation — including one that never
+    // consults the session — so the assertion below would pass even with the
+    // authorId filter deleted. With a real row whose authorId belongs to
+    // nobody in this test, the null has to come from the filter.
+    await t
+      .withIdentity({ subject: otherId })
+      .mutation(api.verifications.verifyReport, {
+        reportId,
+        verdict: "confirm",
+      });
 
     const tally = await t.query(api.verifications.forReport, { reportId });
 
-    expect(tally.confirmCount).toBe(0);
+    // The tally is the report's, not the caller's: the anonymous caller still
+    // sees the vote that was cast. Only myVerdict is withheld.
+    expect(tally.confirmCount).toBe(1);
     expect(tally.disputeCount).toBe(0);
     expect(tally.myVerdict).toBeNull();
   });
