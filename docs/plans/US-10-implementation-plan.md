@@ -1701,8 +1701,11 @@ export default function PlaceReportsScreen() {
   });
 
   const handleVote = async (reportId: string, verdict: Verdict) => {
+    // Clear any prior failure so a later success does not leave a stale
+    // banner: the user has moved on and the old error no longer applies.
+    setError(null);
     try {
-      await verifyReport({ reportId, verdict });
+      await verifyReport({ reportId: reportId as Id<"reports">, verdict });
       // After the await, not before: the optimistic patch is already visible
       // and the tally text is what changed, so that is what to announce.
       AccessibilityInfo.announceForAccessibility(
@@ -1782,7 +1785,7 @@ const styles = StyleSheet.create({
 
 Two are intentional trip hazards. Correct them:
 
-1. `setError` is called but never declared. Add `const [error, setError] = useState<string | null>(null);` after the `useAppTheme()` call, add `useState` to the `react-native` import, and render the banner in the `FlatList`'s `ListHeaderComponent` above the count:
+1. `setError` is called but never declared. Add `const [error, setError] = useState<string | null>(null);` after the `useAppTheme()` call, import `useState` from `"react"` — **not** from `react-native`, which does not re-export it in React Native 0.86 — and render the banner in the `FlatList`'s `ListHeaderComponent` above the count:
    ```tsx
    {
      error ? (
