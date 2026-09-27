@@ -707,8 +707,11 @@ Append to `packages/backend/convex/reports.ts`. It already imports `getAuthUserI
  * numbers on one screen must agree.
  *
  * Tallying is a single pass over `verifications` keyed by report id rather
- * than a `by_report` read per report, which would be 155 index reads for a
- * fully seeded place.
+ * than a `by_report` read per report. The pass is bounded by the size of
+ * the verifications table rather than by this place's report count, and
+ * that is the right trade: report volume grows without bound as users
+ * submit, while one place accumulates only a few reports, so a place detail
+ * view should not cost a scan of the whole table.
  */
 export const listForPlace = query({
   args: { placeId: v.id("places") },
@@ -821,9 +824,11 @@ one. This is that read path.
 
 Returns active reports only, because the place detail screen shows an
 N reports badge computed the same way and the two numbers must agree.
-Tallies come from one pass over verifications rather than a by_place
-read per report, which would be 155 index reads on a seeded place.
-Author email is never included; a report is public, an address is not."
+  Tallies come from one pass over verifications rather than a by_report read
+  per report. The pass scales with the verifications table rather than with
+  this place's reports, which is the right direction as submissions
+  accumulate.
+  Author email is never included; a report is public, an address is not."
 ```
 
 ---
