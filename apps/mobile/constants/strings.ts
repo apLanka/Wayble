@@ -315,6 +315,20 @@ export const STRINGS = {
 
     needsLoadFailed:
       "Couldn't load your accessibility needs. Check your connection.",
+
+    /**
+     * Developer-facing failures from `useLocationPermission`.
+     *
+     * The hook builds these into an `errorMsg` that no screen currently reads,
+     * so they are unreachable in the shipped app. They are here rather than
+     * deleted because deleting the wiring is a behaviour change and not a
+     * refactor — see the plan's Finding 4.
+     */
+    location: {
+      checkStatusFailed: "Failed to check location status.",
+      getCurrentFailed: "Failed to get current location.",
+      requestFailed: "Failed to request permission.",
+    },
   },
 
   /**

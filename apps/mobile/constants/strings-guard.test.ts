@@ -7,6 +7,8 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { STRINGS } from "./strings";
+
 /**
  * The guard behind the EDI localisation claim.
  *
@@ -188,11 +190,27 @@ describe("strings guard", () => {
     expect(violations.length).toBeLessThanOrEqual(INLINE_COPY_CEILING);
   });
 
+  it("keeps the OS permission prompt in app.config.ts in step with strings.ts", () => {
+    // The one place where duplication is not laziness but a hard constraint.
+    // Expo transpiles app.config.ts to app.config.js and requires it with
+    // Node's CommonJS resolver, which cannot follow a relative import into a
+    // .ts sibling. Importing STRINGS there makes `expo start` fail with
+    // "Cannot find module './constants/strings'" — a build-time crash, not a
+    // failing test, which is exactly why this assertion has to exist.
+    //
+    // Same bargain packages/backend/convex/notificationCopy.ts makes with its
+    // own coverage test. This prompt is the first thing a user sees on a real
+    // device, so the two copies must not drift.
+    const config = readFileSync(join(MOBILE_ROOT, "app.config.ts"), "utf8");
+    const match = config.match(/locationWhenInUsePermission:\s*"([^"]+)"/);
+    expect(match).not.toBeNull();
+    expect(match?.[1]).toBe(STRINGS.permissions.os.locationWhenInUse);
+  });
+
   it("keeps strings.ts free of runtime imports", () => {
-    // `app.config.ts` reads the location permission prompt from strings.ts,
-    // and Expo evaluates that config in Node — no `@/` alias, no React Native
-    // modules. A value import here breaks `expo start` at build time, which
-    // no other check in this repo would catch.
+    // The prompt above is the reason anyone would want to import from
+    // strings.ts, and this is what stops the attempt from breaking the build
+    // where no other check would notice.
     const source = readFileSync(
       join(MOBILE_ROOT, "constants/strings.ts"),
       "utf8",
