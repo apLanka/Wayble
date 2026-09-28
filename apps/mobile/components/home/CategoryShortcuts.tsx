@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/app-symbol";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { spacing } from "@/constants/theme";
 
 const HOME_CATEGORIES = [
@@ -59,7 +60,7 @@ export function CategoryShortcuts({
             onPress={() => onSelectCategory(category)}
             accessibilityRole="button"
             accessibilityLabel={CATEGORY_LABELS[category]}
-            accessibilityHint="Opens map filtered by this category"
+            accessibilityHint={STRINGS.home.a11y.categoryShortcutHint}
           >
             <View style={styles.pillContent}>
               <AppSymbol

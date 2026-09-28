@@ -300,8 +300,60 @@ export const STRINGS = {
     },
   },
 
+  /**
+   * The home screen: the greeting, the two quick actions, and the nearby
+   * section's four states.
+   *
+   * `nearby.*` is a set of mutually exclusive states rather than four
+   * independent strings — a user sees exactly one of them at a time, which is
+   * why the empty case has to carry its own call to action instead of reusing
+   * the location-denied one.
+   */
+  home: {
+    quickActionsTitle: "Quick actions",
+    browseByNeedTitle: "Browse by need",
+    nearbyTitle: "Nearby accessible places",
+    seeAll: "See all",
+    searchPlaceholder: "Search accessible places…",
+
+    openMap: "Open Map",
+    nearMe: "Near Me",
+
+    /** Named for the signed-out case, which replaces the whole greeting. */
+    greetingFallback: "Welcome to Wayble",
+
+    profileGreeting: (greeting: string, displayName: string | null): string =>
+      displayName
+        ? `${greeting}, ${displayName}`
+        : STRINGS.home.greetingFallback,
+
+    nearby: {
+      locationNeededTitle: "Location needed",
+      enableLocationBody: "Enable location to see nearby accessible places.",
+      findingNearby: "Finding nearby places…",
+      emptyNearby: "No places found nearby. Explore the map to discover more.",
+      openMapLabel: "Open map",
+      openMapButton: "Open Map",
+    },
+
+    a11y: {
+      screen: "Wayble home",
+      logo: "Wayble logo",
+      openProfile: "Open profile",
+      openProfileHint: "Opens your profile and accessibility needs",
+      searchLabel: "Search accessible places",
+      searchHint: "Opens map search",
+      openMapLabel: "Open map",
+      openMapHint: "Opens the full map view",
+      nearMeLabel: "Show places near me",
+      nearMeHint: "Opens the map centered on your location",
+      categoryShortcutHint: "Opens map filtered by this category",
+      locationEnable: "Enable location",
+      locationOpenSettings: "Open settings for location",
+    },
+  },
+
   // Added by later tasks:
-  //   home     (Task 4)
   //   map      (Task 5)
   //   place    (Task 6)
   //   report   (Task 7)

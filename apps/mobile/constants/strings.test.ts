@@ -42,3 +42,20 @@ describe("STRINGS.common.countLabel", () => {
     expect(STRINGS.common.countLabel(3, "need")).toBe("3 needs");
   });
 });
+
+describe("STRINGS.home.profileGreeting", () => {
+  it("joins the greeting and the name with a comma", () => {
+    expect(STRINGS.home.profileGreeting("Good morning", "Nimal")).toBe(
+      "Good morning, Nimal",
+    );
+  });
+
+  // The absent-name path. A signed-out visitor has no display name, and this
+  // branch replaces the whole sentence rather than omitting a clause — a
+  // mechanical extraction that interpolated anyway would greet nobody.
+  it("welcomes a signed-out visitor instead of trailing a comma", () => {
+    expect(STRINGS.home.profileGreeting("Good morning", null)).toBe(
+      "Welcome to Wayble",
+    );
+  });
+});

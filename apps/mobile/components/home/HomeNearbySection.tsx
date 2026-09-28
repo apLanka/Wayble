@@ -5,6 +5,7 @@ import type { PermissionStatus } from "expo-location";
 import { PlaceListItem } from "@/components/map/PlaceListItem";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { NearbyPlace } from "@/hooks/use-nearby-places";
@@ -41,9 +42,11 @@ export function HomeNearbySection({
           },
         ]}
       >
-        <AppText variant="bodyStrong">Location needed</AppText>
+        <AppText variant="bodyStrong">
+          {STRINGS.home.nearby.locationNeededTitle}
+        </AppText>
         <AppText style={{ color: appTheme.colors.textMuted }}>
-          Enable location to see nearby accessible places.
+          {STRINGS.home.nearby.enableLocationBody}
         </AppText>
         <TouchTarget
           onPress={
@@ -51,7 +54,9 @@ export function HomeNearbySection({
           }
           accessibilityRole="button"
           accessibilityLabel={
-            isDenied ? "Open settings for location" : "Enable location"
+            isDenied
+              ? STRINGS.home.a11y.locationOpenSettings
+              : STRINGS.home.a11y.locationEnable
           }
           style={[
             styles.bannerButton,
@@ -62,7 +67,9 @@ export function HomeNearbySection({
             variant="bodyStrong"
             style={{ color: appTheme.colors.onPrimary }}
           >
-            {isDenied ? "Open Settings" : "Enable Location"}
+            {isDenied
+              ? STRINGS.permissions.location.openSettings
+              : STRINGS.permissions.location.enableLocation}
           </AppText>
         </TouchTarget>
       </View>
@@ -74,7 +81,7 @@ export function HomeNearbySection({
       <View style={styles.centered}>
         <ActivityIndicator size="small" color={appTheme.colors.primary} />
         <AppText style={{ color: appTheme.colors.textMuted }}>
-          Finding nearby places…
+          {STRINGS.home.nearby.findingNearby}
         </AppText>
       </View>
     );
@@ -92,12 +99,12 @@ export function HomeNearbySection({
         ]}
       >
         <AppText style={{ color: appTheme.colors.textMuted }}>
-          No places found nearby. Explore the map to discover more.
+          {STRINGS.home.nearby.emptyNearby}
         </AppText>
         <TouchTarget
           onPress={onOpenMap}
           accessibilityRole="button"
-          accessibilityLabel="Open map"
+          accessibilityLabel={STRINGS.home.a11y.openMapLabel}
           style={[
             styles.bannerButton,
             { backgroundColor: appTheme.colors.primary },
@@ -107,7 +114,7 @@ export function HomeNearbySection({
             variant="bodyStrong"
             style={{ color: appTheme.colors.onPrimary }}
           >
-            Open Map
+            {STRINGS.home.nearby.openMapButton}
           </AppText>
         </TouchTarget>
       </View>
