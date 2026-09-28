@@ -30,10 +30,15 @@ PRD's planning slot", not as a person. Sprint 3's actual assignments:
 | M2/M3 | Nishara Senadheera | US-11, US-13     |
 | M3    | Aathika Ilmudeen   | US-23            |
 
-| Story | Feature                     | Convex function                             | Screen / file                                                                                         | Test                                                                                                                                                                                                                                                                                                    | Owner |
-| ----- | --------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| US-08 | Submit report               | `submitReport`                              | `app/report/[placeId].tsx`, CTA in `app/place/[id]/index.tsx`                                         | `convex/reports.test.ts` (18 cases), `report-draft.test.ts` (30), `report-errors.test.ts` (14)                                                                                                                                                                                                          | M1    |
-| US-10 | Confirm or dispute a report | `verifyReport`, `forReport`, `listForPlace` | `app/place/[id]/reports.tsx`, `components/place/VerifyControl.tsx`, `components/place/ReportCard.tsx` | `convex/verifications.test.ts` (11 cases), `convex/reports.test.ts` (5 `listForPlace`), `verification-tally.test.ts` (14), `verification-errors.test.ts` (6), `format-relative-time.test.ts` (9); `VerifyControl` and `ReportCard` have no automated coverage — `apps/mobile` has no component renderer | M1    |
+| Story | Feature                                             | Convex function                                           | Screen / file                                                                                         | Test                                                                                                                                                                                                                                                                                                    | Owner                   |
+| ----- | --------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| US-08 | Submit report                                       | `submitReport`                                            | `app/report/[placeId].tsx`, CTA in `app/place/[id]/index.tsx`                                         | `convex/reports.test.ts` (18 cases), `report-draft.test.ts` (30), `report-errors.test.ts` (14)                                                                                                                                                                                                          | M1                      |
+| US-10 | Confirm or dispute a report                         | `verifyReport`, `forReport`, `listForPlace`               | `app/place/[id]/reports.tsx`, `components/place/VerifyControl.tsx`, `components/place/ReportCard.tsx` | `convex/verifications.test.ts` (11 cases), `convex/reports.test.ts` (5 `listForPlace`), `verification-tally.test.ts` (14), `verification-errors.test.ts` (6), `format-relative-time.test.ts` (9); `VerifyControl` and `ReportCard` have no automated coverage — `apps/mobile` has no component renderer | M1                      |
+| US-09 | Photo evidence — **not delivered in `main`**        | `generateUploadUrl` **absent**                            | no screen                                                                                             | no test file                                                                                                                                                                                                                                                                                            | M2 / Pasindu Janith     |
+| US-11 | Confidence level — **on an unmerged branch**        | `computeConfidence` **absent from `main`**                | on `origin/feature/s3-4-…(US-11)`, not merged                                                         | `confidence.test.ts` on that branch, not in `main`                                                                                                                                                                                                                                                      | M3 / Nishara Senadheera |
+| US-13 | Flagging — **not delivered in `main`**              | `flagReport` **absent**                                   | no screen                                                                                             | no test file                                                                                                                                                                                                                                                                                            | M2 / Nishara Senadheera |
+| US-16 | Needs ranking — **not delivered in `main`**         | match scorer **absent**                                   | no screen                                                                                             | no test file                                                                                                                                                                                                                                                                                            | M2 / Pasindu Janith     |
+| US-23 | Live activity feed — **branch predates the sprint** | `recentVerifications` **absent**, including on the branch | no screen                                                                                             | no test file                                                                                                                                                                                                                                                                                            | M3 / Aathika Ilmudeen   |
 
 ## Index notes
 
@@ -52,10 +57,12 @@ PRD's planning slot", not as a person. Sprint 3's actual assignments:
 
 ## Status
 
-| Story | Test coverage                                                                                                                                                                                                    | Known gaps                                                                                                                                                                                                                         |
-| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| US-08 | 18 Convex cases, 44 mobile cases (62 for this story; 296 repo-wide across three runners)                                                                                                                         | No component test runner; the five report components, the report route, and the report CTA in `app/place/[id]/index.tsx` have no automated coverage, so verification is the manual checklist below                                 |
-| US-10 | `verifications.test.ts` 11 backend cases, plus 5 `reports.listForPlace` cases; `verification-tally`, `verification-errors` and `format-relative-time` are pure modules fully covered by Vitest (29 mobile cases) | `VerifyControl` and `ReportCard` have no automated coverage — `apps/mobile` has no component renderer — so the screen is verified by the manual checklist below; the vote path is covered indirectly through the pure tally module |
+| Story                      | Test coverage                                                                                                                                                                                                    | Known gaps                                                                                                                                                                                                                         |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US-08                      | 18 Convex cases, 44 mobile cases (62 for this story; 296 repo-wide across three runners)                                                                                                                         | No component test runner; the five report components, the report route, and the report CTA in `app/place/[id]/index.tsx` have no automated coverage, so verification is the manual checklist below                                 |
+| US-10                      | `verifications.test.ts` 11 backend cases, plus 5 `reports.listForPlace` cases; `verification-tally`, `verification-errors` and `format-relative-time` are pure modules fully covered by Vitest (29 mobile cases) | `VerifyControl` and `ReportCard` have no automated coverage — `apps/mobile` has no component renderer — so the screen is verified by the manual checklist below; the vote path is covered indirectly through the pure tally module |
+| US-09, US-13, US-16, US-23 | none — not implemented in `main`                                                                                                                                                                                 | see the story rows above and `docs/sprint-3-delivery-facts.md`                                                                                                                                                                     |
+| US-11                      | `confidence.ts` unit tests exist on `origin/feature/s3-4-…(US-11)`, **not merged**, so `main` has none                                                                                                           | merge or close the branch                                                                                                                                                                                                          |
 
 ## Where the numbers come from
 
@@ -106,6 +113,28 @@ $ bun run test          # root: bun test scripts/
 
 ## Known gaps
 
+- **Five of the seven Sprint 3 stories are not in `main`.** US-09, US-13 and
+  US-16 have no function and no pushed branch. US-11 is complete on an unmerged
+  branch. US-23's branch tip is dated 2026-08-29, three weeks _before_ the
+  sprint opened, and holds no implementation. Sprint 3's committed output is
+  US-08 and US-10. Evidence and method: `docs/sprint-3-delivery-facts.md`.
+  **This is a delivery gap, not a testing gap, and no amount of test coverage
+  closes it.** The rows above record it rather than leaving the stories blank,
+  because a blank reads as an oversight and a row states a fact.
+- **`main` received no merge between 2026-08-29 and 2026-09-26.** The whole
+  Sprint 3 window sits inside that four-week gap, and both delivered stories
+  arrived in one merge on 2026-09-28 — ten days after the sprint closed, on a
+  branch named `chore/strip-claude-coauthor`. The board's close dates and the
+  repository's do not agree, which matters for anything derived from either.
+  See `docs/sprint-3-delivery-facts.md` §2.
+- **Neither ADR-001 nor ADR-002 existed as a file until 2026-09-29.** The
+  repository referenced both in nine places, including three times as the
+  compound "ADR-001/002", and `docs/plans/US-08-submit-an-accessibility-report.md:418`
+  noted the gap during Sprint 3 and handed it to S4-6. Both are now written, as
+  reconstructions with a provenance note each: `docs/adr/README.md`. The Sprint 0
+  retrospective that `docs/PRD-wayble.md:325` says should hold ADR-002's
+  rationale still does not exist.
+
 - **No component test runner in `apps/mobile`.** Vitest there has no DOM or
   React renderer configured, so it covers `report-draft.ts` and
   `report-errors.ts` only. `CategoryStep`, `AttributesStep`, `NotesStep`,
@@ -115,14 +144,17 @@ $ bun run test          # root: bun test scripts/
 - **`bun run test` at the repo root runs none of US-08's tests.** It executes
   `bun test scripts/` and exits green having run zero US-08 assertions. Use
   `turbo run test`, or the per-workspace commands above.
-- **A step-id rename would silently disable the step announcements.**
-  `report/[placeId].tsx` gates the forward transition on `if (title)`, and
-  `STEP_TITLES` is `Record<string, string>` rather than a union keyed by
-  `ReportStep`, so a renamed id makes the lookup miss and the announcement
-  never fire. The back handler and `StepIndicator` are ungated and would
-  announce a truncated "Step 2 of 4: ". `STEP_TITLES` has no test. A one-line
-  assertion that every `REPORT_STEPS` entry has a title would turn a silent
-  accessibility regression into a red test.
+- **Partly resolved: a step-id rename, and what it would still miss.**
+  ~~`STEP_TITLES` is `Record<string, string>` rather than a union keyed by
+  `ReportStep`~~ — **fixed in S4-5.** `StepIndicator.tsx` now declares
+  `const STEP_TITLES: Record<ReportStep, string> = STRINGS.report.stepTitles`, so
+  a renamed step id is a `tsc` error. Two things remain true, and the file's
+  comment says so rather than implying otherwise: the assignment site is not a
+  fresh object literal, so an **excess** key is still not caught by `tsc`; and
+  the key set is now pinned instead by a `stepTitles` test in
+  `apps/mobile/constants/strings.test.ts`. The forward transition's `if (title)`
+  gate and the ungated back handler are unchanged, so a future source of a
+  falsy title would still produce a truncated announcement.
 - **`turbo run test` caches results.** A `FULL TURBO` line means the suites were
   not re-executed; pass `--force` to actually run them. This is safe while the
   suites are hermetic — `convex-test` and the pure mobile tests are in-memory —
