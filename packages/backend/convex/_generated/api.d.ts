@@ -18,10 +18,13 @@ import type * as notificationPolicy from "../notificationPolicy.js";
 import type * as notifications from "../notifications.js";
 import type * as places from "../places.js";
 import type * as pushTokens from "../pushTokens.js";
+import type * as reportLimits from "../reportLimits.js";
+import type * as reports from "../reports.js";
 import type * as seed from "../seed.js";
 import type * as seed_placesSeedData from "../seed/placesSeedData.js";
 import type * as users from "../users.js";
 import type * as verificationNeed from "../verificationNeed.js";
+import type * as verifications from "../verifications.js";
 
 import type {
   ApiFromModules,
@@ -40,10 +43,13 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   places: typeof places;
   pushTokens: typeof pushTokens;
+  reportLimits: typeof reportLimits;
+  reports: typeof reports;
   seed: typeof seed;
   "seed/placesSeedData": typeof seed_placesSeedData;
   users: typeof users;
   verificationNeed: typeof verificationNeed;
+  verifications: typeof verifications;
 }>;
 
 /**

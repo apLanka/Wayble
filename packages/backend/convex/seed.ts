@@ -82,6 +82,11 @@ export const seedPlaces = mutation({
           latitude: item.location.latitude,
           longitude: item.location.longitude,
         },
+        // Derived in placesSeedData. Without these the seeded rows carry no
+        // accessibility tags at all, and the mobile client's filter chips
+        // match nothing against them.
+        accessibilityCategories: item.accessibilityCategories,
+        features: item.features,
         createdBy: seedUser._id,
         updatedAt: now,
       });

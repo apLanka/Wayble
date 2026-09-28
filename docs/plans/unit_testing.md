@@ -9,6 +9,7 @@ Comprehensive plan and task breakdown for implementing full unit testing coverag
 The backend uses **Convex** with `@convex-dev/auth`, `@convex-dev/geospatial`, and `convex-test` integrated with **Vitest** in an `edge-runtime` environment.
 
 ### Primary Objectives:
+
 - Achieve 100% component-level unit test coverage across all Convex backend modules.
 - Test all authentication guards (logged-in vs anonymous vs unauthenticated access).
 - Test all domain logic, validation constraints, calculations, and data mutations.
@@ -19,27 +20,28 @@ The backend uses **Convex** with `@convex-dev/auth`, `@convex-dev/geospatial`, a
 
 ## 2. Component Inventory & Coverage Analysis
 
-| Component / Module | Implementation File | Existing Test File | Status & Gaps |
-|---|---|---|---|
-| **Taxonomy & Vocabulary** | `convex/accessibility.ts` | *None* (Missing) | ❌ Needs new test suite for taxonomy versions, key lists, schema validators |
-| **Places Management** | `convex/places.ts` | `convex/places.test.ts` | ⚠️ Missing tests for `getPlace` aggregation (last-write-wins), `seedMockPlaces`, auth checks, invalid IDs, and updates |
-| **Users & Preferences** | `convex/users.ts` | `convex/users.test.ts` | ⚠️ Missing tests for `currentUser`, `roundCoordinate` precision edge cases, radius boundary limits (250m - 20km), avatar updates |
-| **Push Tokens** | `convex/pushTokens.ts` | `convex/pushTokens.test.ts` | ⚠️ Expand test suite for platform validation, device names, error cases |
-| **Notification Engine** | `convex/notifications.ts` | `convex/notifications.test.ts` & `convex/sweep.test.ts` | ⚠️ Missing unit tests for `getDeliveryContext`, `recordResult` failure paths, and batch limits |
-| **Notification Policy** | `convex/notificationPolicy.ts` | `convex/notificationPolicy.test.ts` | ✅ Comprehensive (verify edge cases like DST & extreme offsets) |
-| **Notification Copy** | `convex/notificationCopy.ts` | `convex/notificationCopy.test.ts` | ✅ Comprehensive (verify 0-day, single/multi-month boundary tests) |
-| **Verification Needs** | `convex/verificationNeed.ts` | `convex/verificationNeed.test.ts` | ✅ Comprehensive |
-| **Database Schema** | `convex/schema.ts` | `convex/schema.test.ts` | ✅ Comprehensive (table schemas, custom validators, index behaviors) |
-| **Health Check** | `convex/health.ts` | `convex/health.test.ts` | ✅ Covers ping and touch |
-| **Authentication Setup** | `convex/auth.ts`, `convex/auth.config.ts` | `convex/auth.test.ts` | ⚠️ Expand session handling and provider config tests |
-| **Crons & Scheduled Jobs** | `convex/crons.ts` | *None* (Missing) | ❌ Needs new test suite validating cron schedules and target handlers |
-| **HTTP Routing** | `convex/http.ts` | *None* (Missing) | ❌ Needs new test suite validating HTTP router initialization |
+| Component / Module         | Implementation File                       | Existing Test File                                      | Status & Gaps                                                                                                                    |
+| -------------------------- | ----------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Taxonomy & Vocabulary**  | `convex/accessibility.ts`                 | _None_ (Missing)                                        | ❌ Needs new test suite for taxonomy versions, key lists, schema validators                                                      |
+| **Places Management**      | `convex/places.ts`                        | `convex/places.test.ts`                                 | ⚠️ Missing tests for `getPlace` aggregation (last-write-wins), `seedMockPlaces`, auth checks, invalid IDs, and updates           |
+| **Users & Preferences**    | `convex/users.ts`                         | `convex/users.test.ts`                                  | ⚠️ Missing tests for `currentUser`, `roundCoordinate` precision edge cases, radius boundary limits (250m - 20km), avatar updates |
+| **Push Tokens**            | `convex/pushTokens.ts`                    | `convex/pushTokens.test.ts`                             | ⚠️ Expand test suite for platform validation, device names, error cases                                                          |
+| **Notification Engine**    | `convex/notifications.ts`                 | `convex/notifications.test.ts` & `convex/sweep.test.ts` | ⚠️ Missing unit tests for `getDeliveryContext`, `recordResult` failure paths, and batch limits                                   |
+| **Notification Policy**    | `convex/notificationPolicy.ts`            | `convex/notificationPolicy.test.ts`                     | ✅ Comprehensive (verify edge cases like DST & extreme offsets)                                                                  |
+| **Notification Copy**      | `convex/notificationCopy.ts`              | `convex/notificationCopy.test.ts`                       | ✅ Comprehensive (verify 0-day, single/multi-month boundary tests)                                                               |
+| **Verification Needs**     | `convex/verificationNeed.ts`              | `convex/verificationNeed.test.ts`                       | ✅ Comprehensive                                                                                                                 |
+| **Database Schema**        | `convex/schema.ts`                        | `convex/schema.test.ts`                                 | ✅ Comprehensive (table schemas, custom validators, index behaviors)                                                             |
+| **Health Check**           | `convex/health.ts`                        | `convex/health.test.ts`                                 | ✅ Covers ping and touch                                                                                                         |
+| **Authentication Setup**   | `convex/auth.ts`, `convex/auth.config.ts` | `convex/auth.test.ts`                                   | ⚠️ Expand session handling and provider config tests                                                                             |
+| **Crons & Scheduled Jobs** | `convex/crons.ts`                         | _None_ (Missing)                                        | ❌ Needs new test suite validating cron schedules and target handlers                                                            |
+| **HTTP Routing**           | `convex/http.ts`                          | _None_ (Missing)                                        | ❌ Needs new test suite validating HTTP router initialization                                                                    |
 
 ---
 
 ## 3. Detailed Proposed Test Plans by Component
 
 ### Phase 1: Accessibility Taxonomy (`convex/accessibility.test.ts`) [NEW]
+
 - [ ] Test taxonomy version constant equals 1.
 - [ ] Test all 19 defined attribute keys in `ACCESSIBILITY_ATTRIBUTE_KEYS` for format (`category.action`), non-emptiness, and uniqueness.
 - [ ] Test validator acceptance of valid values (`yes`, `no`, `partial`, `unknown`, `not_applicable`).
@@ -47,6 +49,7 @@ The backend uses **Convex** with `@convex-dev/auth`, `@convex-dev/geospatial`, a
 - [ ] Test optional `note` field in `accessibilityAttributeValidator`.
 
 ### Phase 2: Places API & Aggregations (`convex/places.test.ts`) [ENHANCE]
+
 - [ ] **`getPlace` Query**:
   - Return `null` when place does not exist.
   - Return place with empty attributes array when no reports exist (`reportCount: 0`, `lastReportedAt: null`).
@@ -70,6 +73,7 @@ The backend uses **Convex** with `@convex-dev/auth`, `@convex-dev/geospatial`, a
   - Gracefully handle stale or corrupted index entries where the DB record no longer exists.
 
 ### Phase 3: Users & Preferences (`convex/users.test.ts`) [ENHANCE]
+
 - [ ] **`currentUser` Query**:
   - Return `null` for unauthenticated requests.
   - Return the authenticated user's record with all fields when logged in.
@@ -89,6 +93,7 @@ The backend uses **Convex** with `@convex-dev/auth`, `@convex-dev/geospatial`, a
   - Update `timeZoneOffsetMinutes` and `updatedAt` timestamps.
 
 ### Phase 4: Internal Notifications & Delivery (`convex/notifications.test.ts`) [ENHANCE]
+
 - [ ] **`getDeliveryContext` Internal Query**:
   - Return `null` when `logId` does not exist.
   - Fall back to `"A nearby place"` if associated place is deleted.
@@ -106,6 +111,7 @@ The backend uses **Convex** with `@convex-dev/auth`, `@convex-dev/geospatial`, a
   - Mark claims older than 24 hours as failed with `errorCode: "DeliveryStalled"`.
 
 ### Phase 5: Crons & HTTP Configuration (`convex/crons.test.ts` & `convex/http.test.ts`) [NEW]
+
 - [ ] **Crons**:
   - Verify `verify-nearby-sweep` is registered on hourly schedule.
   - Verify `verify-nearby-retry-stalled` is registered at 10-minute intervals.
@@ -117,6 +123,7 @@ The backend uses **Convex** with `@convex-dev/auth`, `@convex-dev/geospatial`, a
 ## 4. Verification & Testing Commands
 
 Automated testing execution via Vitest:
+
 ```bash
 # Run all backend unit tests in one shot
 npx vitest run
