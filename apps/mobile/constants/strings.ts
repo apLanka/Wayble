@@ -49,6 +49,23 @@
  *   against backend error messages.
  * - Emoji used as icons. They are always rendered alongside a text label, and
  *   there is nothing to translate about them.
+ * - Two strings on the map tab, `searchPlaceholder` and `emptyNearby`, whose
+ *   keys exist here but whose call sites are still inline. The file carries
+ *   uncommitted work that predates this branch; see the ledger.
+ *
+ * ## What US-22 inherits, and what it does not
+ *
+ * Inherited: every user-facing string, in one place, keyed by feature, with
+ * interpolated sentences as functions so a locale lookup can replace them
+ * without touching a call site. `strings-guard.test.ts` fails if the inline
+ * count rises, so this stays true.
+ *
+ * Not inherited, and not claimed: pluralisation is English one/many only and
+ * Sinhala and Tamil do not use it; dates and numbers are formatted with no
+ * locale argument; there is no right-to-left support; and nothing here is
+ * translated. Saying "localised" about this app would be false — what is
+ * true is that the strings are *extractable*, which is what US-22 needs and
+ * all that is provable today.
  */
 
 /**
