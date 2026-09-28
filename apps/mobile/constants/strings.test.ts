@@ -43,6 +43,33 @@ describe("STRINGS.common.countLabel", () => {
   });
 });
 
+describe("STRINGS.place", () => {
+  // AttributeRow and ReportCard build the same sentence from the same parts —
+  // the latter pre-appends ". Note: " and passes it whole. One function serves
+  // both, because two would drift the first time either was reworded.
+  it("attributeLabel omits the note clause when there is no note", () => {
+    expect(STRINGS.place.attributeLabel("Ramp", "Available", null)).toBe(
+      "Ramp: Available",
+    );
+  });
+
+  it("attributeLabel appends the note after a full stop", () => {
+    expect(STRINGS.place.attributeLabel("Ramp", "Partial", "Slight lip")).toBe(
+      "Ramp: Partial. Note: Slight lip",
+    );
+  });
+
+  it("ownReportNote names the restriction, then the tally", () => {
+    expect(STRINGS.place.ownReportNote("2 confirmed")).toBe(
+      "You can't verify your own report · 2 confirmed",
+    );
+  });
+
+  it("reportedOn prefixes the observation time", () => {
+    expect(STRINGS.place.reportedOn("2 days ago")).toBe("Reported 2 days ago");
+  });
+});
+
 describe("STRINGS.map", () => {
   it("placeRowLabel keeps the comma and the word 'away'", () => {
     expect(STRINGS.map.placeRowLabel("Cafe", "food_and_drink", "450m")).toBe(

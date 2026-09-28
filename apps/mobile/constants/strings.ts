@@ -269,6 +269,22 @@ export const STRINGS = {
       signUpUnexpected:
         "Registration could not be completed. Please try again.",
     },
+
+    /**
+     * Copy for a failed `verifyReport` (US-10).
+     *
+     * The substrings `classifyVerificationError` matches on are *not* here:
+     * they are the backend's own error text, pinned by the backend suite, and
+     * they are never rendered. Only the messages a person reads are.
+     */
+    verification: {
+      unauthenticated: "Sign in to confirm or dispute a report.",
+      selfVerification: "You can't verify your own report.",
+      unknownReport: "This report no longer exists.",
+      noteTooLong: (max: number) =>
+        `Keep your note to ${max} characters or fewer.`,
+      generic: "We couldn't save your vote. Please try again.",
+    },
   },
 
   /**
@@ -471,6 +487,97 @@ export const STRINGS = {
 
     placeMarker: (category: string, label: string): string =>
       category === "all" ? STRINGS.map.placeMarkerLabel : `${label} place`,
+  },
+
+  /**
+   * Place detail, the report list, and the verification control.
+   *
+   * The attribute, value and category *labels* are not here — they live in
+   * `accessibility-metadata.ts`, keyed off the backend's accessibility enum so
+   * that a new attribute appears in the UI automatically. What is here is the
+   * prose that wraps them: the sentence a screen reader reads, the empty state,
+   * and the states of the confirm/dispute control.
+   */
+  place: {
+    attributes: {
+      title: "Accessibility Attributes",
+    },
+
+    noData: {
+      label: "No accessibility data available yet. Be the first to contribute.",
+      title: "No accessibility data yet",
+      body: "Be the first to contribute! Share what you know about this place's accessibility features to help others.",
+      button: "Contribute Accessibility Info",
+      buttonLabel: "Contribute accessibility info",
+      buttonHint: "Opens the accessibility report form for this place",
+    },
+
+    verification: {
+      confirmed: "Confirmed",
+      disputed: "Disputed",
+      confirmLabel: "Confirm this report",
+      disputeLabel: "Dispute this report",
+      /** The separator between the two counts in a tally sentence. */
+      tallySeparator: " · ",
+      noVerifications: "No verifications yet",
+      confirmedCount: (n: number) => `${n} confirmed`,
+      disputedCount: (n: number) => `${n} disputed`,
+    },
+
+    reports: {
+      title: "Reports",
+      empty: "No reports on this place yet.",
+      loading: "Loading reports…",
+      signedOutTitle: "Sign in to verify a report",
+      signedOutBody:
+        "Confirming or disputing a report is tied to your account, so people know who agreed with what.",
+      countLabel: (n: number) => `${n} report${n === 1 ? "" : "s"}`,
+      /** The list header, and the link on the place screen, differ in suffix. */
+      header: (n: number) => `${n} ${plural(n, "report", "reports")}`,
+      onThisPlace: (n: number) =>
+        `${STRINGS.place.reports.countLabel(n)} on this place`,
+    },
+
+    addReport: {
+      button: "Add or correct this report",
+      label: "Add or correct this report",
+      hint: "Opens the accessibility report form to add what others missed or fix a value that is wrong",
+    },
+
+    addressLabel: (address: string): string => `Address: ${address}`,
+
+    notFound: {
+      loading: "Loading place details…",
+      title: "Place not found",
+      body: "This place may have been removed or doesn't exist.",
+    },
+
+    reportsLinkHint:
+      "Opens the list of reports so you can confirm or dispute them",
+
+    /**
+     * "Ramp: Available" or "Ramp: Partial. Note: Slight lip".
+     *
+     * Shared by `AttributeRow` and `ReportCard`, which build the same sentence
+     * by different routes — the card pre-appends ". Note: " and passes it
+     * whole. Two copies would drift the first time either was reworded.
+     */
+    attributeLabel: (
+      label: string,
+      valueLabel: string,
+      note: string | null,
+    ): string => `${label}: ${valueLabel}${note ? `. Note: ${note}` : ""}`,
+
+    /** "Reported 2 days ago", on a report card's timestamp chip. */
+    reportedOn: (observed: string): string => `Reported ${observed}`,
+
+    /**
+     * The disabled reason on a user's own report. Takes the already-formatted
+     * tally rather than the counts, so it cannot re-derive them and disagree
+     * with the control underneath it.
+     */
+    ownReportNote: (tallySummary: string): string =>
+      `You can't verify your own report · ${tallySummary}`,
   },
 
   // Added by later tasks:

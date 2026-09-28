@@ -14,6 +14,7 @@ import {
   ATTRIBUTE_METADATA,
   CATEGORY_DISPLAY_ORDER,
 } from "@/constants/accessibility-metadata";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
@@ -39,14 +40,14 @@ export default function PlaceDetailScreen() {
   if (place === undefined) {
     return (
       <>
-        <Stack.Screen options={{ title: "Loading…" }} />
+        <Stack.Screen options={{ title: STRINGS.common.loadingEllipsis }} />
         <Screen>
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={appTheme.colors.primary} />
             <AppText
               style={[styles.loadingText, { color: appTheme.colors.textMuted }]}
             >
-              Loading place details…
+              {STRINGS.place.notFound.loading}
             </AppText>
           </View>
         </Screen>
@@ -58,16 +59,16 @@ export default function PlaceDetailScreen() {
   if (place === null) {
     return (
       <>
-        <Stack.Screen options={{ title: "Not Found" }} />
+        <Stack.Screen options={{ title: STRINGS.navigation.titles.notFound }} />
         <Screen>
           <View style={styles.centered}>
             <AppText variant="title" style={{ color: appTheme.colors.text }}>
-              Place not found
+              {STRINGS.place.notFound.title}
             </AppText>
             <AppText
               style={[styles.loadingText, { color: appTheme.colors.textMuted }]}
             >
-              This place may have been removed or doesn't exist.
+              {STRINGS.place.notFound.body}
             </AppText>
           </View>
         </Screen>
@@ -116,7 +117,7 @@ export default function PlaceDetailScreen() {
               style={styles.addressRow}
               accessible
               accessibilityRole="text"
-              accessibilityLabel={`Address: ${place.address}`}
+              accessibilityLabel={STRINGS.place.addressLabel(place.address)}
             >
               <AppText
                 style={styles.addressIcon}
@@ -144,7 +145,7 @@ export default function PlaceDetailScreen() {
                     style={{ color: appTheme.colors.text }}
                     accessibilityRole="header"
                   >
-                    Accessibility Attributes
+                    {STRINGS.place.attributes.title}
                   </AppText>
                   {/* No `focusColor`, so `TouchTarget` falls back to
                       `colors.focus`. The badge sits on `primary + "20"`,
@@ -157,10 +158,10 @@ export default function PlaceDetailScreen() {
                       nothing to make the ring conditional on. */}
                   <TouchTarget
                     accessibilityRole="link"
-                    accessibilityLabel={`${place.reportCount} ${
-                      place.reportCount === 1 ? "report" : "reports"
-                    } on this place`}
-                    accessibilityHint="Opens the list of reports so you can confirm or dispute them"
+                    accessibilityLabel={STRINGS.place.reports.onThisPlace(
+                      place.reportCount,
+                    )}
+                    accessibilityHint={STRINGS.place.reportsLinkHint}
                     onPress={() =>
                       router.push({
                         pathname: "/place/[id]/reports",
@@ -205,8 +206,8 @@ export default function PlaceDetailScreen() {
                   corrects a value that is wrong. */}
               <TouchTarget
                 accessibilityRole="button"
-                accessibilityLabel="Add or correct this report"
-                accessibilityHint="Opens the accessibility report form to add what others missed or fix a value that is wrong"
+                accessibilityLabel={STRINGS.place.addReport.label}
+                accessibilityHint={STRINGS.place.addReport.hint}
                 onPress={openReportForm}
                 style={[
                   styles.addReportButton,
@@ -217,7 +218,7 @@ export default function PlaceDetailScreen() {
                   variant="bodyStrong"
                   style={{ color: appTheme.colors.primary }}
                 >
-                  Add or correct this report
+                  {STRINGS.place.addReport.button}
                 </AppText>
               </TouchTarget>
             </>

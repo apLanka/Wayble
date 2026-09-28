@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import {
@@ -21,9 +22,22 @@ type Props = {
   onVote: (reportId: string, verdict: Verdict) => void;
 };
 
+/**
+ * The label names the outcome already reached, the action names what tapping
+ * will do. They are different strings because a screen-reader user hears
+ * `action`, and a sighted user reads `label`.
+ */
 const VERDICTS: { verdict: Verdict; label: string; action: string }[] = [
-  { verdict: "confirm", label: "Confirmed", action: "Confirm this report" },
-  { verdict: "dispute", label: "Disputed", action: "Dispute this report" },
+  {
+    verdict: "confirm",
+    label: STRINGS.place.verification.confirmed,
+    action: STRINGS.place.verification.confirmLabel,
+  },
+  {
+    verdict: "dispute",
+    label: STRINGS.place.verification.disputed,
+    action: STRINGS.place.verification.disputeLabel,
+  },
 ];
 
 /**
