@@ -51,11 +51,11 @@ $ git branch -r | grep -iE "us-09|us-11|us-13|us-16|us-23|flag|confidence|rankin
   origin/feature/s3-4-confidence-level-&-last-verified-date-(US-11)
 ```
 
-| Branch                         | Author             | Tip date       | Holds the story's work?                                                             |
-| ------------------------------ | ------------------ | -------------- | ----------------------------------------------------------------------------------- |
-| `origin/feature/s3-4-…(US-11)` | Nishara Senadheera | 2026-09-28     | **yes** — `convex/confidence.ts` with `computeConfidence`                           |
-| `origin/feat/s3-7-…(us-23)`    | Aathika Ilmudeen   | **2026-08-29** | **no** — no `recentVerifications`, and the tip _predates the sprint by three weeks_ |
-| —                              | —                  | —              | no branch exists for US-09, US-13 or US-16                                          |
+| Branch                         | Author             | Tip date       | Holds the story's work?                                                                                                                                                  |
+| ------------------------------ | ------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `origin/feature/s3-4-…(US-11)` | Nishara Senadheera | 2026-09-28     | **yes** — `convex/confidence.ts` with `computeConfidence`, written **2026-09-07**, the day Sprint 3 opened, and unmerged for 22 days. Only a generated-types sync since. |
+| `origin/feat/s3-7-…(us-23)`    | Aathika Ilmudeen   | **2026-08-29** | **no** — no `recentVerifications`, and the tip _predates the sprint by three weeks_                                                                                      |
+| —                              | —                  | —              | no branch exists for US-09, US-13 or US-16                                                                                                                               |
 
 ---
 
