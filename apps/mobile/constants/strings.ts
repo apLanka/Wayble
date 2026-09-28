@@ -285,6 +285,24 @@ export const STRINGS = {
         `Keep your note to ${max} characters or fewer.`,
       generic: "We couldn't save your vote. Please try again.",
     },
+
+    /**
+     * Copy for a failed `submitReport` (US-08).
+     *
+     * `classifyReportError` matches on the backend's own error text, which is
+     * pinned by the backend suite and never rendered. Only the message a person
+     * reads is here.
+     */
+    report: {
+      duplicate:
+        "You already reported on this place today. You can add another report tomorrow.",
+      unauthenticated: "Sign in to submit a report.",
+      summaryTooLong: (max: number) =>
+        `Keep your summary to ${max} characters or fewer.`,
+      observationTime:
+        "Your device clock looks wrong. Turn on automatic date and time, then try again.",
+      generic: "We couldn't submit your report. Please try again.",
+    },
   },
 
   /**
@@ -578,6 +596,120 @@ export const STRINGS = {
      */
     ownReportNote: (tallySummary: string): string =>
       `You can't verify your own report · ${tallySummary}`,
+  },
+
+  /**
+   * The four-step report wizard.
+   *
+   * `stepTitles` is the only non-scalar leaf in the whole module. It is keyed
+   * on the wizard's own `ReportStep` union, and `StepIndicator` re-annotates it
+   * as `Record<ReportStep, string>` so renaming a step id is a `tsc` error
+   * there — a missing key fails, an extra key does not.
+   */
+  report: {
+    stepTitles: {
+      category: "Category",
+      attributes: "Attributes",
+      notes: "Notes",
+      confirm: "Confirm",
+    },
+
+    stepOf: (position: number, total: number): string =>
+      `Step ${position} of ${total}`,
+
+    /**
+     * The joined form. The em dash is deliberate and load-bearing: it is what
+     * separates the position from the title for a screen reader, and a hyphen
+     * would be read as a dash with no pause.
+     */
+    stepOfWithTitle: (position: number, total: number, title: string): string =>
+      `${STRINGS.report.stepOf(position, total)} — ${title}`,
+
+    continueToLabel: (title: string): string => `Continue to ${title}`,
+    backLabel: "Go back a step",
+    back: "Back",
+    next: "Next",
+    /**
+     * `stepTitle` returns "" for an out-of-range index, and the forward button
+     * is only rendered while `step < 3` — so this fallback is unreachable in
+     * practice. It is named rather than left empty so the Continue label can
+     * never read "Continue to ".
+     */
+    nextStepFallback: "next step",
+
+    category: {
+      title: "What would you like to report?",
+      body: "Pick a group. You will confirm the exact details in the next step.",
+      groupLabel: "Accessibility group",
+      /** "3 attributes. Double tap to report on mobility." */
+      hint: (countLabel: string, category: string): string =>
+        `${countLabel}. Double tap to report on ${category.toLowerCase()}.`,
+    },
+
+    attributes: {
+      body: "Set a value for each one. Leave anything you did not check blank.",
+      groupLabel: (label: string) => `${label} value`,
+      valueLabel: (label: string): string => `${label} value`,
+      valueAnnounce: (label: string, valueLabel: string): string =>
+        `${label}: ${valueLabel}`,
+      setValueHint: "Double tap to set this value.",
+      clearValueHint: "Double tap to clear this value.",
+      noteRequired: "Add a note — required for Partial",
+      noteOptional: "Add a note (optional)",
+      notePlaceholder: "What did you see?",
+      noteLabel: (label: string): string => `Note for ${label}`,
+
+      /**
+       * The banner explaining which groups still need a note.
+       *
+       * The list joining is here rather than at the call site because "A, B
+       * and C" is English grammar, not a fact about the data — and the whole
+       * sentence is spoken aloud, so a dangling " and " is audible.
+       */
+      outstandingNote: (count: number, groups: string[]): string => {
+        if (count === 0) return "";
+        const one = count === 1;
+        const list =
+          groups.length === 1
+            ? groups[0]
+            : `${groups.slice(0, -1).join(", ")} and ${groups[groups.length - 1]}`;
+        return `A note is still required for ${count} attribute${one ? "" : "s"} in ${list}. Go back and choose ${list} to add ${one ? "it" : "them"}.`;
+      },
+    },
+
+    notes: {
+      title: "Anything to add?",
+      body: "One optional sentence about the whole visit. You can skip this.",
+      label: "Your summary",
+      titleLabel: "Your summary (optional)",
+      placeholder:
+        "For example: the side entrance is the only step-free way in.",
+      summaryLabel: "Your summary",
+      summaryHint: (max: number) => `Optional. Up to ${max} characters.`,
+      charactersLeft: (remaining: number, max: number) =>
+        `${remaining} of ${max} characters left`,
+    },
+
+    confirm: {
+      title: "Check your report",
+      noteTitle: "Your note",
+      noteLabel: "Your summary",
+      submit: "Submit report",
+      submitting: "Submitting…",
+      submitHint: "Saves your accessibility report for this place.",
+      summaryLabel: (summary: string): string => `Your note: ${summary}`,
+    },
+
+    account: {
+      checking: "Checking your account…",
+      signedOutTitle: "Sign in to submit a report",
+      signedOutBody:
+        "Reports are tied to your account so other people can confirm or dispute what you observed.",
+      signInLabel: "Go to sign in",
+      missingPlace:
+        "This report form is missing a place. Go back and try again.",
+      reportingOn: (placeName: string) => `Reporting on ${placeName}`,
+    },
   },
 
   // Added by later tasks:

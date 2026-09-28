@@ -43,6 +43,65 @@ describe("STRINGS.common.countLabel", () => {
   });
 });
 
+describe("STRINGS.report", () => {
+  it("stepOf states the position and the total", () => {
+    expect(STRINGS.report.stepOf(2, 4)).toBe("Step 2 of 4");
+  });
+
+  // The em dash is a real character. Swapping it for a hyphen type-checks,
+  // renders, and is invisible until someone diffs the two.
+  it("stepOfWithTitle joins with an em dash, not a hyphen", () => {
+    expect(STRINGS.report.stepOfWithTitle(2, 4, "Attributes")).toBe(
+      "Step 2 of 4 — Attributes",
+    );
+  });
+
+  it("continueToLabel names the step it advances to", () => {
+    expect(STRINGS.report.continueToLabel("Attributes")).toBe(
+      "Continue to Attributes",
+    );
+  });
+
+  it("stepTitles covers every ReportStep", () => {
+    expect(Object.keys(STRINGS.report.stepTitles).sort()).toEqual([
+      "attributes",
+      "category",
+      "confirm",
+      "notes",
+    ]);
+  });
+
+  it("notes.summaryHint names the character cap", () => {
+    expect(STRINGS.report.notes.summaryHint(280)).toBe(
+      "Optional. Up to 280 characters.",
+    );
+  });
+
+  it("notes.charactersLeft counts down from the cap", () => {
+    expect(STRINGS.report.notes.charactersLeft(12, 280)).toBe(
+      "12 of 280 characters left",
+    );
+  });
+
+  it("category.hint names the count, then what tapping does", () => {
+    expect(STRINGS.report.category.hint("3 attributes", "Mobility")).toBe(
+      "3 attributes. Double tap to report on mobility.",
+    );
+  });
+
+  it("attributes.valueAnnounce reads the value being set", () => {
+    expect(STRINGS.report.attributes.valueAnnounce("Ramp", "Available")).toBe(
+      "Ramp: Available",
+    );
+  });
+
+  it("confirm.summaryLabel names the note it speaks", () => {
+    expect(STRINGS.report.confirm.summaryLabel("Side entrance only")).toBe(
+      "Your note: Side entrance only",
+    );
+  });
+});
+
 describe("STRINGS.place", () => {
   // AttributeRow and ReportCard build the same sentence from the same parts —
   // the latter pre-appends ". Note: " and passes it whole. One function serves

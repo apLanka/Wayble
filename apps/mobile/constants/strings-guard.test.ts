@@ -141,12 +141,13 @@ const FILES = SCAN_ROOTS.flatMap((root) =>
  *   204  home screen and its five components (Task 4)
  *   173  map tab, its eight components, the map place screen (Task 5)
  *   141  place detail, report list, verification control (Task 6)
+ *   103  the four-step report wizard (Task 7)
  *
  * By S4-5 Task 11 it should be down to the handful of non-copy strings listed
  * in that task's summary — emoji ticks and similar iconography, which are not
  * prose and are never localised.
  */
-const INLINE_COPY_CEILING = 141;
+const INLINE_COPY_CEILING = 103;
 
 describe("strings guard", () => {
   it("scans the whole copy surface, so a silently empty walk cannot pass", () => {
