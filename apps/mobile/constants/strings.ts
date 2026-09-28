@@ -208,22 +208,106 @@ export const STRINGS = {
    * text still has to get all of it.
    */
   announcements: {
-    welcome: "Welcome to Wayble…",
+    welcome: "Welcome to Wayble. Find a better way to get there.",
     reportSubmitted: "Report submitted. Thank you.",
     reportConfirmed: "Report confirmed.",
     reportDisputed: "Report disputed.",
     needsCleared: "All accessibility needs cleared.",
   },
 
+  /**
+   * Signing in and signing up.
+   *
+   * `fieldLabels` is shared between the two screens and between a field's
+   * visible label and its `accessibilityLabel` — they are the same word, and
+   * the visible label is already announced through `accessibilityLabelledBy`.
+   */
+  auth: {
+    fieldLabels: {
+      email: "Email",
+      password: "Password",
+      confirmPassword: "Confirm Password",
+    },
+    signIn: {
+      subtitle: "Sign in to contribute and verify accessibility information.",
+      emailPlaceholder: "name@example.com",
+      passwordPlaceholder: "Enter your password",
+      toSignUpLabel: "Go to sign up screen",
+      noAccount: "Don't have an account? ",
+    },
+    signUp: {
+      subtitle: "Join Wayble to map and verify accessibility worldwide.",
+      passwordPlaceholder: "Minimum 8 characters",
+      confirmPasswordPlaceholder: "Re-enter your password",
+      toSignInLabel: "Go to sign in screen",
+      haveAccount: "Already have an account? ",
+    },
+  },
+
+  /**
+   * Validation and server-failure copy for the auth screens.
+   *
+   * The `includes("invalid")`-style substrings in sign-in and sign-up stay in
+   * those files: they classify what the auth provider threw, they are never
+   * rendered, and moving them would hide the fact that they are a wire-level
+   * guess rather than a contract.
+   */
+  errors: {
+    auth: {
+      emailRequired: "Email address is required.",
+      emailInvalid: "Please enter a valid email address.",
+      passwordRequired: "Password is required.",
+      passwordTooShort: (min: number) =>
+        `Password must be at least ${min} characters.`,
+      confirmPasswordRequired: "Please confirm your password.",
+      passwordsDoNotMatch: "Passwords do not match.",
+      invalidCredentials:
+        "Invalid email or password. Please check your credentials.",
+      emailAlreadyInUse:
+        "An account with this email already exists. Please sign in instead.",
+      signInUnexpected: "An unexpected error occurred. Please try again.",
+      signUpUnexpected:
+        "Registration could not be completed. Please try again.",
+    },
+  },
+
+  /**
+   * First-run screen.
+   *
+   * `slogan` is the tagline in curly quotes, which is not the same string as
+   * `common.tagline` — the home header shows it unquoted.
+   *
+   * The two feature pills keep their leading emoji inside the string. It is
+   * the one place in the app where iconography is glued to copy, and US-22
+   * should split them: an emoji does not translate, and a translator editing
+   * that string will have to preserve a character they cannot read.
+   */
+  onboarding: {
+    slogan: "“Find a better way to get there.”",
+    benefitRoutes: "🗺️ Accessible route navigation & place guides",
+    benefitMobility: "♿ Verified ramp, entrance & mobility info",
+    getStarted: "Get Started",
+    haveAccount: "I already have an account",
+    exploreAsGuest: "Explore map as guest →",
+    a11y: {
+      logo: "Wayble application logo",
+      getStartedLabel: "Get Started",
+      getStartedHint: "Creates a new account to join Wayble",
+      haveAccountLabel: "I already have an account. Sign in",
+      haveAccountHint: "Navigates to the sign in page",
+      exploreAsGuestLabel: "Explore map as guest",
+      exploreAsGuestHint: "Explores accessible map without signing in",
+    },
+  },
+
   // Added by later tasks:
-  //   auth, onboarding  (Task 3)
-  //   home              (Task 4)
-  //   map               (Task 5)
-  //   place             (Task 6)
-  //   report            (Task 7)
-  //   profile           (Task 8)
-  //   settings          (Task 9)
-  //   errors            (Tasks 3, 6, 7, 8, 9)
+  //   home     (Task 4)
+  //   map      (Task 5)
+  //   place    (Task 6)
+  //   report   (Task 7)
+  //   profile  (Task 8)
+  //   settings (Task 9)
+  //   errors.* (Tasks 6, 7, 8, 9)
 } as const;
 
 export type Strings = typeof STRINGS;
