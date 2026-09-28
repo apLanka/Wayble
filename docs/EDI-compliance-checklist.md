@@ -366,3 +366,12 @@ cannot silently regress, and no text is trapped inside an image.
 Sprint 4 tasks S4-3 (the accessibility audit) and S4-4 (branding and the Figma
 prototype) close most of the gap between this table and a full one. Neither is
 this task's.
+
+**Where the story-level evidence lives.** This document is the EDI rubric's
+table. The story-to-test mapping is a different artefact and lives in
+[`traceability.md`](./traceability.md), which since 2026-09-29 also records the
+fact that five of the seven Sprint 3 stories never reached `main` — see
+[`sprint-3-delivery-facts.md`](./sprint-3-delivery-facts.md). Two of the rows
+above, Screen reader and Cognitive, depend on Sprint 3 screens; one of those
+screens was never built, so a reader should take those two rows with the
+traceability matrix open.

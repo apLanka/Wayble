@@ -30,6 +30,19 @@ PRD's planning slot", not as a person. Sprint 3's actual assignments:
 | M2/M3 | Nishara Senadheera | US-11, US-13     |
 | M3    | Aathika Ilmudeen   | US-23            |
 
+### Sprint 3 evidence set
+
+Five documents, all written 2026-09-29 for S4-6. They are reachable from each
+other so a reader arriving at any one finds the rest.
+
+| Document                                                       | What it holds                                                | Rubric |
+| -------------------------------------------------------------- | ------------------------------------------------------------ | ------ |
+| [`sprint-3-delivery-facts.md`](./sprint-3-delivery-facts.md)   | the dated fact base every other document cites               | both   |
+| [`adr/`](./adr/README.md)                                      | ADR-0001 and ADR-0002, reconstructed                         | SE3080 |
+| [`sprint-3-burndown.md`](./sprint-3-burndown.md)               | planned against delivered; ClickUp close dates still missing | SE3080 |
+| [`sprint-3-retrospective.md`](./sprint-3-retrospective.md)     | what went well, what to improve, six action items            | SE3080 |
+| [`EDI-compliance-checklist.md`](./EDI-compliance-checklist.md) | the PRD §6 requirements and their evidence                   | SE3050 |
+
 | Story | Feature                                             | Convex function                                           | Screen / file                                                                                         | Test                                                                                                                                                                                                                                                                                                    | Owner                   |
 | ----- | --------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
 | US-08 | Submit report                                       | `submitReport`                                            | `app/report/[placeId].tsx`, CTA in `app/place/[id]/index.tsx`                                         | `convex/reports.test.ts` (18 cases), `report-draft.test.ts` (30), `report-errors.test.ts` (14)                                                                                                                                                                                                          | M1                      |
@@ -188,8 +201,14 @@ $ bun run test          # root: bun test scripts/
 
 ## Manual verification checklist
 
-Not yet run. This needs a simulator or device and a signed-in account, so it
-is a human step. Screen-level behaviour is unverified until every box is
+**Still not run** — the 21 boxes below are unticked, because no device
+run has been recorded. That is what they are for: an unticked box says the screen
+is unverified, where a ticked box nobody ran would be a fabrication. S4-5 added
+a second runbook,
+[`plans/S4-5-manual-test-runbook.md`](./plans/S4-5-manual-test-runbook.md),
+for the 46 screens the strings refactor touched. It is also unrun.
+
+This needs a simulator or device and a signed-in account, so it is a human step. Screen-level behaviour is unverified until every box is
 ticked and the result is recorded in the US-08 pull request. The procedure is
 [docs/tasks/S3-1-S3-3-manual-test-runbook.md](./S3-1-S3-3-manual-test-runbook.md),
 scoped to an iOS Simulator with VoiceOver and one client with two accounts.
