@@ -133,12 +133,13 @@ const FILES = SCAN_ROOTS.flatMap((root) =>
  * The committed ceiling on inline copy literals.
  *
  * Lower it by exactly the number a refactor task moves out, and say so in the
- * commit body. It is a floor that only falls: 311 at S4-5 Task 1, and by
+ * commit body. It is a floor that only falls: 311 when the guard was written
+ * (S4-5 Task 1), 299 after the navigation and stack titles (Task 2). By
  * S4-5 Task 11 it should be down to the handful of non-copy strings listed in
  * that task's summary — emoji ticks and similar iconography, which are not
  * prose and are never localised.
  */
-const INLINE_COPY_CEILING = 311;
+const INLINE_COPY_CEILING = 299;
 
 describe("strings guard", () => {
   it("scans the whole copy surface, so a silently empty walk cannot pass", () => {
