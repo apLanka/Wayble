@@ -140,20 +140,24 @@ $ cd apps/mobile && bunx vitest run
 
 Not yet run. This needs a simulator or device and a signed-in account, so it
 is a human step. Screen-level behaviour is unverified until every box is
-ticked and the result is recorded in the US-08 pull request.
+ticked and the result is recorded in the US-08 pull request. The procedure is
+[docs/tasks/S3-1-S3-3-manual-test-runbook.md](./S3-1-S3-3-manual-test-runbook.md),
+scoped to an iOS Simulator with VoiceOver and one client with two accounts.
 
-- [ ] Signed-out user sees "Sign in to submit a report" with a working sign-in action
-- [ ] Signed-in user reaches the form from the place detail CTA
-- [ ] Steps 1→2→3→4 advance and the step indicator reads correctly at each step
-- [ ] Step 2 blocks "Next" while a `partial` attribute has an empty note
-- [ ] Submitting succeeds and returns to the place detail already showing the new attributes
-- [ ] A second submission within 24 hours shows the plain-language duplicate message
-- [ ] Offline submit reverts the optimistic patch and announces the failure
-- [ ] VoiceOver and TalkBack announce each step transition and each value change
-- [ ] Hardware back moves back one step, then leaves the form
-- [ ] Light and dark mode both legible on all four steps
-- [ ] 200% font scale causes no clipping (WCAG 1.4.4)
-- [ ] All touch targets ≥ 44×44 dp (WCAG 2.5.8)
+**How to run:** [docs/tasks/S3-1-S3-3-manual-test-runbook.md](./S3-1-S3-3-manual-test-runbook.md).
+
+- [ ] Signed-out user sees "Sign in to submit a report" with a working sign-in action — runbook S3-1-A
+- [ ] Signed-in user reaches the form from the place detail CTA — runbook S3-1-B
+- [ ] Steps 1→2→3→4 advance and the step indicator reads correctly at each step — runbook S3-1-C
+- [ ] Step 2 blocks "Next" while a `partial` attribute has an empty note — runbook S3-1-D
+- [ ] Submitting succeeds and returns to the place detail already showing the new attributes — runbook S3-1-E
+- [ ] A second submission within 24 hours shows the plain-language duplicate message — runbook S3-1-F
+- [ ] Offline submit reverts the optimistic patch and announces the failure — runbook S3-1-G
+- [ ] VoiceOver and TalkBack announce each step transition and each value change — runbook S3-1-H
+- [ ] Hardware back moves back one step, then leaves the form — runbook S3-1-I
+- [ ] Light and dark mode both legible on all four steps — runbook S3-1-J
+- [ ] 200% font scale causes no clipping (WCAG 1.4.4) — runbook S3-1-K
+- [ ] All touch targets ≥ 44×44 dp (WCAG 2.5.8) — runbook S3-1-L
 
 ### US-10 — confirm or dispute a report
 
@@ -165,12 +169,14 @@ checker or linter could see — an invisible focus ring that passed both `tsc`
 and `eslint` twice, an announce gate whose bug is only observable by racing two
 taps, and a signed-out screen that read as a dead end.
 
-- [ ] A signed-in user can confirm and dispute another user's report, and change their mind
-- [ ] A second signed-in user sees the first user's vote with no manual refresh
-- [ ] Your own report shows disabled controls with a visible reason, and voting on it via any client is rejected
-- [ ] No author email address appears in any reports response
-- [ ] The reports list length matches the `N reports` badge on the place detail
-- [ ] VerifyControl passes screen reader, 200% font scale, and 44×44 dp checks
-- [ ] Keyboard-focus both Agree and Dispute in both the selected and unselected states, in light and dark mode, and confirm the focus ring is visible in all four combinations and changes with the state
-- [ ] Rapid double-tap across the two buttons so the attempts interleave, and confirm at most one announcement is heard and no stale success is announced over a failure
-- [ ] Sign out, open the reports screen from the place detail, and confirm a sign-in affordance appears rather than a dead end
+**How to run:** [docs/tasks/S3-1-S3-3-manual-test-runbook.md](./S3-1-S3-3-manual-test-runbook.md).
+
+- [ ] A signed-in user can confirm and dispute another user's report, and change their mind — runbook S3-3-A
+- [ ] A second signed-in user sees the first user's vote with no manual refresh — runbook S3-3-B
+- [ ] Your own report shows disabled controls with a visible reason, and voting on it via any client is rejected — runbook S3-3-C
+- [ ] No author email address appears in any reports response — runbook S3-3-D
+- [ ] The reports list length matches the `N reports` badge on the place detail — runbook S3-3-E
+- [ ] VerifyControl passes screen reader, 200% font scale, and 44×44 dp checks — runbook S3-3-F
+- [ ] Keyboard-focus both Agree and Dispute in both the selected and unselected states, in light and dark mode, and confirm the focus ring is visible in all four combinations and changes with the state — runbook S3-3-G
+- [ ] Rapid double-tap across the two buttons so the attempts interleave, and confirm at most one announcement is heard and no stale success is announced over a failure — runbook S3-3-H
+- [ ] Sign out, open the reports screen from the place detail, and confirm a sign-in affordance appears rather than a dead end — runbook S3-3-I
