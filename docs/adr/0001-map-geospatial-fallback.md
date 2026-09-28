@@ -71,7 +71,8 @@ Measured against `32f946e` (the last merge before the window):
   geospatial index.
 - The map stack is unchanged in committed history.
 - Two dev dependencies were added — `vitest` and `sf-symbols-typescript` — and a
-  `test` script was added to the root. No runtime dependency changed.
+  `test` script was added to `apps/mobile/package.json`; the root already had
+  one. No runtime dependency changed.
 
 **The fallback was therefore never exercised.** The only working-tree change that
 removes the map is uncommitted local work, not a committed change, so it is not

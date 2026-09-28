@@ -10,7 +10,7 @@ is in [`docs/sprint-3-delivery-facts.md`](./sprint-3-delivery-facts.md), and a r
 asserting a function, screen and test that do not exist would be a fabrication
 rather than a traceability record.
 
-The PRD's §9 starter table has 14 rows (US-01 … US-23). The 5 rows outside
+The PRD's §9 starter table has 14 rows (US-01 … US-23). The 7 rows outside
 Sprint 3 are still outstanding — several of which already have shipped tests
 (US-01 `auth.test.ts`, US-02 `users.test.ts`, US-05 `places.test.ts`, US-06
 `schema.test.ts`). Their absence from this table is not evidence that they are
@@ -128,7 +128,7 @@ $ bun run test          # root: bun test scripts/
 
 - **Five of the seven Sprint 3 stories are not in `main`.** US-09, US-13 and
   US-16 have no function and no pushed branch. US-11 is complete on an unmerged
-  branch. US-23's branch tip is dated 2026-08-29, three weeks _before_ the
+  branch. US-23's branch tip is dated 2026-08-29, 9 days _before_ the
   sprint opened, and holds no implementation. Sprint 3's committed output is
   US-08 and US-10. Evidence and method: `docs/sprint-3-delivery-facts.md`.
   **This is a delivery gap, not a testing gap, and no amount of test coverage
@@ -141,7 +141,9 @@ $ bun run test          # root: bun test scripts/
   repository's do not agree, which matters for anything derived from either.
   See `docs/sprint-3-delivery-facts.md` §2.
 - **Neither ADR-001 nor ADR-002 existed as a file until 2026-09-29.** The
-  repository referenced both in nine places, including three times as the
+  repository referenced both in nine places — though seven of the nine are in
+  `docs/PRD-wayble.md` and `docs/sprint_tasks_and_subtasks.md`, which are
+  **untracked**, so only two are visible to a fresh clone — including three times as the
   compound "ADR-001/002", and `docs/plans/US-08-submit-an-accessibility-report.md:418`
   noted the gap during Sprint 3 and handed it to S4-6. Both are now written, as
   reconstructions with a provenance note each: `docs/adr/README.md`. The Sprint 0

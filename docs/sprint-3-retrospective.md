@@ -1,12 +1,6 @@
 # Sprint 3 retrospective
 
-**Sprint:** 07–18 Sep 2026 · **Stories:** US-08, 09, 10, 11, 13, 16, 23 ·
-**Team:** Pasindu Lanka, Pasindu Janith, Nishara Senadheera, Aathika Ilmudeen
-**Written:** 2026-09-29, during Sprint 4 task S4-6 (`z8v0kmrj5e`)
-
-## Which rubric this belongs to
-
-`docs/PRD-wayble.md:17` splits the codebase across two rubrics, and the S4-6
+**Sprint:** 07–18 Sep 2026 · **Stories:** US- **US-11 was finished in the sprint's first three days.** 15 branch-only commits dated **2026-09-07 to 09-09** — the scoring module, the badge component, the place-detail wiring and the unit tests. The branch then went idle for **20 days**, its only later activity a merge of `main` and a generated-types sync. This story is not late and not unwritten: it is _finished and invisible_, which is a different failure and a much cheaper one to fix.md:17` splits the codebase across two rubrics, and the S4-6
 subtask names look contradictory because each is right about its own artefact:
 
 > "The task breakdown is an **SE3080 Assignment 1** artefact (sprints, story
@@ -34,13 +28,14 @@ the command behind each one.
 ## What went well
 
 **The entity model absorbed a sprint of features without being redesigned.**
-`schema.ts` gained exactly one net index across the window —
-`by_place_and_author` — and that index exists only because US-08's duplicate
-guard needed a single indexed read. Two backend modules and three test files
-were added and **nothing was restructured or removed**. The S0-5 taxonomy,
-agreed before any feature work, is the reason a two-person-equivalent of
-delivered work needed no schema renegotiation. That is the strongest return on
-a design decision this project has.
+`schema.ts` changed by four lines in two hunks: one net index added —
+`by_place_and_author`, which exists only because US-08's duplicate guard needed a
+single indexed read — and `verificationVerdictValidator` became exported so
+`verifications.ts` could reuse it. Two backend modules and three test files were
+added and **nothing was restructured or removed**. The S0-5 taxonomy, agreed
+before any feature work, is the reason a whole sprint of features needed no
+schema renegotiation. That is the strongest return on a design decision this
+project has.
 
 **The error-classification split survived a 335-string refactor untouched.**
 `report-errors.ts` and `verification-errors.ts` classify a backend failure into a
@@ -75,8 +70,8 @@ week:
   _finished and invisible_, which is a different failure and a much cheaper one
   to fix.
 - **US-09, US-13 and US-16 have no code and no pushed branch anywhere.**
-- **US-23's branch tip is dated 2026-08-29**, three weeks _before_ the sprint
-  opened, and holds no implementation. That one looks like it never started.
+- **US-23's branch tip is dated 2026-08-29** — 9 days before the sprint opened —
+  and holds no implementation. That one looks like it never started.
 
 **The PRD already told us this would happen, and told us what to do about it.**
 `docs/PRD-wayble.md:305`:
@@ -106,12 +101,16 @@ two taps, and a signed-out screen that read as a dead end"
 device run has been recorded. Sprint 4 wrote two more runbooks
 (`S3-1-S3-3` and `S4-5`) and both are unrun.
 
-**Two things were claimed before they existed.** "My accessibility needs"
-became "Accessibility needs" during the S4-5 refactor — three surfaces have
-always said three different things, and two got collapsed. The EDI checklist
-said the guard made the localisation claim unfalsifiable; it cannot, because a
-ternary inside a JSX expression is invisible to it. Both were caught by review
-and corrected, and both are the same failure: a claim that outran its evidence.
+**Two claims outran their evidence, and review caught both.** During the S4-5
+refactor the profile nav row's "My accessibility needs" was pointed at the
+settings card's "Accessibility needs" key, collapsing two of three surfaces
+into one. The EDI checklist then said the guard made the localisation claim
+unfalsifiable; it cannot, because a ternary inside a JSX expression is invisible
+to it. **The copy did not ship changed** — `constants/strings.ts` now holds all
+three sentences as distinct keys, and the checklist states the guard's limits. The
+value here is not that the bugs existed; it is that a review of a 50-file refactor
+found two copy regressions that `tsc`, `eslint` and 116 green tests had all
+passed.
 
 ---
 

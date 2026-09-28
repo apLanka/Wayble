@@ -84,10 +84,12 @@ Measured against `32f946e` (the last merge before the Sprint 3 window):
   restructured, renamed or removed. A stack change would have shown as
   restructuring.
 - **No runtime dependency changed.** Two dev dependencies were added
-  (`vitest`, `sf-symbols-typescript`) and a `test` script was added to the root.
-- The `seed` script in `packages/backend/package.json` changed from
-  `bun run --filter @packages/backend seed` to `convex run seed:seedPlaces` — a
-  runner change, not a stack change.
+  (`vitest`, `sf-symbols-typescript`) and a `test` script was added to
+  `apps/mobile/package.json`. The root already had a `test` script, and
+  `packages/backend/package.json` is byte-identical across the window.
+- `schema.ts` changed by four lines in two hunks: `verificationVerdictValidator`
+  becomes exported so `verifications.ts` can reuse it, and one index is added.
+  No table was added, removed or renamed.
 - The stack in `package.json` is unchanged: same workspaces, same two runtimes.
 
 **Worth recording honestly:** the stack question and the delivery question are

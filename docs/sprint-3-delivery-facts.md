@@ -1,6 +1,5 @@
-# Sprint 3 delivery — verified fact base
+# Spredates the sprint by 9 days**Snapshot of `origin/main` at `e6379fc`, measured 2026-09-29.** Every number
 
-**Snapshot of `origin/main` at `e6379fc`, measured 2026-09-29.** Every number
 below was produced by a command shown with its output, on that date, on that
 commit. If a number here disagrees with the code, the code moved and this file is
 stale — it is a snapshot, not a live view.
@@ -51,11 +50,11 @@ $ git branch -r | grep -iE "us-09|us-11|us-13|us-16|us-23|flag|confidence|rankin
   origin/feature/s3-4-confidence-level-&-last-verified-date-(US-11)
 ```
 
-| Branch                         | Author             | Tip date       | Holds the story's work?                                                                                                                                                  |
-| ------------------------------ | ------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `origin/feature/s3-4-…(US-11)` | Nishara Senadheera | 2026-09-28     | **yes** — `convex/confidence.ts` with `computeConfidence`, written **2026-09-07**, the day Sprint 3 opened, and unmerged for 22 days. Only a generated-types sync since. |
-| `origin/feat/s3-7-…(us-23)`    | Aathika Ilmudeen   | **2026-08-29** | **no** — no `recentVerifications`, and the tip _predates the sprint by three weeks_                                                                                      |
-| —                              | —                  | —              | no branch exists for US-09, US-13 or US-16                                                                                                                               |
+| Branch                         | Author             | Tip date       | Holds the story's work?                                                                                                                                         |
+| ------------------------------ | ------------------ | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `origin/feature/s3-4-…(US-11)` | Nishara Senadheera | 2026-09-28     | **yes** — `convex/confidence.ts` with `computeConfidence`, written **2026-09-07 to 09-09** — the sprint's first three days, 15 commits — then idle for 20 days. |
+| `origin/feat/s3-7-…(us-23)`    | Aathika Ilmudeen   | **2026-08-29** | **no** — no `recentVerifications`, and the tip _predates the sprint by 9 days_                                                                                  |
+| —                              | —                  | —              | no branch exists for US-09, US-13 or US-16                                                                                                                      |
 
 ---
 
@@ -95,7 +94,7 @@ $ for m in $(git log --first-parent --format='%H' origin/main -4); do
 |       | Written                                      | Reached `main` |
 | ----- | -------------------------------------------- | -------------- |
 | US-08 | 2026-09-16 (44 commits, 44 tagged `(us-08)`) | **2026-09-28** |
-| US-10 | 2026-09-27 (10 commits)                      | **2026-09-28** |
+| US-10 | 2026-09-27 (10 commits tagged `(us-10)`)     | **2026-09-28** |
 
 **Both stories shipped in one merge, `e6379fc`, on 2026-09-28 — ten days after
 Sprint 3 closed — on a branch named `chore/strip-claude-coauthor`.**
@@ -199,15 +198,24 @@ type-checked and nothing more, which is why
 
 ```bash
 $ git diff 32f946e e6379fc -- packages/backend/convex/schema.ts | grep -E "^[+-]" | grep -vE "^(\+\+\+|---)"
+-const verificationVerdictValidator = v.union(
++export const verificationVerdictValidator = v.union(
 -    .index("by_author", ["authorId"]),
 +    .index("by_author", ["authorId"])
 +    .index("by_place_and_author", ["placeId", "authorId"]),
 ```
 
-One net index added, `by_place_and_author`, plus a reordering of the chain so
-`by_author` is no longer last. Both are required by US-08's own design — the
-24-hour duplicate guard is a single indexed read. This is a story implementing
-itself inside the existing entity model, not a change to the model.
+Four changed lines in two hunks, both required by US-08's own design.
+
+1. `verificationVerdictValidator` becomes **exported**, so
+   `convex/verifications.ts:5` can import and reuse it rather than redeclare the
+   union. A shared-validator extraction across two modules.
+2. One net index added, `by_place_and_author`, and the chain reordered so
+   `by_author` is no longer last. The 24-hour duplicate guard is a single
+   indexed read.
+
+A story implementing itself inside the existing entity model, not a change to
+the model. No table was added, removed or renamed.
 
 Backend files added or removed in the same range:
 
@@ -238,7 +246,8 @@ $ git diff 32f946e e6379fc -- package.json 'apps/mobile/package.json' 'packages/
 ```
 
 **Two dev dependencies were added** — `vitest` and `sf-symbols-typescript` — and
-a `test` script was added to the root. The `typescript` pair is a line move, not
+a `test` script was added to `apps/mobile/package.json` (the root already had
+one). The `typescript` pair is a line move, not
 a version change: the same `~6.0.3`, reordered by Prettier. **No runtime
 dependency was added, removed or upgraded.**
 
