@@ -143,12 +143,15 @@ const FILES = SCAN_ROOTS.flatMap((root) =>
  *   141  place detail, report list, verification control (Task 6)
  *   103  the four-step report wizard (Task 7)
  *    58  profile tab and the accessibility-needs editor (Task 8)
+ *     9  settings tab and the notifications sub-screen (Task 9)
  *
- * By S4-5 Task 11 it should be down to the handful of non-copy strings listed
- * in that task's summary — emoji ticks and similar iconography, which are not
- * prose and are never localised.
+ * Of the 9 that remain after Task 9, six are emoji used as icons and never
+ * will be moved — the close "✕", the search "🔍", the clear "✕", the place
+ * "📍", the clipboard "📋" and the checkbox "✓". The other three are in
+ * apps/(tabs)/mapbox/index.tsx, which carries uncommitted work predating this
+ * branch and is finished in a final commit. That takes the floor to 6.
  */
-const INLINE_COPY_CEILING = 58;
+const INLINE_COPY_CEILING = 9;
 
 describe("strings guard", () => {
   it("scans the whole copy surface, so a silently empty walk cannot pass", () => {

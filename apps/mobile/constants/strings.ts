@@ -793,6 +793,20 @@ export const STRINGS = {
       `${count} ${plural(count, "need", "needs")} selected`,
 
     /**
+     * The one-line summary of a user's needs, used by both the profile tab and
+     * the settings tab.
+     *
+     * Takes `signedIn` and `count` rather than a user object, so this module
+     * stays import-free — the caller does the reading. The settings screen used
+     * to build this triple inline, and the two copies could have drifted.
+     */
+    needsSummary: (signedIn: boolean, count: number): string => {
+      if (!signedIn) return STRINGS.profile.needs.signInToSet;
+      if (count === 0) return STRINGS.profile.needs.notSetYet;
+      return STRINGS.profile.needsCountLabel(count);
+    },
+
+    /**
      * The per-group row's spoken name. The `selected` flag is what makes it
      * "remove from" rather than "add to" — the same row does both.
      */
@@ -811,6 +825,79 @@ export const STRINGS = {
       displayName
         ? `Profile photo for ${displayName}`
         : STRINGS.profile.header.defaultAvatar,
+  },
+
+  /**
+   * The settings tab and the notifications sub-screen.
+   *
+   * `locationStatus` exists because "Granted" / "Denied" / "Undetermined" are
+   * each spoken as a separate word after a visible "Status: " prefix, and
+   * splitting that across two files is how a locale ends up half-translated.
+   */
+  settings: {
+    title: "Settings",
+    body: "Manage your account and app preferences.",
+
+    account: {
+      section: "Account",
+      signedOut: "Not signed in",
+      signOut: "Sign Out",
+      a11yLabel: "Account information",
+    },
+
+    theme: {
+      title: "Current theme",
+      body: "Follows your device appearance setting.",
+      label: (mode: string): string => `Theme: ${mode}`,
+      dark: "Dark",
+      light: "Light",
+    },
+
+    location: {
+      section: "Location",
+      a11yLabel: "Location permissions",
+      statusPrefix: "Status: ",
+      status: (state: "granted" | "denied" | "undetermined"): string => {
+        if (state === "granted") return STRINGS.permissions.location.granted;
+        if (state === "denied") return STRINGS.permissions.location.denied;
+        return STRINGS.permissions.location.undetermined;
+      },
+      openOsSettings: "Open OS settings for location",
+    },
+
+    developer: {
+      section: "Developer",
+      a11yLabel: "Developer tools",
+      body: "Convex connection health check and debug utilities.",
+      openLabel: "Open debug screen",
+      openButton: "Open debug screen",
+      openHint: "Opens the Convex connection health check",
+    },
+
+    notifications: {
+      signInTitle: "Sign in to manage notifications",
+      body: "Get a notification when you're near a place whose accessibility information is missing or out of date, so you can check it while you're there.",
+      toggleLabel: "Notify me about nearby places",
+      permissionHint:
+        "Asks for notification permission the first time you turn this on",
+      howClose: "How close",
+      radius: {
+        m500: "Within 500 m",
+        km2: "Within 2 km",
+        km5: "Within 5 km",
+      },
+      whatWeStore: "What we store",
+      privacy:
+        "While this is on, Wayble records your approximate location when you open the app rounded to about 110 metres, never your exact position, and never in the background. Turn this off and we stop.",
+    },
+
+    /**
+     * Simulator-specific. Shown when a user toggles notifications on something
+     * that cannot receive them — a real, actionable sentence rather than a
+     * generic failure, because the fix is "use your phone".
+     */
+    notificationsUnavailable:
+      "Couldn't set up notifications on this device. Push notifications need a real device, not a simulator.",
   },
 
   // Added by later tasks:
