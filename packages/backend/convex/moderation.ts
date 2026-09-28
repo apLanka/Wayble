@@ -8,14 +8,41 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
+import { MAX_NOTE_LENGTH } from "./reportLimits";
 import { userRoleValidator } from "./schema";
 
 /**
  * S4-7 (US-14 lite) — the moderator's view of flagged reports.
  *
  * A report is "flagged" while at least one of its `flags` rows is `open`.
- * Dismissing closes those rows; the report itself is never modified.
+ * Dismissing closes those rows and leaves the report alone. Removing (S4-7b)
+ * also takes the report out of circulation by marking it `removed`.
  */
+
+const HISTORY_LIMIT = 50;
+
+/** Trims a moderator note; blank means "no note"; over-long is rejected. */
+function cleanNote(note: string | undefined): string | undefined {
+  const trimmed = note?.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.length > MAX_NOTE_LENGTH) {
+    throw new Error(
+      `Note too long: ${trimmed.length} characters, maximum ${MAX_NOTE_LENGTH}`,
+    );
+  }
+  return trimmed;
+}
+
+async function openFlagsFor(
+  ctx: QueryCtx | MutationCtx,
+  reportId: Doc<"reports">["_id"],
+) {
+  return await ctx.db
+    .query("flags")
+    .withIndex("by_report", (q) => q.eq("reportId", reportId))
+    .filter((q) => q.eq(q.field("status"), "open"))
+    .collect();
+}
 
 /**
  * Resolves the caller and throws unless they hold the moderator role.
@@ -85,20 +112,17 @@ export const getFlaggedReports = query({
 });
 
 export const dismissFlag = mutation({
-  args: { reportId: v.id("reports") },
+  args: { reportId: v.id("reports"), note: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const moderator = await requireModerator(ctx);
+    const note = cleanNote(args.note);
 
     const report = await ctx.db.get(args.reportId);
     if (!report) {
       throw new Error(`Unknown report: ${args.reportId}`);
     }
 
-    const openFlags = await ctx.db
-      .query("flags")
-      .withIndex("by_report", (q) => q.eq("reportId", args.reportId))
-      .filter((q) => q.eq(q.field("status"), "open"))
-      .collect();
+    const openFlags = await openFlagsFor(ctx, args.reportId);
 
     if (openFlags.length === 0) {
       throw new Error("No open flags on this report");
@@ -110,11 +134,130 @@ export const dismissFlag = mutation({
         status: "dismissed",
         resolvedBy: moderator._id,
         resolvedAt: now,
+        resolutionNote: note,
         updatedAt: now,
       });
     }
 
     return openFlags.length;
+  },
+});
+
+/**
+ * S4-7b — upholds the flags: the report is marked `removed` (so place detail,
+ * the reports list and the confidence maths stop seeing it) and its open flags
+ * are `resolved`. Like `dismissFlag` it needs an open flag, so removal is a
+ * decision about a flagged report rather than a general-purpose delete.
+ */
+export const removeReport = mutation({
+  args: { reportId: v.id("reports"), note: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const moderator = await requireModerator(ctx);
+    const note = cleanNote(args.note);
+
+    const report = await ctx.db.get(args.reportId);
+    if (!report) {
+      throw new Error(`Unknown report: ${args.reportId}`);
+    }
+    if (report.status === "removed") {
+      throw new Error("Report already removed");
+    }
+
+    const openFlags = await openFlagsFor(ctx, args.reportId);
+    if (openFlags.length === 0) {
+      throw new Error("No open flags on this report");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(report._id, { status: "removed", updatedAt: now });
+    for (const flag of openFlags) {
+      await ctx.db.patch(flag._id, {
+        status: "resolved",
+        resolvedBy: moderator._id,
+        resolvedAt: now,
+        resolutionNote: note,
+        updatedAt: now,
+      });
+    }
+
+    return openFlags.length;
+  },
+});
+
+/**
+ * S4-7b — past decisions, newest first. All flags closed by one action share
+ * the same `resolvedAt`, so (reportId, resolvedAt) identifies one decision.
+ */
+export const getResolvedFlags = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireModerator(ctx);
+
+    const flags = await ctx.db.query("flags").collect();
+    const closed = flags.filter(
+      (flag) =>
+        (flag.status === "resolved" || flag.status === "dismissed") &&
+        flag.resolvedAt !== undefined,
+    );
+
+    const groups = new Map<string, Doc<"flags">[]>();
+    for (const flag of closed) {
+      const key = `${flag.reportId}:${flag.resolvedAt}`;
+      const group = groups.get(key);
+      if (group) group.push(flag);
+      else groups.set(key, [flag]);
+    }
+
+    const ordered = [...groups.values()]
+      .sort((a, b) => (b[0]?.resolvedAt ?? 0) - (a[0]?.resolvedAt ?? 0))
+      .slice(0, HISTORY_LIMIT);
+
+    const names = new Map<string, string>();
+    const items = [];
+    for (const group of ordered) {
+      const [first] = group;
+      if (!first || first.resolvedAt === undefined) continue;
+      const report = await ctx.db.get(first.reportId);
+      if (!report) continue;
+      const place = await ctx.db.get(report.placeId);
+      if (!place) continue;
+
+      let resolvedByName = "A moderator";
+      if (first.resolvedBy) {
+        const cached = names.get(first.resolvedBy);
+        if (cached) resolvedByName = cached;
+        else {
+          const user = await ctx.db.get(first.resolvedBy);
+          resolvedByName =
+            user?.displayName?.trim() || user?.name?.trim() || "A moderator";
+          names.set(first.resolvedBy, resolvedByName);
+        }
+      }
+
+      const reasonCounts = new Map<Doc<"flags">["reason"], number>();
+      for (const flag of group) {
+        reasonCounts.set(flag.reason, (reasonCounts.get(flag.reason) ?? 0) + 1);
+      }
+
+      items.push({
+        reportId: report._id,
+        placeName: place.name,
+        summary: report.summary,
+        outcome:
+          first.status === "resolved"
+            ? ("removed" as const)
+            : ("dismissed" as const),
+        flagCount: group.length,
+        reasons: [...reasonCounts.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .map(([reason]) => reason),
+        resolutionNote: first.resolutionNote,
+        resolvedByName,
+        resolvedAt: first.resolvedAt,
+      });
+    }
+
+    return items;
   },
 });
 

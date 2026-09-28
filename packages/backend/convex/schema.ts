@@ -180,6 +180,8 @@ export default defineSchema({
     status: flagStatusValidator,
     resolvedBy: v.optional(v.id("users")),
     resolvedAt: v.optional(v.number()),
+    // S4-7b: the moderator's optional reason for the decision.
+    resolutionNote: v.optional(v.string()),
     updatedAt: v.number(),
   })
     .index("by_report", ["reportId"])
