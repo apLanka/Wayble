@@ -4,6 +4,7 @@ import { View, StyleSheet } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -41,15 +42,21 @@ export function LocationPermissionBanner({
       ]}
     >
       <View style={styles.content}>
-        <AppText variant="bodyStrong">Location Access</AppText>
+        <AppText variant="bodyStrong">
+          {STRINGS.permissions.location.title}
+        </AppText>
         <AppText style={{ color: appTheme.colors.textMuted }}>
           {isDenied
-            ? "Location access denied. Using default location (Bangalore). Enable in settings for local results."
-            : "Allow location access to see places near you. Currently using default location (Bangalore)."}
+            ? STRINGS.map.location.deniedBody
+            : STRINGS.map.location.undeterminedBody}
         </AppText>
       </View>
       <TouchTarget
-        accessibilityLabel={isDenied ? "Open Settings" : "Enable Location"}
+        accessibilityLabel={
+          isDenied
+            ? STRINGS.permissions.location.openSettings
+            : STRINGS.permissions.location.enableLocation
+        }
         accessibilityRole="button"
         onPress={handlePress}
         style={[styles.button, { backgroundColor: appTheme.colors.primary }]}
@@ -58,7 +65,9 @@ export function LocationPermissionBanner({
           variant="bodyStrong"
           style={{ color: appTheme.colors.surface }}
         >
-          {isDenied ? "Open Settings" : "Enable"}
+          {isDenied
+            ? STRINGS.permissions.location.openSettings
+            : STRINGS.permissions.location.enable}
         </AppText>
       </TouchTarget>
     </View>

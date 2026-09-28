@@ -43,6 +43,59 @@ describe("STRINGS.common.countLabel", () => {
   });
 });
 
+describe("STRINGS.map", () => {
+  it("placeRowLabel keeps the comma and the word 'away'", () => {
+    expect(STRINGS.map.placeRowLabel("Cafe", "food_and_drink", "450m")).toBe(
+      "Cafe, food_and_drink, 450m away",
+    );
+  });
+
+  // The absent-clause case. `name, , 450m away` type-checks and still renders,
+  // so it only fails when someone reads it aloud.
+  it("placeRowLabel drops the distance clause entirely when there is none", () => {
+    expect(STRINGS.map.placeRowLabel("Cafe", "food_and_drink", null)).toBe(
+      "Cafe, food_and_drink",
+    );
+  });
+
+  it("searchResultLabel omits absent clauses without a dangling comma", () => {
+    expect(STRINGS.map.searchResultLabel("Cafe", "450m", null)).toBe(
+      "Cafe, 450m",
+    );
+    expect(STRINGS.map.searchResultLabel("Cafe", null, "ramp, lift")).toBe(
+      "Cafe, features: ramp, lift",
+    );
+    expect(STRINGS.map.searchResultLabel("Cafe", null, null)).toBe("Cafe");
+  });
+
+  it("categoryLabel prefixes the category", () => {
+    expect(STRINGS.map.categoryLabel("Retail")).toBe("Category: Retail");
+  });
+
+  // Both map surfaces resolve a known category to its label and fall back to
+  // composing from the raw key. The known branch deliberately does NOT append
+  // " accessible" — that is the existing behaviour, kept verbatim.
+  it("categoryAccessible prefers the known label", () => {
+    expect(STRINGS.map.categoryAccessible("ramp", "Ramp")).toBe("Ramp");
+  });
+
+  it("categoryAccessible composes from the raw key when unknown", () => {
+    expect(STRINGS.map.categoryAccessible("ramp", null)).toBe(
+      "ramp accessible",
+    );
+  });
+
+  it("placeMarker names the all-category pin, not the category", () => {
+    expect(STRINGS.map.placeMarker("all", "All places")).toBe("Place marker");
+  });
+
+  it("placeMarker names the category otherwise", () => {
+    expect(STRINGS.map.placeMarker("wheelchair", "Wheelchair Accessible")).toBe(
+      "Wheelchair Accessible place",
+    );
+  });
+});
+
 describe("STRINGS.home.profileGreeting", () => {
   it("joins the greeting and the name with a comma", () => {
     expect(STRINGS.home.profileGreeting("Good morning", "Nimal")).toBe(

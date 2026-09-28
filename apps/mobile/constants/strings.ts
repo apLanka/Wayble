@@ -353,8 +353,127 @@ export const STRINGS = {
     },
   },
 
+  /**
+   * The map tab: its search bar, the category filter, and the sentences the
+   * map's list view speaks.
+   *
+   * `categoryLabels` is the map's own five categories, which are not the ten
+   * place categories in `accessibility-metadata.ts`. They were declared on
+   * `CategoryFilter` and imported from a component by four other files; they
+   * are here because a component is not a constants module. `CATEGORY_COLORS`
+   * and the emoji tables stay on the component — colour and iconography are
+   * not copy.
+   */
+  map: {
+    categoryLabels: {
+      all: "All places",
+      wheelchair: "Wheelchair Accessible",
+      elevator: "Elevator",
+      bathroom: "Accessible Bathroom",
+      multi: "Multiple Features",
+    },
+
+    /**
+     * The search bar's own default. Distinct from the home screen's entry
+     * placeholder, which is longer and includes the ellipsis — two strings,
+     * not one.
+     */
+    searchPlaceholderShort: "Search places...",
+
+    /** The deferred `app/(tabs)/mapbox/index.tsx` copy. See Ruling 6. */
+    searchPlaceholder: "Search accessible places…",
+    emptyNearby: "No places found nearby.",
+
+    search: {
+      inputLabel: "Search nearby places",
+      clearLabel: "Clear search",
+      distanceAway: (km: string) => `${km} km away`,
+      distanceShort: (km: string) => `${km} km`,
+      /** Joins a place's feature list in the dropdown. */
+      featureSeparator: " • ",
+    },
+
+    location: {
+      /** Verbatim, including the wrong city — see Finding 1 in the plan. */
+      deniedBody:
+        "Location access denied. Using default location (Bangalore). Enable in settings for local results.",
+      undeterminedBody:
+        "Allow location access to see places near you. Currently using default location (Bangalore).",
+      enable: "Enable",
+    },
+
+    detailSheet: {
+      closeLabel: "Close place details",
+      /** The direction button's accessible name, not its visible text. */
+      directionsLabel: "Show walking directions",
+      directionsButton: "Show the direction",
+      viewDetailsLabel: "View full accessibility details",
+      viewDetailsHint:
+        "Opens the full place detail screen with all accessibility attributes",
+      viewDetailsButton: "View Details →",
+    },
+
+    locate: {
+      label: "Locate me",
+      hint: "Centers the map on your current location",
+      button: "Locate me 📍",
+    },
+
+    viewMode: {
+      label: "List View",
+      hint: "Toggles between map and accessible list views",
+    },
+
+    placeDetail: {
+      addressTitle: "Address",
+      profileTitle: "Accessibility Profile",
+      verifiedTitle: "Verified Features",
+      noFeatures: "No accessibility features reported.",
+      unknownPlace: "Unknown Place",
+      disclaimer:
+        "Note: A feature not listed here has not been assessed — it does not mean it is unavailable.",
+    },
+
+    /** The pin's accessible name when the filter is showing everything. */
+    placeMarkerLabel: "Place marker",
+
+    /**
+     * "Cafe, food_and_drink, 450m away" — one continuous string so a screen
+     * reader reads the row as a sentence instead of three disconnected items.
+     */
+    placeRowLabel: (
+      name: string,
+      category: string,
+      distance: string | null,
+    ): string => `${name}, ${category}${distance ? `, ${distance} away` : ""}`,
+
+    /** The same idea for a search-dropdown row, which also lists features. */
+    searchResultLabel: (
+      name: string,
+      distanceText: string | null,
+      features: string | null,
+    ): string =>
+      `${name}${distanceText ? `, ${distanceText}` : ""}${
+        features ? `, features: ${features}` : ""
+      }`,
+
+    categoryLabel: (label: string): string => `Category: ${label}`,
+
+    /**
+     * Resolves a category to its label, composing from the raw key when the
+     * category is not one the filter knows.
+     *
+     * The known branch does NOT get " accessible" appended. That is the
+     * existing behaviour, and changing it is a copy change, not a refactor.
+     */
+    categoryAccessible: (category: string, label: string | null): string =>
+      label ?? `${category} accessible`,
+
+    placeMarker: (category: string, label: string): string =>
+      category === "all" ? STRINGS.map.placeMarkerLabel : `${label} place`,
+  },
+
   // Added by later tasks:
-  //   map      (Task 5)
   //   place    (Task 6)
   //   report   (Task 7)
   //   profile  (Task 8)

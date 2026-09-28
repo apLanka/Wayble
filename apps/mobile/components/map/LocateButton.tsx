@@ -3,6 +3,7 @@ import { StyleSheet, Platform } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -20,8 +21,8 @@ export function LocateButton({
   return (
     <TouchTarget
       accessibilityRole="button"
-      accessibilityLabel="Locate me"
-      accessibilityHint="Centers the map on your current location"
+      accessibilityLabel={STRINGS.map.locate.label}
+      accessibilityHint={STRINGS.map.locate.hint}
       onPress={onPress}
       style={[
         styles.button,
@@ -36,7 +37,7 @@ export function LocateButton({
         variant="bodyStrong"
         style={[styles.text, { color: appTheme.colors.text }]}
       >
-        Locate me 📍
+        {STRINGS.map.locate.button}
       </AppText>
     </TouchTarget>
   );

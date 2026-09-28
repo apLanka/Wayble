@@ -4,7 +4,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 
 import { AppText } from "@/components/ui/app-text";
-import { CATEGORY_LABELS } from "@/components/map/CategoryFilter";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { AccessibleLocation } from "../../data/mock-data";
 
@@ -83,7 +83,7 @@ export function DetailSheet({
                 onPress={onClose}
                 hitSlop={8}
                 accessibilityRole="button"
-                accessibilityLabel="Close place details"
+                accessibilityLabel={STRINGS.map.detailSheet.closeLabel}
               >
                 <AppText
                   style={[styles.close, { color: appTheme.colors.textMuted }]}
@@ -100,7 +100,9 @@ export function DetailSheet({
               ]}
               accessible
               accessibilityRole="text"
-              accessibilityLabel={`Category: ${location.category.replace(/_/g, " ")}`}
+              accessibilityLabel={STRINGS.map.categoryLabel(
+                location.category.replace(/_/g, " "),
+              )}
             >
               <AppText
                 style={[styles.badgeText, { color: appTheme.colors.primary }]}
@@ -131,9 +133,12 @@ export function DetailSheet({
                     }
                   ).accessibilityCategories ?? []
                 ).map((cat: string) => {
-                  const label =
-                    CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ||
-                    `${cat} accessible`;
+                  const label = STRINGS.map.categoryAccessible(
+                    cat,
+                    STRINGS.map.categoryLabels[
+                      cat as keyof typeof STRINGS.map.categoryLabels
+                    ] ?? null,
+                  );
                   return (
                     <View
                       key={cat}
@@ -184,7 +189,7 @@ export function DetailSheet({
                 ]}
                 onPress={onShowDirection}
                 accessibilityRole="button"
-                accessibilityLabel="Show walking directions"
+                accessibilityLabel={STRINGS.map.detailSheet.directionsLabel}
                 activeOpacity={0.7}
               >
                 <AppText
@@ -193,7 +198,7 @@ export function DetailSheet({
                     { color: appTheme.colors.onPrimary },
                   ]}
                 >
-                  Show the direction
+                  {STRINGS.map.detailSheet.directionsButton}
                 </AppText>
               </TouchableOpacity>
             )}
@@ -205,8 +210,8 @@ export function DetailSheet({
               onPress={handleViewDetails}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel="View full accessibility details"
-              accessibilityHint="Opens the full place detail screen with all accessibility attributes"
+              accessibilityLabel={STRINGS.map.detailSheet.viewDetailsLabel}
+              accessibilityHint={STRINGS.map.detailSheet.viewDetailsHint}
             >
               <AppText
                 style={[
@@ -214,7 +219,7 @@ export function DetailSheet({
                   { color: appTheme.colors.onPrimary },
                 ]}
               >
-                View Details →
+                {STRINGS.map.detailSheet.viewDetailsButton}
               </AppText>
             </TouchableOpacity>
           </>
