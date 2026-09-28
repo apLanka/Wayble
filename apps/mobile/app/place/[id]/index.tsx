@@ -1,11 +1,12 @@
 import React from "react";
 import { View, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "convex/react";
 
 import { api } from "@packages/backend/convex/_generated/api";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
+import { TouchTarget } from "@/components/ui/touch-target";
 import { CategoryBadge } from "@/components/place/CategoryBadge";
 import { ConfidenceBadge } from "@/components/place/ConfidenceBadge";
 import { AttributeGroup } from "@/components/place/AttributeGroup";
@@ -14,7 +15,7 @@ import {
   ATTRIBUTE_METADATA,
   CATEGORY_DISPLAY_ORDER,
 } from "@/constants/accessibility-metadata";
-import { spacing } from "@/constants/theme";
+import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { AccessibilityAttributeKey } from "@packages/backend/convex/accessibility";
@@ -27,6 +28,7 @@ type Attribute = {
 
 export default function PlaceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { appTheme } = useAppTheme();
 
   const place = useQuery(
@@ -80,6 +82,17 @@ export default function PlaceDetailScreen() {
   );
   const hasAttributes = place.attributes.length > 0;
 
+  /**
+   * The report form, from either state of the screen: the empty place
+   * invites the first report, the populated one adds to or corrects what is
+   * already recorded. One call, so the two entry points cannot diverge.
+   */
+  const openReportForm = () =>
+    router.push({
+      pathname: "/report/[placeId]",
+      params: { placeId: id },
+    });
+
   return (
     <>
       <Stack.Screen options={{ title: place.name }} />
@@ -124,56 +137,100 @@ export default function PlaceDetailScreen() {
 
           {/* ── Attributes Section ─────────────────────────── */}
           {hasAttributes ? (
-            <View style={styles.attributesSection}>
-              <View style={styles.sectionHeader}>
-                <AppText
-                  variant="bodyStrong"
-                  style={{ color: appTheme.colors.text }}
-                  accessibilityRole="header"
-                >
-                  Accessibility Attributes
-                </AppText>
-                <View style={styles.headerBadges}>
-                  <ConfidenceBadge
-                    tier={place.confidence.tier}
-                    isStale={place.confidence.isStale}
-                  />
-                  <View
-                    style={[
-                      styles.countBadge,
-                      { backgroundColor: appTheme.colors.primary + "20" },
-                    ]}
+            <>
+              <View style={styles.attributesSection}>
+                <View style={styles.sectionHeader}>
+                  <AppText
+                    variant="bodyStrong"
+                    style={{ color: appTheme.colors.text }}
+                    accessibilityRole="header"
                   >
-                    <AppText
-                      variant="label"
-                      style={{ color: appTheme.colors.primary, fontSize: 12 }}
+                    Accessibility Attributes
+                  </AppText>
+                  {/* No `focusColor`, so `TouchTarget` falls back to
+                      `colors.focus`. The badge sits on `primary + "20"`,
+                      which is a translucent tint over `background` and not
+                      solid `primary`, so the `onPrimary` ring this state
+                      would otherwise want measures 1.24:1 light and 1.86:1
+                      dark against that background — under the 3:1 of WCAG
+                      1.4.11. The default `focus` token measures 7.41:1 and
+                      24.22:1. The badge has one visual state, so there is
+                      nothing to make the ring conditional on. */}
+                  <View style={styles.headerBadges}>
+                    <ConfidenceBadge
+                      tier={place.confidence.tier}
+                      isStale={place.confidence.isStale}
+                    />
+                    <TouchTarget
+                      accessibilityRole="link"
+                      accessibilityLabel={`${place.reportCount} ${
+                        place.reportCount === 1 ? "report" : "reports"
+                      } on this place`}
+                      accessibilityHint="Opens the list of reports so you can confirm or dispute them"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/place/[id]/reports",
+                          params: { id: place._id },
+                        })
+                      }
+                      style={[
+                        styles.countBadge,
+                        { backgroundColor: appTheme.colors.primary + "20" },
+                      ]}
                     >
-                      {place.reportCount}{" "}
-                      {place.reportCount === 1 ? "report" : "reports"}
-                    </AppText>
+                      <AppText
+                        variant="label"
+                        style={{ color: appTheme.colors.primary, fontSize: 12 }}
+                      >
+                        {place.reportCount}{" "}
+                        {place.reportCount === 1 ? "report" : "reports"}
+                      </AppText>
+                    </TouchTarget>
                   </View>
                 </View>
+
+                {CATEGORY_DISPLAY_ORDER.map((categoryName) => {
+                  const attrs = groupedAttributes.get(categoryName);
+                  if (!attrs || attrs.length === 0) return null;
+                  return (
+                    <AttributeGroup
+                      key={categoryName}
+                      categoryName={categoryName}
+                      attributes={attrs}
+                    />
+                  );
+                })}
               </View>
 
-              {CATEGORY_DISPLAY_ORDER.map((categoryName) => {
-                const attrs = groupedAttributes.get(categoryName);
-                if (!attrs || attrs.length === 0) return null;
-                return (
-                  <AttributeGroup
-                    key={categoryName}
-                    categoryName={categoryName}
-                    attributes={attrs}
-                  />
-                );
-              })}
-            </View>
+              {/* ── Add Or Correct ───────────────────────────── */}
+              {/* Sits outside `attributesSection` and outside any
+                  `accessible` group, so it is not swallowed by one and not
+                  read as part of the attribute list. Outlined rather than
+                  filled, which is what keeps it secondary to the data above
+                  and to `NoDataPrompt`'s filled call to action on the empty
+                  place: this one adds to what is already recorded, or
+                  corrects a value that is wrong. */}
+              <TouchTarget
+                accessibilityRole="button"
+                accessibilityLabel="Add or correct this report"
+                accessibilityHint="Opens the accessibility report form to add what others missed or fix a value that is wrong"
+                onPress={openReportForm}
+                style={[
+                  styles.addReportButton,
+                  { borderColor: appTheme.colors.border },
+                ]}
+              >
+                <AppText
+                  variant="bodyStrong"
+                  style={{ color: appTheme.colors.primary }}
+                >
+                  Add or correct this report
+                </AppText>
+              </TouchTarget>
+            </>
           ) : (
             /* ── No Data State ─────────────────────────────── */
-            <NoDataPrompt
-              onContribute={() => {
-                // Placeholder — will navigate to report submission in a future story
-              }}
-            />
+            <NoDataPrompt onContribute={openReportForm} />
           )}
         </ScrollView>
       </Screen>
@@ -250,5 +307,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.xs,
+  },
+  addReportButton: {
+    borderRadius: radii.md,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: spacing.lg,
   },
 });

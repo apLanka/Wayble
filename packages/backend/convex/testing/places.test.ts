@@ -3,6 +3,7 @@ import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { api } from "../_generated/api";
 import schema from "../schema";
+import type { Id } from "../_generated/dataModel";
 
 const modules = import.meta.glob("../**/*.*s");
 
@@ -343,9 +344,7 @@ describe("places.getPlace aggregation and last-write-wins", () => {
         placeId,
         authorId: userId,
         taxonomyVersion: 1,
-        attributes: [
-          { key: "sensory.quiet_space", value: "yes" },
-        ],
+        attributes: [{ key: "sensory.quiet_space", value: "yes" }],
         evidence: [],
         observedAt: 3000,
         status: "superseded",
@@ -378,5 +377,110 @@ describe("places.getPlace aggregation and last-write-wins", () => {
     });
 
     expect(attrMap.has("sensory.quiet_space")).toBe(false);
+  });
+});
+
+describe("places.listAll", () => {
+  /** Inserts `count` places plus one report on the first, optionally
+   *  non-active. Reuses the file's `seedUser` so the users insert matches
+   *  whatever the schema currently requires. */
+  async function seedPlaces(
+    t: ReturnType<typeof setup>,
+    opts: { count: number; reportStatus?: "active" | "superseded" },
+  ) {
+    const ownerId = await seedUser(t);
+    return await t.run(async (ctx) => {
+      const ids: Id<"places">[] = [];
+      for (let i = 0; i < opts.count; i++) {
+        ids.push(
+          await ctx.db.insert("places", {
+            name: `Place ${String(i).padStart(2, "0")}`,
+            category: "retail",
+            address: `${i} Test Street`,
+            location: { latitude: 6.9, longitude: 79.8 },
+            accessibilityCategories: i === 0 ? ["wheelchair"] : [],
+            createdBy: ownerId,
+            updatedAt: 1,
+          }),
+        );
+      }
+
+      await ctx.db.insert("reports", {
+        placeId: ids[0]!,
+        authorId: ownerId,
+        taxonomyVersion: 1,
+        attributes: [{ key: "mobility.wheelchair_seating", value: "yes" }],
+        evidence: [],
+        observedAt: 1,
+        status: opts.reportStatus ?? "active",
+        updatedAt: 1,
+      });
+
+      return { ownerId, ids };
+    });
+  }
+
+  test("returns every place without needing a location", async () => {
+    const t = setup();
+    await seedPlaces(t, { count: 3 });
+
+    const places = await t.query(api.places.listAll, {});
+
+    expect(places).toHaveLength(3);
+    // No `point` argument anywhere — that is the whole point of this query.
+    expect(places.every((p) => p.location.latitude === 6.9)).toBe(true);
+  });
+
+  test("sorts by name so the list does not reshuffle", async () => {
+    const t = setup();
+    await seedPlaces(t, { count: 3 });
+
+    const places = await t.query(api.places.listAll, {});
+
+    expect(places.map((p) => p.name)).toEqual([
+      "Place 00",
+      "Place 01",
+      "Place 02",
+    ]);
+  });
+
+  test("counts only active reports", async () => {
+    const t = setup();
+    await seedPlaces(t, { count: 2, reportStatus: "active" });
+
+    let places = await t.query(api.places.listAll, {});
+    expect(places[0]?.reportCount).toBe(1);
+    expect(places[1]?.reportCount).toBe(0);
+
+    // A superseded report must stop counting, matching `getPlace` — the card
+    // and the detail screen it opens cannot disagree.
+    const superseded = setup();
+    await seedPlaces(superseded, { count: 2, reportStatus: "superseded" });
+
+    places = await superseded.query(api.places.listAll, {});
+    expect(places.every((p) => p.reportCount === 0)).toBe(true);
+  });
+
+  test("defaults accessibilityCategories to an empty array", async () => {
+    const t = setup();
+    await seedPlaces(t, { count: 2 });
+
+    const places = await t.query(api.places.listAll, {});
+
+    expect(places[0]?.accessibilityCategories).toEqual(["wheelchair"]);
+    expect(places[1]?.accessibilityCategories).toEqual([]);
+  });
+
+  test("respects the limit argument", async () => {
+    const t = setup();
+    await seedPlaces(t, { count: 5 });
+
+    expect(await t.query(api.places.listAll, { limit: 2 })).toHaveLength(2);
+  });
+
+  test("returns an empty list when there are no places", async () => {
+    const t = setup();
+
+    expect(await t.query(api.places.listAll, {})).toEqual([]);
   });
 });
