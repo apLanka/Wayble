@@ -44,14 +44,8 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="debug" options={{ title: "Debug" }} />
-            {/* Screens are keyed by route *node* name, not href, and a
-                directory route's node name keeps its `index` segment (see
-                `getReactNavigationConfig.js`). This screen moved from
-                `place/[id].tsx` to `place/[id]/index.tsx` so `/place/[id]`
-                could have a child, which is what `place/[id]/reports` is.
-                The href is still `/place/[id]`. */}
             <Stack.Screen
-              name="place/[id]/index"
+              name="place/[id]"
               options={{ title: "Place Details" }}
             />
             <Stack.Screen

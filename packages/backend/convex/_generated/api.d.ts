@@ -24,7 +24,6 @@ import type * as seed from "../seed.js";
 import type * as seed_placesSeedData from "../seed/placesSeedData.js";
 import type * as users from "../users.js";
 import type * as verificationNeed from "../verificationNeed.js";
-import type * as verifications from "../verifications.js";
 
 import type {
   ApiFromModules,
@@ -49,7 +48,6 @@ declare const fullApi: ApiFromModules<{
   "seed/placesSeedData": typeof seed_placesSeedData;
   users: typeof users;
   verificationNeed: typeof verificationNeed;
-  verifications: typeof verifications;
 }>;
 
 /**
