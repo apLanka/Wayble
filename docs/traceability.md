@@ -3,16 +3,17 @@
 Story-to-test mapping for Wayble. Seeded from the PRD §9 starter table and
 extended as stories land.
 
-Only the US-08 row is seeded so far. The PRD's §9 starter table has 14 rows
-(US-01 … US-23) and the other 13 are outstanding — several of which already
+US-08 and US-10 are mapped so far. The PRD's §9 starter table has 14 rows
+(US-01 … US-23) and the other 12 are outstanding — several of which already
 have shipped tests (US-01 `auth.test.ts`, US-02 `users.test.ts`, US-05
 `places.test.ts`, US-06 `schema.test.ts`). Their absence from this table is
 not evidence that they are untested. The PRD itself is not tracked, so the
-seed row cannot be re-verified from a fresh clone.
+seeded rows cannot be re-verified from a fresh clone.
 
-| Story | Feature       | Convex function | Screen / file                                           | Test                                                                                           | Owner |
-| ----- | ------------- | --------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----- |
-| US-08 | Submit report | `submitReport`  | `app/report/[placeId].tsx`, CTA in `app/place/[id].tsx` | `convex/reports.test.ts` (18 cases), `report-draft.test.ts` (29), `report-errors.test.ts` (15) | M1    |
+| Story | Feature                     | Convex function                             | Screen / file                                                                                         | Test                                                                                                                                                                                                                                                                                                    | Owner |
+| ----- | --------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| US-08 | Submit report               | `submitReport`                              | `app/report/[placeId].tsx`, CTA in `app/place/[id]/index.tsx`                                         | `convex/reports.test.ts` (18 cases), `report-draft.test.ts` (30), `report-errors.test.ts` (14)                                                                                                                                                                                                          | M1    |
+| US-10 | Confirm or dispute a report | `verifyReport`, `forReport`, `listForPlace` | `app/place/[id]/reports.tsx`, `components/place/VerifyControl.tsx`, `components/place/ReportCard.tsx` | `convex/verifications.test.ts` (11 cases), `convex/reports.test.ts` (5 `listForPlace`), `verification-tally.test.ts` (14), `verification-errors.test.ts` (6), `format-relative-time.test.ts` (9); `VerifyControl` and `ReportCard` have no automated coverage — `apps/mobile` has no component renderer | M1    |
 
 ## Index notes
 
@@ -23,9 +24,10 @@ seed row cannot be re-verified from a fresh clone.
 
 ## Status
 
-| Story | Test coverage                                                   | Known gaps                                                                                                                                                                                   |
-| ----- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| US-08 | 18 Convex cases, 44 mobile cases (151 in the two vitest suites) | No component test runner; the five report components, the report route, and the report CTA in `app/place/[id].tsx` have no automated coverage, so verification is the manual checklist below |
+| Story | Test coverage                                                                                                                                                                                                    | Known gaps                                                                                                                                                                                                                         |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US-08 | 18 Convex cases, 44 mobile cases (151 in the two vitest suites)                                                                                                                                                  | No component test runner; the five report components, the report route, and the report CTA in `app/place/[id]/index.tsx` have no automated coverage, so verification is the manual checklist below                                 |
+| US-10 | `verifications.test.ts` 11 backend cases, plus 5 `reports.listForPlace` cases; `verification-tally`, `verification-errors` and `format-relative-time` are pure modules fully covered by Vitest (29 mobile cases) | `VerifyControl` and `ReportCard` have no automated coverage — `apps/mobile` has no component renderer — so the screen is verified by the manual checklist below; the vote path is covered indirectly through the pure tally module |
 
 ## Where the numbers come from
 
@@ -43,13 +45,46 @@ $ cd apps/mobile && bunx vitest run
   the pre-existing suites, untouched by US-08 (`git diff main...HEAD -- '*test*'`
   returns only the three files this story added or created). They were not
   re-verified against `main` in this task.
-- The 44 mobile tests split 29 in `report-draft.test.ts` and 15 in
-  `report-errors.test.ts`. Both files test pure logic only.
+- The 44 mobile tests split 30 in `report-draft.test.ts` and 14 in
+  `report-errors.test.ts`. Both files test pure logic only. **Both** recorded
+  counts have since drifted — 29 → 30 and 15 → 14 — so the total of 44 stayed
+  right while the split did not. US-10 left both files untouched, so the drift
+  is not accounted for here; it was found by recounting the two files for the
+  US-10 row above.
 - `turbo run test` runs both vitest workspaces and reports 151 passing tests.
 - **That is not the repo total.** A third suite, `scripts/lib/env-file.test.ts`
   (17 `bun:test` cases), runs under the root `bun run test`. `scripts/` is not a
   turbo workspace, so `turbo run test` excludes it. Repo-wide there are 168
   tests across three runners, not 151.
+
+### Where the US-10 numbers come from
+
+Re-measured for this story; the block above is US-08's and has not been
+re-measured against the current tree.
+
+```
+$ cd packages/backend && bunx vitest run
+ Test Files  17 passed (17)
+      Tests  162 passed (162)
+
+$ cd apps/mobile && bunx vitest run
+ Test Files  5 passed (5)
+      Tests  73 passed (73)
+```
+
+- `verifications.test.ts` holds 11 cases: 7 under `verifications.verifyReport`
+  and 4 under `verifications.forReport`. The 7th `verifyReport` case,
+  "a different user can verify the report", was added during a fix round after
+  the plan recorded 6, so an earlier draft of the US-10 row said 10.
+- `reports.test.ts` grew from 18 to 23; the 5 new ones are all
+  `reports.listForPlace`.
+- The 29 US-10 mobile cases split 14 in `verification-tally.test.ts`, 9 in
+  `format-relative-time.test.ts` and 6 in `verification-errors.test.ts`. All
+  three files test pure logic only; none of them renders a component.
+- Backend total moved 151 → 162 and the mobile total 44 → 73, so the repo-wide
+  figure is now 253 across three runners (162 + 73 + 18 in
+  `scripts/lib/env-file.test.ts`, which is 18 rather than the 17 recorded
+  above).
 
 ## Known gaps
 
@@ -58,7 +93,7 @@ $ cd apps/mobile && bunx vitest run
   `report-errors.ts` only. `CategoryStep`, `AttributesStep`, `NotesStep`,
   `ConfirmStep`, `StepIndicator` and the `report/[placeId]` route have zero
   automated coverage, as is the report CTA added to
-  `app/place/[id].tsx`.
+  `app/place/[id]/index.tsx`.
 - **`bun run test` at the repo root runs none of US-08's tests.** It executes
   `bun test scripts/` and exits green having run zero US-08 assertions. Use
   `turbo run test`, or the per-workspace commands above.
@@ -119,3 +154,23 @@ ticked and the result is recorded in the US-08 pull request.
 - [ ] Light and dark mode both legible on all four steps
 - [ ] 200% font scale causes no clipping (WCAG 1.4.4)
 - [ ] All touch targets ≥ 44×44 dp (WCAG 2.5.8)
+
+### US-10 — confirm or dispute a report
+
+These nine are the **only** verification `VerifyControl`, `ReportCard` and
+`app/place/[id]/reports.tsx` will get: `apps/mobile` has no component renderer,
+so nothing below can fail a test. Each is worded as something a human can do
+and observe. The last three exist because review found defects that no type
+checker or linter could see — an invisible focus ring that passed both `tsc`
+and `eslint` twice, an announce gate whose bug is only observable by racing two
+taps, and a signed-out screen that read as a dead end.
+
+- [ ] A signed-in user can confirm and dispute another user's report, and change their mind
+- [ ] A second signed-in user sees the first user's vote with no manual refresh
+- [ ] Your own report shows disabled controls with a visible reason, and voting on it via any client is rejected
+- [ ] No author email address appears in any reports response
+- [ ] The reports list length matches the `N reports` badge on the place detail
+- [ ] VerifyControl passes screen reader, 200% font scale, and 44×44 dp checks
+- [ ] Keyboard-focus both Agree and Dispute in both the selected and unselected states, in light and dark mode, and confirm the focus ring is visible in all four combinations and changes with the state
+- [ ] Rapid double-tap across the two buttons so the attempts interleave, and confirm at most one announcement is heard and no stale success is announced over a failure
+- [ ] Sign out, open the reports screen from the place detail, and confirm a sign-in affordance appears rather than a dead end

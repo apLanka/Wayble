@@ -42,7 +42,7 @@ const reportStatusValidator = v.union(
   v.literal("removed"),
 );
 
-const verificationVerdictValidator = v.union(
+export const verificationVerdictValidator = v.union(
   v.literal("confirm"),
   v.literal("dispute"),
 );
