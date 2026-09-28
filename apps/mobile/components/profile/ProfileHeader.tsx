@@ -4,6 +4,7 @@ import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { AppSymbol, HOME_SYMBOLS } from "@/components/ui/app-symbol";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -42,8 +43,8 @@ export function ProfileHeader({
           <TouchTarget
             onPress={onEditName}
             accessibilityRole="button"
-            accessibilityLabel="Edit display name"
-            accessibilityHint="Opens a dialog to change your name"
+            accessibilityLabel={STRINGS.profile.header.editLabel}
+            accessibilityHint={STRINGS.profile.header.editHint}
             style={styles.editButton}
           >
             <AppSymbol

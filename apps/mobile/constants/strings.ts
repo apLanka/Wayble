@@ -303,6 +303,18 @@ export const STRINGS = {
         "Your device clock looks wrong. Turn on automatic date and time, then try again.",
       generic: "We couldn't submit your report. Please try again.",
     },
+
+    /**
+     * A failed write that is not tied to one story. Shared by the
+     * accessibility-needs editor and the notifications screen, which both
+     * showed the same sentence.
+     */
+    saveFailed: "Couldn't save that change. Check your connection.",
+
+    nameSaveFailed: "Couldn't save your name. Check your connection.",
+
+    needsLoadFailed:
+      "Couldn't load your accessibility needs. Check your connection.",
   },
 
   /**
@@ -710,6 +722,95 @@ export const STRINGS = {
         "This report form is missing a place. Go back and try again.",
       reportingOn: (placeName: string) => `Reporting on ${placeName}`,
     },
+  },
+
+  /**
+   * The profile tab and the accessibility-needs editor.
+   *
+   * `accessibilityNeedsTitle` is sentence case, which is what the body text
+   * has always said. The stack header says "Accessibility Needs" in title
+   * case and lives at `navigation.titles.accessibilityNeeds`. Both are correct
+   * where they are; unifying them is a copy change, not a refactor.
+   */
+  profile: {
+    title: "Profile",
+    loading: "Loading profile…",
+    accessibilityNeedsTitle: "Accessibility needs",
+    needsLinkHint:
+      "Opens the screen where you choose the accessibility features you need",
+
+    signOut: {
+      button: "Sign Out",
+      label: "Sign out of your account",
+      hint: "Signs you out and returns to the sign in screen",
+    },
+
+    header: {
+      editLabel: "Edit display name",
+      editHint: "Opens a dialog to change your name",
+      guestSubtitle: "Sign in to save your profile",
+      defaultAvatar: "Default profile avatar",
+    },
+
+    guest: {
+      signIn: "Sign In",
+      createAccount: "Create Account",
+      signInLabel: "Sign in",
+      createAccountLabel: "Create account",
+      signInHint: "Opens the sign in screen",
+      signUpHint: "Opens the sign up screen",
+    },
+
+    editName: {
+      title: "Edit name",
+      body: "This is how you appear in Wayble.",
+      label: "Display name",
+      placeholder: "Your name",
+      closeLabel: "Close edit name dialog",
+      cancel: "Cancel",
+      cancelLabel: "Cancel editing name",
+      save: "Save",
+      saveLabel: "Save display name",
+    },
+
+    needs: {
+      loading: "Loading your needs…",
+      signInToSet: "Sign in to set your needs",
+      notSetYet: "Not set yet",
+      /** The summary shown when nothing is selected. */
+      signedInBody:
+        "Your accessibility needs are saved to your account so the app can highlight places that match them.",
+      editorBody:
+        "Choose the features you need. We use them to highlight and rank places that work for you. Changes save automatically.",
+      clearAll: "Clear all",
+      clearAllLabel: "Clear all accessibility needs",
+      cleared: "All accessibility needs cleared.",
+      noneSelected: "No needs selected yet",
+    },
+
+    /** "0 needs selected" / "1 need selected" — matches the util it replaces. */
+    needsCountLabel: (count: number): string =>
+      `${count} ${plural(count, "need", "needs")} selected`,
+
+    /**
+     * The per-group row's spoken name. The `selected` flag is what makes it
+     * "remove from" rather than "add to" — the same row does both.
+     */
+    needsCategoryHint: (categoryName: string, selected: boolean): string =>
+      `${categoryName} need. Double tap to ${
+        selected ? "remove from" : "add to"
+      } your accessibility needs.`,
+
+    /** " · 3 selected" — the count badge on a group row. */
+    needsCategoryCount: (count: number): string => ` · ${count} selected`,
+
+    navRowLabel: (title: string, subtitle: string | null): string =>
+      subtitle ? `${title}. ${subtitle}` : title,
+
+    profilePhotoLabel: (displayName: string | null): string =>
+      displayName
+        ? `Profile photo for ${displayName}`
+        : STRINGS.profile.header.defaultAvatar,
   },
 
   // Added by later tasks:

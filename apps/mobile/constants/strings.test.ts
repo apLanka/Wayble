@@ -43,6 +43,53 @@ describe("STRINGS.common.countLabel", () => {
   });
 });
 
+describe("STRINGS.profile", () => {
+  it("navRowLabel joins title and subtitle with a full stop", () => {
+    expect(
+      STRINGS.profile.navRowLabel("Reports", "For places you follow"),
+    ).toBe("Reports. For places you follow");
+  });
+
+  // The absent-clause case. "Sign Out. " type-checks and renders, and only
+  // fails when a screen reader reads it aloud.
+  it("navRowLabel returns the title alone when there is no subtitle", () => {
+    expect(STRINGS.profile.navRowLabel("Sign Out", null)).toBe("Sign Out");
+  });
+
+  it("profilePhotoLabel names the person", () => {
+    expect(STRINGS.profile.profilePhotoLabel("Nimal")).toBe(
+      "Profile photo for Nimal",
+    );
+  });
+
+  it("profilePhotoLabel falls back to the default avatar", () => {
+    expect(STRINGS.profile.profilePhotoLabel(null)).toBe(
+      "Default profile avatar",
+    );
+  });
+
+  // Pinned to the exact strings utils/get-accessibility-needs-summary.ts
+  // returns today. Its test asserts 0, 1 and 2.
+  it("needsCountLabel matches the util it replaces", () => {
+    expect(STRINGS.profile.needsCountLabel(0)).toBe("0 needs selected");
+    expect(STRINGS.profile.needsCountLabel(1)).toBe("1 need selected");
+    expect(STRINGS.profile.needsCountLabel(2)).toBe("2 needs selected");
+  });
+
+  it("needsCategoryHint says which way the tap goes", () => {
+    expect(STRINGS.profile.needsCategoryHint("Mobility", true)).toBe(
+      "Mobility need. Double tap to remove from your accessibility needs.",
+    );
+    expect(STRINGS.profile.needsCategoryHint("Mobility", false)).toBe(
+      "Mobility need. Double tap to add to your accessibility needs.",
+    );
+  });
+
+  it("needsCategoryCount is a suffix, and is only used when positive", () => {
+    expect(STRINGS.profile.needsCategoryCount(3)).toBe(" · 3 selected");
+  });
+});
+
 describe("STRINGS.report", () => {
   it("stepOf states the position and the total", () => {
     expect(STRINGS.report.stepOf(2, 4)).toBe("Step 2 of 4");
