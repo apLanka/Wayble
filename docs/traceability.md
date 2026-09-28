@@ -3,12 +3,32 @@
 Story-to-test mapping for Wayble. Seeded from the PRD §9 starter table and
 extended as stories land.
 
-US-08 and US-10 are mapped so far. The PRD's §9 starter table has 14 rows
-(US-01 … US-23) and the other 12 are outstanding — several of which already
-have shipped tests (US-01 `auth.test.ts`, US-02 `users.test.ts`, US-05
-`places.test.ts`, US-06 `schema.test.ts`). Their absence from this table is
-not evidence that they are untested. The PRD itself is not tracked, so the
-seeded rows cannot be re-verified from a fresh clone.
+**Sprint 3 is mapped below: two stories delivered, five recorded as not
+delivered.** US-08 and US-10 have rows. US-09, US-11, US-13, US-16 and US-23 do
+not, because the functions PRD §9 names for them are not in `main` — the evidence
+is in [`docs/sprint-3-delivery-facts.md`](./sprint-3-delivery-facts.md), and a row
+asserting a function, screen and test that do not exist would be a fabrication
+rather than a traceability record.
+
+The PRD's §9 starter table has 14 rows (US-01 … US-23). The 5 rows outside
+Sprint 3 are still outstanding — several of which already have shipped tests
+(US-01 `auth.test.ts`, US-02 `users.test.ts`, US-05 `places.test.ts`, US-06
+`schema.test.ts`). Their absence from this table is not evidence that they are
+untested. The PRD itself is not tracked, so the seeded rows cannot be re-verified
+from a fresh clone.
+
+**Owner codes.** The `Owner` column uses `M1`/`M2`/`M3` from PRD §9. **These do
+not map cleanly onto the four people**, and the mismatch is worth naming rather
+than inheriting: US-13 is coded `M2` but assigned to Nishara Senadheera, while
+US-11 (`M3`) and US-23 (`M3`) are split across two people. Read a code as "the
+PRD's planning slot", not as a person. Sprint 3's actual assignments:
+
+| Code  | Person             | Sprint 3 stories |
+| ----- | ------------------ | ---------------- |
+| M1    | Pasindu Lanka      | US-08, US-10     |
+| M2    | Pasindu Janith     | US-09, US-16     |
+| M2/M3 | Nishara Senadheera | US-11, US-13     |
+| M3    | Aathika Ilmudeen   | US-23            |
 
 | Story | Feature                     | Convex function                             | Screen / file                                                                                         | Test                                                                                                                                                                                                                                                                                                    | Owner |
 | ----- | --------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
@@ -21,70 +41,68 @@ seeded rows cannot be re-verified from a fresh clone.
   `by_place_and_author`. The third was added by US-08 so the 24-hour
   duplicate guard is a single indexed read. The S0-5 plan recorded only the
   first two.
+- **Both Sprint 3 rows reached `main` on 2026-09-28, ten days after the sprint
+  closed on 18 Sep** — in a single merge, `e6379fc`, on a branch named
+  `chore/strip-claude-coauthor`. US-08's 44 commits are dated 16 Sep; US-10's 10
+  are dated 27 Sep. `main` received no merge at all between 29 Aug and 26 Sep, so
+  the sprint's entire output shipped as one event. Evidence and method:
+  [`docs/sprint-3-delivery-facts.md`](./sprint-3-delivery-facts.md) §2. This
+  matters when reading the board's close dates against the repository: they do
+  not agree.
 
 ## Status
 
 | Story | Test coverage                                                                                                                                                                                                    | Known gaps                                                                                                                                                                                                                         |
 | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| US-08 | 18 Convex cases, 44 mobile cases (151 in the two vitest suites)                                                                                                                                                  | No component test runner; the five report components, the report route, and the report CTA in `app/place/[id]/index.tsx` have no automated coverage, so verification is the manual checklist below                                 |
+| US-08 | 18 Convex cases, 44 mobile cases (62 for this story; 296 repo-wide across three runners)                                                                                                                         | No component test runner; the five report components, the report route, and the report CTA in `app/place/[id]/index.tsx` have no automated coverage, so verification is the manual checklist below                                 |
 | US-10 | `verifications.test.ts` 11 backend cases, plus 5 `reports.listForPlace` cases; `verification-tally`, `verification-errors` and `format-relative-time` are pure modules fully covered by Vitest (29 mobile cases) | `VerifyControl` and `ReportCard` have no automated coverage — `apps/mobile` has no component renderer — so the screen is verified by the manual checklist below; the vote path is covered indirectly through the pure tally module |
 
 ## Where the numbers come from
 
-```
-$ cd packages/backend && bunx vitest run
- Test Files  12 passed (12)
-      Tests  107 passed (107)
-
-$ cd apps/mobile && bunx vitest run
- Test Files  2 passed (2)
-      Tests  44 passed (44)
-```
-
-- 18 of the 107 backend tests are in `convex/reports.test.ts`; the other 89 are
-  the pre-existing suites, untouched by US-08 (`git diff main...HEAD -- '*test*'`
-  returns only the three files this story added or created). They were not
-  re-verified against `main` in this task.
-- The 44 mobile tests split 30 in `report-draft.test.ts` and 14 in
-  `report-errors.test.ts`. Both files test pure logic only. **Both** recorded
-  counts have since drifted — 29 → 30 and 15 → 14 — so the total of 44 stayed
-  right while the split did not. US-10 left both files untouched, so the drift
-  is not accounted for here; it was found by recounting the two files for the
-  US-10 row above.
-- `turbo run test` runs both vitest workspaces and reports 151 passing tests.
-- **That is not the repo total.** A third suite, `scripts/lib/env-file.test.ts`
-  (17 `bun:test` cases), runs under the root `bun run test`. `scripts/` is not a
-  turbo workspace, so `turbo run test` excludes it. Repo-wide there are 168
-  tests across three runners, not 151.
-
-### Where the US-10 numbers come from
-
-Re-measured for this story; the block above is US-08's and has not been
-re-measured against the current tree.
+**Re-measured 2026-09-29 for S4-6 against `origin/main` at `e6379fc`.** The two
+earlier blocks this section used to hold -- one per story, the second explicitly
+"not re-measured against the current tree" -- are replaced by this one.
+Per-suite counts are in `docs/sprint-3-delivery-facts.md` §3.
 
 ```
-$ cd packages/backend && bunx vitest run
- Test Files  17 passed (17)
-      Tests  162 passed (162)
+$ bun run --filter @packages/backend test
+  Test Files  17 passed (17)
+       Tests  162 passed (162)
 
-$ cd apps/mobile && bunx vitest run
- Test Files  5 passed (5)
-      Tests  73 passed (73)
+$ bun run --filter mobile test
+  Test Files  7 passed (7)
+       Tests  116 passed (116)
+
+$ bun run test          # root: bun test scripts/
+ 18 pass
+  Ran 18 tests across 1 file.
 ```
 
-- `verifications.test.ts` holds 11 cases: 7 under `verifications.verifyReport`
-  and 4 under `verifications.forReport`. The 7th `verifyReport` case,
-  "a different user can verify the report", was added during a fix round after
-  the plan recorded 6, so an earlier draft of the US-10 row said 10.
-- `reports.test.ts` grew from 18 to 23; the 5 new ones are all
-  `reports.listForPlace`.
-- The 29 US-10 mobile cases split 14 in `verification-tally.test.ts`, 9 in
-  `format-relative-time.test.ts` and 6 in `verification-errors.test.ts`. All
-  three files test pure logic only; none of them renders a component.
-- Backend total moved 151 → 162 and the mobile total 44 → 73, so the repo-wide
-  figure is now 253 across three runners (162 + 73 + 18 in
-  `scripts/lib/env-file.test.ts`, which is 18 rather than the 17 recorded
-  above).
+- **Repo-wide: 296 across three runners** -- 162 backend + 116 mobile + 18 in
+  `scripts/lib/env-file.test.ts`. The previous figure of 253 predates S4-5, which
+  added 43 mobile cases. `scripts/` is still not a turbo workspace, so
+  `turbo run test` still reports only the first two, and is not the repo total.
+- **The per-story counts in both rows above are still correct**, re-counted from
+  the test declarations rather than from the runner's total:
+
+  | Story | backend                                                     | mobile                                                                             | total  |
+  | ----- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------ |
+  | US-08 | 18 -- `reports.test.ts`, "US-08 report submission"          | 44 -- `report-draft` 30 + `report-errors` 14                                       | **62** |
+  | US-10 | 16 -- `verifications.test.ts` 11 + `reports.listForPlace` 5 | 29 -- `verification-tally` 14 + `format-relative-time` 9 + `verification-errors` 6 | **45** |
+
+  `reports.test.ts` holds 23 cases across two `describe` blocks -- 18 US-08 and 5
+  `reports.listForPlace` for US-10 -- so the two stories share the file without
+  sharing cases. `verifications.test.ts` holds 11 across two: 7 `verifyReport`,
+  4 `forReport`.
+
+- `format-relative-time.test.ts` is counted under **both** stories: US-08 wrote
+  it, US-10 was the first consumer. So 62 + 45 = 107 exceeds the 116 mobile
+  cases by 9 -- counted twice by design, not double-counted in the repo total.
+- **Both byte-pinned suites survived S4-5 unchanged.** The refactor that moved
+  335 strings into `constants/strings.ts` edited neither
+  `utils/format-relative-time.test.ts` nor
+  `components/place/verification-tally.test.ts`, and both still pass. That is the
+  evidence that moving a string's _home_ did not change its _output_.
 
 ## Known gaps
 
