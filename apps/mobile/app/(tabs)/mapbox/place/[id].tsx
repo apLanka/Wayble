@@ -20,7 +20,10 @@ export default function PlaceDetailScreen() {
   const params = useLocalSearchParams();
 
   // Safely parse params
-  const name = typeof params.name === "string" ? params.name : "Unknown Place";
+  const name =
+    typeof params.name === "string"
+      ? params.name
+      : STRINGS.map.placeDetail.unknownPlace;
   const category =
     typeof params.category === "string" ? params.category : "unknown";
   const address = typeof params.address === "string" ? params.address : null;

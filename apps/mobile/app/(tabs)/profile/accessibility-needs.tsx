@@ -95,10 +95,8 @@ export default function AccessibilityNeedsScreen() {
     try {
       await updateProfile({ accessibilityNeeds });
     } catch {
-      setError("Couldn't save that change. Check your connection.");
-      AccessibilityInfo.announceForAccessibility(
-        "Couldn't save that change. Check your connection.",
-      );
+      setError(STRINGS.errors.saveFailed);
+      AccessibilityInfo.announceForAccessibility(STRINGS.errors.saveFailed);
     }
   };
 
@@ -118,7 +116,7 @@ export default function AccessibilityNeedsScreen() {
 
   const handleClearAll = () => {
     AccessibilityInfo.announceForAccessibility(
-      "All accessibility needs cleared.",
+      STRINGS.announcements.needsCleared,
     );
     void persist(new Set());
   };

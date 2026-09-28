@@ -130,7 +130,7 @@ export default function ReportScreen() {
     const title = stepTitle(step);
     if (title) {
       AccessibilityInfo.announceForAccessibility(
-        `Step ${step + 1} of ${REPORT_STEPS.length}: ${title}`,
+        STRINGS.announcements.stepOf(step + 1, REPORT_STEPS.length, title),
       );
     }
   }, []);
@@ -148,7 +148,7 @@ export default function ReportScreen() {
         dispatch({ type: "back" });
         const title = stepTitle(draft.step - 1);
         AccessibilityInfo.announceForAccessibility(
-          `Step ${draft.step} of ${REPORT_STEPS.length}: ${title}`,
+          STRINGS.announcements.stepOf(draft.step, REPORT_STEPS.length, title),
         );
         return true;
       },
@@ -186,7 +186,7 @@ export default function ReportScreen() {
         params: { id: placeIdArg },
       });
       AccessibilityInfo.announceForAccessibility(
-        "Report submitted. Thank you.",
+        STRINGS.announcements.reportSubmitted,
       );
     } catch (caught) {
       // Convex reverts the optimistic patch on failure; all that is left is

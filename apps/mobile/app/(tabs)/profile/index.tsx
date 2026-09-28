@@ -61,7 +61,7 @@ export default function ProfileScreen() {
       await updateProfile({ displayName: name });
       setIsEditModalVisible(false);
     } catch {
-      setNameError("Couldn't save your name. Check your connection.");
+      setNameError(STRINGS.errors.nameSaveFailed);
     } finally {
       setIsSavingName(false);
     }
@@ -82,7 +82,7 @@ export default function ProfileScreen() {
 
   const isGuest = currentUser === null;
   const displayName = isGuest
-    ? "Guest"
+    ? STRINGS.common.guest
     : currentUser.displayName || currentUser.name || STRINGS.common.user;
 
   return (
@@ -108,7 +108,7 @@ export default function ProfileScreen() {
         />
 
         <ProfileNavRow
-          title={STRINGS.profile.accessibilityNeedsTitle}
+          title={STRINGS.profile.needsRowTitle}
           subtitle={needsSummary}
           accessibilityHint={STRINGS.profile.needsLinkHint}
           onPress={() => router.push("/profile/accessibility-needs")}

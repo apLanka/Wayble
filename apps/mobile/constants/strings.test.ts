@@ -68,9 +68,10 @@ describe("STRINGS.profile", () => {
     );
   });
 
-  // Pinned to the exact strings utils/get-accessibility-needs-summary.ts
-  // returns today. Its test asserts 0, 1 and 2.
-  it("needsCountLabel matches the util it replaces", () => {
+  // Pinned to the exact sentences utils/get-accessibility-needs-summary.ts
+  // returns, because that function now delegates here. Nothing else pins
+  // them: there is no test file for that util.
+  it("needsCountLabel matches the util it replaced", () => {
     expect(STRINGS.profile.needsCountLabel(0)).toBe("0 needs selected");
     expect(STRINGS.profile.needsCountLabel(1)).toBe("1 need selected");
     expect(STRINGS.profile.needsCountLabel(2)).toBe("2 needs selected");
@@ -146,6 +147,41 @@ describe("STRINGS.report", () => {
     expect(STRINGS.report.confirm.summaryLabel("Side entrance only")).toBe(
       "Your note: Side entrance only",
     );
+  });
+
+  // The most grammar-heavy function in the module: a list join, two plural
+  // forms and a pronoun switch, all spoken aloud. Ruling 14 moved the English
+  // joining here, so it is pinned here.
+  describe("attributes.outstandingNote", () => {
+    it("returns empty for a count of zero rather than saying 'undefined'", () => {
+      expect(STRINGS.report.attributes.outstandingNote(0, [])).toBe("");
+    });
+
+    it("uses the singular noun and 'it' for one attribute", () => {
+      expect(STRINGS.report.attributes.outstandingNote(1, ["Mobility"])).toBe(
+        "A note is still required for 1 attribute in Mobility. Go back and choose Mobility to add it.",
+      );
+    });
+
+    it("pluralises the noun and the pronoun for more than one", () => {
+      expect(
+        STRINGS.report.attributes.outstandingNote(3, ["Mobility", "Vision"]),
+      ).toBe(
+        "A note is still required for 3 attributes in Mobility and Vision. Go back and choose Mobility and Vision to add them.",
+      );
+    });
+
+    // Three groups is where a naive join produces "A, B and " with nothing
+    // after it; two groups is where it produces "A,  and B".
+    it("joins three groups with commas and a final 'and'", () => {
+      expect(
+        STRINGS.report.attributes.outstandingNote(4, [
+          "Mobility",
+          "Vision",
+          "Hearing",
+        ]),
+      ).toContain("in Mobility, Vision and Hearing.");
+    });
   });
 });
 

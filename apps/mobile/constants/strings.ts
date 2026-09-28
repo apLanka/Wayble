@@ -42,7 +42,13 @@
  * - `packages/backend/convex/notificationCopy.ts` — 19 server-side push
  *   labels. The backend cannot import from `apps/mobile`, and that file's own
  *   comment says US-22 turns its map into a locale lookup.
- * - `components/debug/*` and `app/debug/*` — dev-only screens, never shipped.
+ * - `components/debug/*` and `app/debug/*` — real expo-router routes, reachable
+ *   in any build from the Developer card in settings, and they do render copy.
+ *   Excluded from the guard as a *scope* decision, not because they never ship.
+ * - `app.json:3` — `"name": "mobile"`, the label under the home-screen icon on
+ *   both platforms. A fourth copy surface that `SCAN_ROOTS` cannot reach;
+ *   `common.appName` is the in-app name only. Pre-existing and out of scope
+ *   here, but naming it keeps this list honest.
  * - React Native tokens and identifiers: `accessibilityRole` values, SF
  *   Symbol names, route params, storage keys, `console` output, and the
  *   substrings `classifyReportError` / `classifyVerificationError` match
@@ -94,15 +100,12 @@ export const STRINGS = {
     save: "Save",
     next: "Next",
     close: "Close",
-    retry: "Retry",
 
     // The two authentication verbs, in the casing each surface uses. A
     // button reads "Sign In"; a screen-reader label reads "Sign in". They are
     // different strings on purpose — see GuestProfilePrompt.
     signIn: "Sign In",
     signInLower: "Sign in",
-    signUp: "Sign Up",
-    signUpLower: "Sign up",
     createAccount: "Create account",
     createAccountCapitalised: "Create Account",
 
@@ -121,10 +124,11 @@ export const STRINGS = {
     chevron: "›",
 
     /**
-     * "1 need", "0 needs", "3 needs".
+     * "1 attribute", "0 attributes", "3 needs" — a bare count plus noun.
      *
-     * The count is the only interpolated part, so this is the one place the
-     * one/many choice is made for every list length in the app.
+     * Sentences needing more than a count (a tally, a summary, a place link)
+     * build their own, because the joining is part of the sentence and this
+     * one's joining is a single space.
      */
     countLabel: (count: number, noun: string): string =>
       `${count} ${plural(count, noun, `${noun}s`)}`,
@@ -230,6 +234,18 @@ export const STRINGS = {
     reportConfirmed: "Report confirmed.",
     reportDisputed: "Report disputed.",
     needsCleared: "All accessibility needs cleared.",
+
+    /**
+     * What the wizard speaks on every step change, forward or back.
+     *
+     * Deliberately *not* `report.stepOfWithTitle`: the on-screen label joins
+     * position and title with an em dash, while these announcements have
+     * always used a colon. A screen-reader user hears this one dozens of times
+     * per form, so it is worth keeping the punctuation it has always had rather
+     * than tidying it into the visible label's style.
+     */
+    stepOf: (position: number, total: number, title: string): string =>
+      `Step ${position} of ${total}: ${title}`,
   },
 
   /**
@@ -329,9 +345,6 @@ export const STRINGS = {
     saveFailed: "Couldn't save that change. Check your connection.",
 
     nameSaveFailed: "Couldn't save your name. Check your connection.",
-
-    needsLoadFailed:
-      "Couldn't load your accessibility needs. Check your connection.",
 
     /**
      * Developer-facing failures from `useLocationPermission`.
@@ -507,6 +520,13 @@ export const STRINGS = {
       verifiedTitle: "Verified Features",
       noFeatures: "No accessibility features reported.",
       unknownPlace: "Unknown Place",
+      /**
+       * The map tab's own location dot. Keyed here but not yet called: the
+       * file that would call it carries uncommitted work predating this
+       * branch, so it is the one screen this task does not finish. Declared
+       * anyway so that finishing it is a substitution, not a decision.
+       */
+      yourCurrentLocation: "Your current location",
       disclaimer:
         "Note: A feature not listed here has not been assessed — it does not mean it is unavailable.",
     },
@@ -767,6 +787,13 @@ export const STRINGS = {
     title: "Profile",
     loading: "Loading profile…",
     accessibilityNeedsTitle: "Accessibility needs",
+    /**
+     * The profile tab's nav row, which has always said "My" — distinct from
+     * the settings card's "Accessibility needs" and from the stack header's
+     * "Accessibility Needs". Three surfaces, three sentences; conflating any
+     * two is a copy change, not a refactor.
+     */
+    needsRowTitle: "My accessibility needs",
     needsLinkHint:
       "Opens the screen where you choose the accessibility features you need",
 

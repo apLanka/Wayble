@@ -30,14 +30,15 @@ claims either.
 | 3   | Text scaling        | ⬜ Pending       | S4-3 `z8v0kmrj53`               |
 | 4   | Touch targets       | ⬜ Pending       | S4-3 `z8v0kmrj5b`               |
 | 5   | Screen reader       | ⬜ Pending       | S4-3 `z8v0kmrj5m`, `z8v0kmrj5x` |
-| 6   | Announcements       | ✅ Evidenced     | S3-7 `z8v0kmrj49`               |
+| 6   | Announcements       | 🟡 Partial       | S3-7 `z8v0kmrj49`               |
 | 7   | Motor               | ⬜ Pending       | S4-3 `z8v0kmrj5x`               |
 | 8   | Cognitive           | ✅ Evidenced     | S3-1, S3-3                      |
 | 9   | Equity of need      | ⬜ Pending       | S3-5 `z8v0kmrj4f`               |
 | 10  | **Localisation**    | **✅ Evidenced** | **S4-5 `z8v0kmrg2d`**           |
 | 11  | Socioeconomic       | ⬜ Pending       | S3-2 `z8v0kmrj4c`               |
 
-One of eleven is complete. The other ten are named, not guessed at.
+Two of the eleven carry a ✅ — Localisation and Cognitive. Announcements is 🟡,
+with its gap stated in the row. The other eight are named, not guessed at.
 
 ---
 
@@ -98,31 +99,47 @@ A screen-reader walkthrough log exists at
 cover the Sprint 3 screens is not established by this task, so they are not cited
 as evidence for a Sprint 4 claim.
 
-### 6. Announcements — ✅ Evidenced
+### 6. Announcements — 🟡 Partial
 
 > Async state changes announced
 
 **Evidence:** code reference. **Source:** US-23.
 
-Announcements are held as a first-class namespace rather than scattered through
-screens — `STRINGS.announcements` in `apps/mobile/constants/strings.ts`, with a
-doc comment stating why: it is "copy for the ear, not for the page … written to
-be understood without a visual referent, in one breath, and never seen."
+Announcements are gathered in a first-class namespace — `STRINGS.announcements` in
+`apps/mobile/constants/strings.ts`, with a doc comment stating why: it is "copy
+for the ear, not for the page … written to be understood without a visual
+referent, in one breath, and never seen."
 
-Call sites, each calling
-`AccessibilityInfo.announceForAccessibility`:
+**Partial, and the gap is real: 6 of the app's 9 `announceForAccessibility` call
+sites read from it, and 3 do not.**
 
-| Site                              | Announces                                                      |
-| --------------------------------- | -------------------------------------------------------------- |
-| `app/onboarding.tsx`              | the welcome, on mount                                          |
-| `app/place/[id]/reports.tsx`      | "Report confirmed." / "Report disputed." after an awaited vote |
-| `app/place/[id]/reports.tsx`      | the classified error message, inline beside the control        |
-| `components/place/ReportCard.tsx` | via its own disabled reason and tally                          |
+| Site                                         | Reads `STRINGS.announcements`                              |
+| -------------------------------------------- | ---------------------------------------------------------- |
+| `app/onboarding.tsx`                         | ✅ `welcome`                                               |
+| `app/place/[id]/reports.tsx`                 | ✅ `reportConfirmed` / `reportDisputed`                    |
+| `app/place/[id]/reports.tsx`                 | ✅ the classified error message, inline beside the control |
+| `app/report/[placeId].tsx`                   | ✅ `stepOf`, on both forward and hardware-back             |
+| `app/report/[placeId].tsx`                   | ✅ `reportSubmitted`                                       |
+| `app/(tabs)/profile/accessibility-needs.tsx` | ✅ `needsCleared`                                          |
+| `app/(tabs)/profile/accessibility-needs.tsx` | ❌ interpolates a needs summary                            |
+| `app/place/[id]/index.tsx`                   | ❌ interpolates a report count                             |
+| `app/(tabs)/settings/notifications.tsx`      | ❌ interpolates a toggle result                            |
+
+The three that remain interpolate live state — a summary, a count, a toggle
+result — so each is a _sentence shape_ rather than a fixed string, which is
+harder to key and is why the refactor left them. They are copy a screen-reader
+user hears, so US-22 must come back to them.
+
+`STRINGS.announcements.stepOf` is deliberately **not** the same function as
+`STRINGS.report.stepOfWithTitle`. The visible step label joins position and title
+with an em dash; these announcements have always used a colon, and a screen-reader
+user hears one dozens of times per form. Both forms are pinned in
+`strings.test.ts`.
 
 `app/place/[id]/reports.tsx` carries a comment worth quoting, because it is the
-reason the row is evidenced: the announcement happens **after** the `await`, not
-before, since the optimistic patch is already visible and the tally text is what
-changed.
+reason the row is evidenced at all: the announcement happens **after** the
+`await`, not before, since the optimistic patch is already visible and the tally
+text is what changed.
 
 ### 7. Motor — ⬜ Pending
 
@@ -202,11 +219,12 @@ screen. `placeRowLabel` is the clearest case: it reads
 that output exactly, because a comma lost in a refactor still type-checks and
 still renders — it only fails when a screen reader reads it aloud.
 
-**The claim is enforced, not asserted.** `apps/mobile/constants/strings-guard.test.ts`
-walks 73 source files across `app/`, `components/`, `hooks/` and `utils/`,
-detects inline copy in accessibility props, placeholders, route titles and
-plain-text `AppText` bodies, and fails if the count rises above a committed
-ceiling. That ceiling is a countdown, and the diff is the record:
+**The claim is enforced on the surface the guard covers — and that surface has
+edges.** `apps/mobile/constants/strings-guard.test.ts` walks 73 source files
+across `app/`, `components/`, `hooks/` and `utils/`, detects inline copy in
+accessibility props, placeholders, route titles and plain-text `AppText` bodies,
+and fails if the count rises above a committed ceiling. That ceiling is a
+countdown, and the diff is the record:
 
 |        |                                        |
 | ------ | -------------------------------------- |
@@ -219,14 +237,41 @@ ceiling. That ceiling is a countdown, and the diff is the record:
 | 103    | report wizard (Task 7)                 |
 | 58     | profile (Task 8)                       |
 | 9      | settings (Task 9)                      |
-| **13** | **final**                              |
+| **12** | **final**                              |
 
-Of the 13 that remain, **ten are emoji used as icons** — the close `✕`, the
-search `🔍`, the clear `✕`, the place `📍`, the clipboard `📋`, the checkbox `✓`,
-the standing person `🧍` — which are not prose and have nothing to translate.
-The other three are on the map tab: `apps/(tabs)/mapbox/index.tsx`, whose two
-strings already have keys in `STRINGS.map` and which is the one file this branch
-does not finish, because it carries uncommitted work predating the branch.
+Two things about that 12, because reading it naively overstates it. The unit is
+**pattern hits, not distinct strings** — a JSX prop written `label="x"` matches
+two patterns and counts twice, while an `AppText` body counts once. And those 12
+hits are **10 sites holding 9 distinct strings**:
+
+- **6 sites, 5 distinct icon glyphs** — the close `✕`, the search `🔍`, the
+  clear `✕`, the clipboard `📋`, the place `📍`, the checkbox `✓`. Icons
+  rendered beside a text label; nothing in them to translate.
+- **4 sites, 3 distinct prose sentences, all on the map tab** — "Your current
+  location", "Search accessible places…" and "No places found nearby."
+
+The map tab is the one file this branch does not finish, and the reason is
+recorded rather than worked around. `apps/(tabs)/mapbox/index.tsx` carries
+uncommitted work predating the branch, and staging it would commit that work. All
+three sentences already have keys in `STRINGS.map`, so finishing the file is a
+substitution, not a decision.
+
+**What the guard cannot see, stated plainly.** It is a ratchet, not a proof:
+
+- A ternary inside an expression container — `<AppText>{saving ? "Saving…" :
+"Submit report"}</AppText>` — and copy passed as a call argument —
+  `setError("Notifications are blocked.")` — are both invisible to it. Both
+  patterns exist in the app today. Interpolated copy was moved by hand and
+  pinned in `strings.test.ts` instead.
+- `constants/`, `data/`, `app.config.ts` and any new top-level directory are
+  outside `SCAN_ROOTS`.
+- `app/debug` and `components/debug` are excluded as a **scope** decision, not
+  because they never ship — they are real routes, reachable from the Developer
+  card in settings, and they do render copy. Not user-facing product, so out of
+  scope, but the exclusion is a choice and not a fact about the build.
+
+So: the surface the guard covers cannot regress, and the residue is enumerated
+and owned. It is **not** true that no inline copy remains anywhere in the app.
 
 **No text is baked into any live image.** Audited all 23 image files in
 `apps/mobile/assets/`. Five are referenced by the shipped app, and all five were
@@ -307,9 +352,10 @@ another member. Offline is explicitly **not** claimed, per the PRD.
 
 ## 3. For SE3050
 
-The honest summary of where EDI compliance stands today: **one requirement is
-fully evidenced, one is evidenced for the app but not the prototype, and nine are
-named but not done.**
+The honest summary of where EDI compliance stands today: **two requirements
+carry a ✅, one is 🟡 with its gap written down, and eight are named but not
+done.** Announcements is the partial one — 6 of 9 call sites read from the
+namespace. Localisation is evidenced for the app and not the prototype.
 
 Three of the eleven name capability that does not exist and must not be claimed:
 multilingual support (US-22), offline support (US-17), and — for row 10 — any

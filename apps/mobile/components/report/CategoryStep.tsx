@@ -55,7 +55,7 @@ export function CategoryStep({ selected, onSelect }: Props) {
           (category) => (ATTRIBUTE_KEYS_BY_CATEGORY[category]?.length ?? 0) > 0,
         ).map((category) => {
           const count = ATTRIBUTE_KEYS_BY_CATEGORY[category]?.length ?? 0;
-          const countLabel = `${count} attribute${count === 1 ? "" : "s"}`;
+          const countLabel = STRINGS.common.countLabel(count, "attribute");
           const isSelected = selected === category;
           return (
             <TouchTarget
