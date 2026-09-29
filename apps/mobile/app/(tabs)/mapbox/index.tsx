@@ -61,21 +61,7 @@ export default function MapboxTab() {
 
   const handlePlacePress = (place: NearbyPlace) => {
     if (isListMode) {
-      // Encode params as strings for router
-      router.push({
-        pathname: "/mapbox/place/[id]",
-        params: {
-          id: place._id,
-          name: place.name,
-          category: place.category,
-          address: place.address || "",
-          features: place.features ? JSON.stringify(place.features) : "",
-          accessibilityCategories: place.accessibilityCategories
-            ? JSON.stringify(place.accessibilityCategories)
-            : "",
-          distance: place.distance?.toString() || "",
-        },
-      });
+      router.push(`/place/${place._id}`);
     } else {
       setSelectedPlaceId(place._id);
     }

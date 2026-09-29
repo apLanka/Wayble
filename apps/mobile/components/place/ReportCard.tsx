@@ -9,6 +9,7 @@ import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { formatRelativeTime } from "@/utils/format-relative-time";
 import type { AccessibilityAttribute } from "@packages/backend/convex/accessibility";
+import { ReportCardMenu } from "./ReportCardMenu";
 import { VerifyControl } from "./VerifyControl";
 import {
   isOwnReport,
@@ -180,6 +181,12 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
         // on their own report would hear the reason and no counts at all.
         disabledReason={`You can't verify your own report · ${tallySummary(tally)}`}
         onVote={onVote}
+      />
+
+      <ReportCardMenu
+        reportId={report._id}
+        disabled={own}
+        disabledReason="You can't flag your own report"
       />
     </View>
   );
