@@ -61,21 +61,7 @@ export default function MapboxTab() {
 
   const handlePlacePress = (place: NearbyPlace) => {
     if (isListMode) {
-      // Encode params as strings for router
-      router.push({
-        pathname: "/mapbox/place/[id]",
-        params: {
-          id: place._id,
-          name: place.name,
-          category: place.category,
-          address: place.address || "",
-          features: place.features ? JSON.stringify(place.features) : "",
-          accessibilityCategories: place.accessibilityCategories
-            ? JSON.stringify(place.accessibilityCategories)
-            : "",
-          distance: place.distance?.toString() || "",
-        },
-      });
+      router.push(`/place/${place._id}`);
     } else {
       setSelectedPlaceId(place._id);
     }
@@ -514,9 +500,12 @@ export default function MapboxTab() {
       {selectedPlace && !isListMode && (
         <DetailSheet
           location={selectedPlace as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+          placeId={selectedPlaceId ?? undefined}
           onClose={() => {
             setSelectedPlaceId(null);
-            setRouteCoordinates(null);
+            // Route not cleared here — "Show the direction" closes the
+            // sheet via this same handler and the just-fetched route must
+            // stay visible. New searches/selections clear it separately.
           }}
           onShowDirection={() => fetchRoute(selectedPlace)}
         />

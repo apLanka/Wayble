@@ -11,6 +11,7 @@ import {
 
 import { AddPlaceForm } from "@/components/debug/AddPlaceForm";
 import { LoadAllPlacesButton } from "@/components/debug/LoadAllPlacesButton";
+import { VerifyPlaceForm } from "@/components/debug/VerifyPlaceForm";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
@@ -95,6 +96,7 @@ export default function DebugScreen() {
               View all places →
             </AppText>
           </TouchTarget>
+          <VerifyPlaceForm />
         </ScrollView>
       </KeyboardAvoidingView>
     </Screen>

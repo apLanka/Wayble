@@ -1,4 +1,5 @@
 import type { AccessibilityAttributeKey } from "./accessibility";
+import { describeAge } from "./confidence";
 import type { VerificationNeed } from "./verificationNeed";
 
 /**
@@ -68,13 +69,4 @@ export function buildVerifyNearbyPush(args: {
     ? `${placeName}'s ${PUSH_ATTRIBUTE_LABELS[attributeKey]} was last confirmed ${age} ago. You're nearby — is it still right?`
     : `${placeName}'s accessibility information is ${age} old. You're nearby — is it still right?`;
   return { title, body };
-}
-
-/** Days for the first month, whole months after that. */
-function describeAge(ageDays: number): string {
-  if (ageDays < 31) {
-    return `${ageDays} days`;
-  }
-  const months = Math.round(ageDays / 30);
-  return `${months} month${months === 1 ? "" : "s"}`;
 }

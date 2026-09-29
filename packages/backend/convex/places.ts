@@ -12,6 +12,9 @@ import type {
   AccessibilityAttribute,
   AccessibilityAttributeKey,
 } from "./accessibility";
+import { computeConfidence } from "./confidence";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 // Component has no DB triggers — create/update/remove mutations below keep
 // the places table and this index in sync manually, in the same mutation.
@@ -159,6 +162,17 @@ export const remove = mutation({
   },
 });
 
+// Debug-only: populates the place picker on the debug screen. No pagination
+// — capped list is fine for that use case, add real pagination if this ever
+// serves a user-facing list.
+export const listPlaces = query({
+  args: {},
+  handler: async (ctx) => {
+    const places = await ctx.db.query("places").take(100);
+    return places.map((p) => ({ _id: p._id, name: p.name }));
+  },
+});
+
 export const getPlace = query({
   args: { placeId: v.id("places") },
   handler: async (ctx, args) => {
@@ -205,15 +219,50 @@ export const getPlace = query({
         ? Math.max(...activeReports.map((r) => r.observedAt))
         : null;
 
+    // Whole-place confidence, not per-attribute — the attribute merge above
+    // already discards per-report lineage, so there is no per-attribute
+    // signal left to aggregate against.
+    const allVerifications = (
+      await Promise.all(
+        activeReports.map((r) =>
+          ctx.db
+            .query("verifications")
+            .withIndex("by_report", (q) => q.eq("reportId", r._id))
+            .collect(),
+        ),
+      )
+    ).flat();
+
+    const agreeCount = allVerifications.filter(
+      (ver) => ver.verdict === "confirm",
+    ).length;
+    const totalVotes = allVerifications.length;
+    const distinctVerifiers = new Set(
+      allVerifications.map((ver) => ver.authorId),
+    ).size;
+
+    const confidence = computeConfidence({
+      agreeCount,
+      totalVotes,
+      distinctVerifiers,
+      reportAgeDays: lastReportedAt
+        ? Math.floor((Date.now() - lastReportedAt) / DAY_MS)
+        : Infinity,
+      now: Date.now(),
+      lastVerifiedAt: lastReportedAt,
+    });
+
     return {
       _id: place._id,
       name: place.name,
       category: place.category,
       address: place.address,
       location: place.location,
+      accessibilityCategories: place.accessibilityCategories,
       attributes,
       reportCount: activeReports.length,
       lastReportedAt,
+      confidence,
     };
   },
 });

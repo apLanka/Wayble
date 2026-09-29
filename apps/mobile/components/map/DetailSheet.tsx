@@ -1,12 +1,30 @@
 import React, { useRef, useCallback, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
+import { useQuery } from "convex/react";
 
 import { AppText } from "@/components/ui/app-text";
 import { CATEGORY_LABELS } from "@/components/map/CategoryFilter";
+import { ConfidenceBadge } from "@/components/place/ConfidenceBadge";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { api } from "@packages/backend/convex/_generated/api";
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 import type { AccessibleLocation } from "../../data/mock-data";
+
+// Mock locations use ids like "loc-001" — not real Convex ids. Only query
+// when placeId is a real place, else there's nothing to fetch confidence for.
+const MOCK_ID_PREFIX = "loc-";
+
+// Real fix for the tab-bar overlap: content was clipped/overflowing a fixed
+// 40% snap point (BottomSheetView has flex:1, no scroll) — the "View
+// Details" button spilled past the sheet's own bottom edge, into the
+// floating tab bar's space. BottomSheetScrollView + dynamic sizing makes the
+// sheet fit its content instead of clipping it. Sheet itself is anchored
+// flush to the screen bottom (no `bottomInset`); this padding on the scroll
+// content is what actually reserves room so the last button clears the
+// floating tab bar.
+const TAB_BAR_INSET = 100;
 
 type Props = {
   location: AccessibleLocation | null;
@@ -21,8 +39,6 @@ const ACCESSIBILITY_EMOJIS = {
   bathroom: "🚻",
   multi: "🌟",
 };
-
-const SNAP_POINTS = ["40%"];
 
 export function DetailSheet({
   location,
@@ -51,24 +67,39 @@ export function DetailSheet({
 
   const handleViewDetails = useCallback(() => {
     const targetId = placeId ?? location?.id;
-    if (targetId) {
-      router.push(`/place/${targetId}` as never);
-    }
-  }, [placeId, location?.id, router]);
+    if (!targetId || !location) return;
+    // Use main global place details screen
+    router.push({
+      pathname: "/place/[id]",
+      params: { id: targetId },
+    });
+  }, [placeId, location, router]);
+
+  const realPlaceId = placeId ?? location?.id;
+  const isRealPlace = !!realPlaceId && !realPlaceId.startsWith(MOCK_ID_PREFIX);
+  const place = useQuery(
+    api.places.getPlace,
+    isRealPlace ? { placeId: realPlaceId as Id<"places"> } : "skip",
+  );
 
   return (
     <BottomSheet
       ref={sheetRef}
       index={location ? 0 : -1}
-      snapPoints={SNAP_POINTS}
-      enableDynamicSizing={false}
+      enableDynamicSizing
       enablePanDownToClose
       onChange={handleSheetChange}
       backgroundStyle={{ backgroundColor: appTheme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: appTheme.colors.border }}
     >
-      <BottomSheetView
-        style={[styles.content, { backgroundColor: appTheme.colors.surface }]}
+      <BottomSheetScrollView
+        contentContainerStyle={[
+          styles.content,
+          {
+            backgroundColor: appTheme.colors.surface,
+            paddingBottom: TAB_BAR_INSET,
+          },
+        ]}
       >
         {location && (
           <>
@@ -108,6 +139,13 @@ export function DetailSheet({
                 {location.category.replace(/_/g, " ")}
               </AppText>
             </View>
+
+            {place && (
+              <ConfidenceBadge
+                tier={place.confidence.tier}
+                isStale={place.confidence.isStale}
+              />
+            )}
 
             <AppText
               style={[styles.address, { color: appTheme.colors.textMuted }]}
@@ -167,74 +205,84 @@ export function DetailSheet({
               </View>
             )}
 
-            {(location.features ?? []).map((f) => (
-              <AppText
-                key={f}
-                style={[styles.feature, { color: appTheme.colors.text }]}
-              >
-                ✓ {f}
-              </AppText>
-            ))}
+            {(location.features ?? []).length > 0 && (
+              <View style={styles.features}>
+                {(location.features ?? []).map((f) => (
+                  <AppText
+                    key={f}
+                    style={[styles.feature, { color: appTheme.colors.text }]}
+                  >
+                    ✓ {f}
+                  </AppText>
+                ))}
+              </View>
+            )}
 
-            {onShowDirection && (
+            <View style={styles.actions}>
+              {onShowDirection && (
+                <TouchableOpacity
+                  style={[
+                    styles.directionButton,
+                    { backgroundColor: appTheme.colors.primary },
+                  ]}
+                  onPress={() => {
+                    onShowDirection();
+                    onClose();
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Show walking directions"
+                  activeOpacity={0.7}
+                >
+                  <AppText
+                    style={[
+                      styles.directionButtonText,
+                      { color: appTheme.colors.onPrimary },
+                    ]}
+                  >
+                    Show the direction
+                  </AppText>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 style={[
-                  styles.directionButton,
+                  styles.detailsButton,
                   { backgroundColor: appTheme.colors.primary },
                 ]}
-                onPress={onShowDirection}
-                accessibilityRole="button"
-                accessibilityLabel="Show walking directions"
+                onPress={handleViewDetails}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="View full accessibility details"
+                accessibilityHint="Opens the full place detail screen with all accessibility attributes"
               >
                 <AppText
                   style={[
-                    styles.directionButtonText,
+                    styles.detailsButtonText,
                     { color: appTheme.colors.onPrimary },
                   ]}
                 >
-                  Show the direction
+                  View Details →
                 </AppText>
               </TouchableOpacity>
-            )}
-            <TouchableOpacity
-              style={[
-                styles.detailsButton,
-                { backgroundColor: appTheme.colors.primary },
-              ]}
-              onPress={handleViewDetails}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel="View full accessibility details"
-              accessibilityHint="Opens the full place detail screen with all accessibility attributes"
-            >
-              <AppText
-                style={[
-                  styles.detailsButtonText,
-                  { color: appTheme.colors.onPrimary },
-                ]}
-              >
-                View Details →
-              </AppText>
-            </TouchableOpacity>
+            </View>
           </>
         )}
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheet>
   );
 }
 
+const SPACING = 12;
+
 const styles = StyleSheet.create({
   content: {
-    flex: 1,
     paddingHorizontal: 16,
     paddingTop: 8,
+    gap: SPACING,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 8,
   },
   name: {
     fontSize: 18,
@@ -250,7 +298,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 3,
-    marginBottom: 8,
   },
   badgeText: {
     fontSize: 12,
@@ -259,13 +306,11 @@ const styles = StyleSheet.create({
   },
   address: {
     fontSize: 14,
-    marginBottom: 10,
   },
   accessibilityRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-    marginBottom: 12,
   },
   accessibilityTile: {
     flexDirection: "row",
@@ -283,23 +328,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: "capitalize",
   },
+  features: {
+    gap: 4,
+  },
   feature: {
     fontSize: 14,
-    marginBottom: 4,
+  },
+  actions: {
+    gap: SPACING,
+    marginTop: SPACING / 2,
   },
   directionButton: {
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 16,
-    marginBottom: 20,
   },
   directionButtonText: {
     fontSize: 16,
     fontWeight: "bold",
   },
   detailsButton: {
-    marginTop: 12,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 10,

@@ -1,13 +1,21 @@
 import React from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import { useLocalSearchParams } from "expo-router";
+import { useQuery } from "convex/react";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { CATEGORY_LABELS } from "@/components/map/CategoryFilter";
+import { ConfidenceBadge } from "@/components/place/ConfidenceBadge";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { api } from "@packages/backend/convex/_generated/api";
+import type { Id } from "@packages/backend/convex/_generated/dataModel";
 
 import { formatDistance } from "@/utils/format-distance";
 import { radii, spacing } from "@/constants/theme";
+
+// Mock locations use ids like "loc-001" — not real Convex ids. Only query
+// when the id is a real place, mirroring DetailSheet.tsx's guard.
+const MOCK_ID_PREFIX = "loc-";
 const ACCESSIBILITY_EMOJIS = {
   wheelchair: "♿️",
   elevator: "🛗",
@@ -53,6 +61,13 @@ export default function PlaceDetailScreen() {
   const categoryColor = "#6b7280"; // Default badge color for business categories
   const distanceStr = distance !== undefined ? formatDistance(distance) : "";
 
+  const rawId = typeof params.id === "string" ? params.id : undefined;
+  const isRealPlace = !!rawId && !rawId.startsWith(MOCK_ID_PREFIX);
+  const place = useQuery(
+    api.places.getPlace,
+    isRealPlace ? { placeId: rawId as Id<"places"> } : "skip",
+  );
+
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.container}>
@@ -80,6 +95,15 @@ export default function PlaceDetailScreen() {
               </AppText>
             ) : null}
           </View>
+
+          {place && (
+            <View style={{ marginTop: spacing.sm }}>
+              <ConfidenceBadge
+                tier={place.confidence.tier}
+                isStale={place.confidence.isStale}
+              />
+            </View>
+          )}
         </View>
 
         {address && (
