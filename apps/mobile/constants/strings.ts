@@ -55,9 +55,6 @@
  *   against backend error messages.
  * - Emoji used as icons. They are always rendered alongside a text label, and
  *   there is nothing to translate about them.
- * - Two strings on the map tab, `searchPlaceholder` and `emptyNearby`, whose
- *   keys exist here but whose call sites are still inline. The file carries
- *   uncommitted work that predates this branch; see the ledger.
  *
  * ## What US-22 inherits, and what it does not
  *
@@ -406,6 +403,10 @@ export const STRINGS = {
     seeAll: "See all",
     searchPlaceholder: "Search accessible places…",
 
+    activity: "Activity",
+    activityLabel: "Nearby verification activity",
+    activityHint: "Opens a live feed of verifications near you",
+
     openMap: "Open Map",
     nearMe: "Near Me",
 
@@ -521,10 +522,7 @@ export const STRINGS = {
       noFeatures: "No accessibility features reported.",
       unknownPlace: "Unknown Place",
       /**
-       * The map tab's own location dot. Keyed here but not yet called: the
-       * file that would call it carries uncommitted work predating this
-       * branch, so it is the one screen this task does not finish. Declared
-       * anyway so that finishing it is a substitution, not a decision.
+       * The map tab's own location dot, read by `app/(tabs)/mapbox/index.tsx`.
        */
       yourCurrentLocation: "Your current location",
       disclaimer:
@@ -568,6 +566,97 @@ export const STRINGS = {
 
     placeMarker: (category: string, label: string): string =>
       category === "all" ? STRINGS.map.placeMarkerLabel : `${label} place`,
+  },
+
+  /**
+   * The nearby verification feed (S3-7 / US-23).
+   */
+  feed: {
+    title: "Nearby activity",
+    locationNeededTitle: "Location needed",
+    locationNeededBody:
+      "Allow location to see verifications happening near you.",
+    allowLocationLabel: "Allow location access",
+    allowLocationButton: "Allow location",
+    finding: "Finding your location…",
+    loading: "Loading nearby activity…",
+    header: "Nearby verifications",
+    empty:
+      "No verifications near you yet. When someone confirms or disputes a report nearby, it will show up here.",
+    you: "You",
+    confirmed: "confirmed",
+    disputed: "disputed",
+    confirmedTitle: "Confirmed",
+    disputedTitle: "Disputed",
+    needsRecheck: ", needs re-check",
+    rowLabel: (
+      who: string,
+      verb: string,
+      attribute: string,
+      placeName: string,
+      when: string,
+      confidenceText: string,
+    ) =>
+      `${who} ${verb} ${attribute} at ${placeName}. ${when}. ${confidenceText}.`,
+  },
+
+  /**
+   * The moderator queue (S4-7 / S4-7b): flagged reports, the confirm dialog
+   * and the decision history.
+   */
+  moderator: {
+    title: "Moderation queue",
+    signInTitle: "Sign in to continue",
+    goToSignInLabel: "Go to sign in",
+    signInButton: "Sign in",
+    moderatorsOnlyTitle: "Moderators only",
+    noAccess: "Your account doesn't have access to the moderation queue.",
+    tabOpen: "Open",
+    tabHistory: "History",
+    loadingFlagged: "Loading flagged reports…",
+    loadingHistory: "Loading history…",
+    flaggedHeader: (n: number) =>
+      `${n} flagged ${plural(n, "report", "reports")}`,
+    emptyQueue: "No flagged reports. Nothing needs review.",
+    historyHeader: "Past decisions",
+    emptyHistory:
+      "No decisions yet. Dismissed and removed reports show up here.",
+
+    row: {
+      flagCount: (n: number) => `${n} ${plural(n, "flag", "flags")}`,
+      noSummary: "No summary provided",
+      reason: (reasons: string) => `Reason: ${reasons}`,
+      summaryLabel: (
+        placeName: string,
+        summary: string,
+        reasons: string,
+        count: string,
+      ) => `${placeName}. ${summary}. Reason: ${reasons}. ${count}.`,
+      note: (text: string) => `Note: ${text}`,
+      dismissLabel: (placeName: string) => `Dismiss flags on ${placeName}`,
+      dismiss: "Dismiss",
+      removeLabel: (placeName: string) => `Remove report at ${placeName}`,
+      remove: "Remove",
+    },
+
+    dialog: {
+      closeLabel: "Close dialog",
+      notePlaceholder: "Add a note (optional)",
+      noteLabel: "Moderator note, optional",
+      cancel: "Cancel",
+      confirmLabel: (confirm: string, placeName: string) =>
+        `${confirm} report at ${placeName}`,
+      dismiss: {
+        title: "Dismiss flags",
+        body: "The report stays visible. The flags are closed as unfounded.",
+        confirm: "Dismiss",
+      },
+      remove: {
+        title: "Remove report",
+        body: "The report is hidden from everyone and the flags are upheld. This can't be undone from the app.",
+        confirm: "Remove",
+      },
+    },
   },
 
   /**
@@ -626,6 +715,32 @@ export const STRINGS = {
     },
 
     addressLabel: (address: string): string => `Address: ${address}`,
+
+    /** The per-report overflow menu that flags an inaccurate or abusive entry. */
+    reportMenu: {
+      options: "Report options",
+      kebab: "⋮",
+      closeMenu: "Close report reason menu",
+      pickerTitle: "Report this report as…",
+      reasonLabel: (label: string) => `Report as ${label}`,
+      reasons: {
+        inaccurate: "Inaccurate",
+        spam: "Spam",
+        abusive: "Abusive",
+        privacy: "Privacy concern",
+        duplicate: "Duplicate",
+        other: "Other",
+      },
+      cancelFlagging: "Cancel flagging this report",
+      confirmTitle: (reason: string) => `Flag this report as ${reason}?`,
+      cancel: "Cancel",
+      confirmFlagging: "Confirm flagging this report",
+      flag: "Flag",
+      flagged: "Report flagged.",
+    },
+
+    confidenceLabel: (text: string): string => `Confidence: ${text}`,
+    staleSuffix: (label: string): string => `${label} ⚠ Needs re-check`,
 
     addFirstReport: {
       label: "Add the first report",
@@ -789,6 +904,11 @@ export const STRINGS = {
    * where they are; unifying them is a copy change, not a refactor.
    */
   profile: {
+    moderationQueue: {
+      title: "Moderation queue",
+      subtitle: "Review and dismiss flagged reports",
+      hint: "Opens the list of reports that users have flagged",
+    },
     title: "Profile",
     loading: "Loading profile…",
     accessibilityNeedsTitle: "Accessibility needs",
