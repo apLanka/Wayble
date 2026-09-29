@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { formatRelativeTime } from "@/utils/format-relative-time";
@@ -61,11 +62,11 @@ export function HistoryRow({ item }: { item: ResolvedFlag }) {
         <AppText style={{ color: colors.text }}>{item.summary}</AppText>
       ) : null}
       <AppText variant="label" style={{ color: colors.textMuted }}>
-        Reason: {reasons}
+        {STRINGS.moderator.row.reason(reasons)}
       </AppText>
       {item.resolutionNote ? (
         <AppText style={{ color: colors.text }}>
-          Note: {item.resolutionNote}
+          {STRINGS.moderator.row.note(item.resolutionNote)}
         </AppText>
       ) : null}
       <AppText variant="label" style={{ color: colors.textMuted }}>
