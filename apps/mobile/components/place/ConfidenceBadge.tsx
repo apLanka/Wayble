@@ -6,6 +6,7 @@ import {
   CONFIDENCE_LABELS,
   CONFIDENCE_SEMANTIC_COLORS,
 } from "@/constants/confidence-metadata";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { ConfidenceTier } from "@packages/backend/convex/confidence";
 
@@ -23,14 +24,14 @@ export function ConfidenceBadge({ tier, isStale }: Props) {
   const { appTheme } = useAppTheme();
   const label = CONFIDENCE_LABELS[tier];
   const badgeColor = appTheme.colors[CONFIDENCE_SEMANTIC_COLORS[tier]];
-  const text = isStale ? `${label} ⚠ Needs re-check` : label;
+  const text = isStale ? STRINGS.place.staleSuffix(label) : label;
 
   return (
     <View
       style={[styles.badge, { backgroundColor: `${badgeColor}20` }]}
       accessible
       accessibilityRole="text"
-      accessibilityLabel={`Confidence: ${text}`}
+      accessibilityLabel={STRINGS.place.confidenceLabel(text)}
     >
       <AppText variant="label" style={[styles.label, { color: badgeColor }]}>
         {text}
