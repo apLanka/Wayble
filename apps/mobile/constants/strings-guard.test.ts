@@ -162,35 +162,22 @@ const FILES = SCAN_ROOTS.flatMap((root) =>
  *    58  profile tab and the accessibility-needs editor (Task 8)
  *     9  settings tab and the notifications sub-screen (Task 9)
  *    12  final, including the deferred map tab file
+ *     6  map tab finished, and the moderator queue, feed and report menu
+ *        merged from main moved into `STRINGS`; only icon glyphs remain
  *
- * ## Why the floor is 12, and what the number counts
+ * ## Why the floor is 6, and what the number counts
  *
- * The unit is **pattern hits**, not distinct strings, and the two differ: a
- * JSX prop written `label="x"` matches both the plain-prop pattern and the
- * destructuring-default pattern, so a prop counts twice while an `AppText`
- * body counts once. 311 -> 12 measures what the patterns see; reading it as
- * "12 strings" would overstate it.
+ * The unit is **pattern hits**, not distinct strings: a JSX prop written
+ * `label="x"` matches both the plain-prop pattern and the destructuring-default
+ * pattern, so a prop counts twice while an `AppText` body counts once.
  *
- * Those 12 hits are 10 sites holding 9 distinct strings:
- *
- * - **6 sites, 5 distinct icon glyphs** — the close "✕", the search "🔍", the
- *   clear "✕", the clipboard "📋", the place "📍" and the checkbox "✓". Icons
- *   rendered beside a text label, with nothing in them to translate.
- * - **4 sites, 3 distinct prose sentences, all on the map tab** — "Your current
- *   location", "Search accessible places…" and "No places found nearby."
- *
- * The map tab is the one file this branch does not finish, and the reason is
- * in the ledger: `apps/(tabs)/mapbox/index.tsx` carries uncommitted work that
- * predates the branch, and the partner asked that it not be committed. All
- * three sentences already have keys in `STRINGS.map`, so finishing the file is
- * a substitution rather than a decision.
- *
- * This ceiling is set from the *committed* branch, which is what CI and a
- * reviewer see. A fresh clone counts 6 in that file; the working tree counts 3,
- * because the uncommitted change removed the map. 12 holds both, and because
- * the assertion is `> CEILING`, 12 means one new inline string fails.
+ * The 6 hits that remain are all icon glyphs rendered beside a text label,
+ * with nothing in them to translate: the close "✕" (DetailSheet), the search
+ * "🔍" and clear "✕" (SearchBar), the clipboard "📋" (NoDataPrompt), the
+ * checkbox "✓" and the map tab's "🧍" marker. No prose sentence is left on
+ * the scanned surface.
  */
-const INLINE_COPY_CEILING = 12;
+const INLINE_COPY_CEILING = 6;
 
 describe("strings guard", () => {
   it("scans the whole copy surface, so a silently empty walk cannot pass", () => {
