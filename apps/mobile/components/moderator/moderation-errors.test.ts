@@ -11,6 +11,8 @@ describe("classifyModerationError", () => {
     ["Forbidden: moderator role required", "forbidden"],
     ["Unknown report: abc", "unknownReport"],
     ["No open flags on this report", "alreadyHandled"],
+    ["Report already removed", "alreadyRemoved"],
+    ["Note too long: 300 characters, maximum 280", "noteTooLong"],
     ["boom", "generic"],
   ])("maps %s to %s", (message, kind) => {
     expect(classifyModerationError(new Error(message))).toBe(kind);
@@ -31,9 +33,16 @@ describe("moderationErrorMessage", () => {
       "forbidden",
       "unknownReport",
       "alreadyHandled",
+      "alreadyRemoved",
+      "noteTooLong",
       "generic",
     ] as const) {
       expect(moderationErrorMessage(kind)).not.toBe("");
     }
+  });
+
+  test("the generic copy names the action that failed", () => {
+    expect(moderationErrorMessage("generic")).toContain("dismiss");
+    expect(moderationErrorMessage("generic", "remove")).toContain("remove");
   });
 });
