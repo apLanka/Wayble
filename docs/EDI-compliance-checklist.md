@@ -220,41 +220,33 @@ that output exactly, because a comma lost in a refactor still type-checks and
 still renders — it only fails when a screen reader reads it aloud.
 
 **The claim is enforced on the surface the guard covers — and that surface has
-edges.** `apps/mobile/constants/strings-guard.test.ts` walks 73 source files
+edges.** `apps/mobile/constants/strings-guard.test.ts` walks 88 source files
 across `app/`, `components/`, `hooks/` and `utils/`, detects inline copy in
 accessibility props, placeholders, route titles and plain-text `AppText` bodies,
 and fails if the count rises above a committed ceiling. That ceiling is a
 countdown, and the diff is the record:
 
-|        |                                        |
-| ------ | -------------------------------------- |
-| 311    | guard written (Task 1)                 |
-| 299    | navigation titles, tab labels (Task 2) |
-| 237    | sign-in, sign-up, onboarding (Task 3)  |
-| 204    | home screen (Task 4)                   |
-| 173    | map tab (Task 5)                       |
-| 141    | place detail, verification (Task 6)    |
-| 103    | report wizard (Task 7)                 |
-| 58     | profile (Task 8)                       |
-| 9      | settings (Task 9)                      |
-| **12** | **final**                              |
+|       |                                                                                              |
+| ----- | -------------------------------------------------------------------------------------------- |
+| 311   | guard written (Task 1)                                                                       |
+| 299   | navigation titles, tab labels (Task 2)                                                       |
+| 237   | sign-in, sign-up, onboarding (Task 3)                                                        |
+| 204   | home screen (Task 4)                                                                         |
+| 173   | map tab (Task 5)                                                                             |
+| 141   | place detail, verification (Task 6)                                                          |
+| 103   | report wizard (Task 7)                                                                       |
+| 58    | profile (Task 8)                                                                             |
+| 9     | settings (Task 9)                                                                            |
+| 12    | final, map tab deferred                                                                      |
+| **6** | **map tab finished; moderator queue, feed and report menu from `main` moved into `STRINGS`** |
 
-Two things about that 12, because reading it naively overstates it. The unit is
-**pattern hits, not distinct strings** — a JSX prop written `label="x"` matches
-two patterns and counts twice, while an `AppText` body counts once. And those 12
-hits are **10 sites holding 9 distinct strings**:
-
-- **6 sites, 5 distinct icon glyphs** — the close `✕`, the search `🔍`, the
-  clear `✕`, the clipboard `📋`, the place `📍`, the checkbox `✓`. Icons
-  rendered beside a text label; nothing in them to translate.
-- **4 sites, 3 distinct prose sentences, all on the map tab** — "Your current
-  location", "Search accessible places…" and "No places found nearby."
-
-The map tab is the one file this branch does not finish, and the reason is
-recorded rather than worked around. `apps/(tabs)/mapbox/index.tsx` carries
-uncommitted work predating the branch, and staging it would commit that work. All
-three sentences already have keys in `STRINGS.map`, so finishing the file is a
-substitution, not a decision.
+The unit is **pattern hits, not distinct strings** — a JSX prop written
+`label="x"` matches two patterns and counts twice, while an `AppText` body
+counts once. The 6 hits that remain are **6 sites holding 5 distinct icon
+glyphs** — the close `✕` (detail sheet), the search `🔍` and clear `✕`, the
+clipboard `📋`, the checkbox `✓` and the map marker `🧍`. Icons rendered beside a
+text label; nothing in them to translate. No prose sentence is left on the
+scanned surface.
 
 **What the guard cannot see, stated plainly.** It is a ratchet, not a proof:
 
