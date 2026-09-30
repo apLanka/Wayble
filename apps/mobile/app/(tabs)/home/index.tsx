@@ -134,10 +134,10 @@ export default function HomeScreen() {
               onPress={openMapNearMe}
             />
             <QuickActionCard
-              label="Activity"
+              label={STRINGS.home.activity}
               symbol={{ ios: "person.2.fill", android: "group" }}
-              accessibilityLabel="Nearby verification activity"
-              accessibilityHint="Opens a live feed of verifications near you"
+              accessibilityLabel={STRINGS.home.activityLabel}
+              accessibilityHint={STRINGS.home.activityHint}
               onPress={openActivityFeed}
             />
           </View>

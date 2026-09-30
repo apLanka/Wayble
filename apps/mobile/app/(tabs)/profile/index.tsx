@@ -116,9 +116,9 @@ export default function ProfileScreen() {
 
         {!isGuest && currentUser.role === "moderator" ? (
           <ProfileNavRow
-            title="Moderation queue"
-            subtitle="Review and dismiss flagged reports"
-            accessibilityHint="Opens the list of reports that users have flagged"
+            title={STRINGS.profile.moderationQueue.title}
+            subtitle={STRINGS.profile.moderationQueue.subtitle}
+            accessibilityHint={STRINGS.profile.moderationQueue.hint}
             onPress={() => router.push("/moderator")}
           />
         ) : null}
