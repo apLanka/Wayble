@@ -9,6 +9,7 @@ import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { formatRelativeTime } from "@/utils/format-relative-time";
 import type { AccessibilityAttribute } from "@packages/backend/convex/accessibility";
+import { ReportCardMenu } from "./ReportCardMenu";
 import { VerifyControl } from "./VerifyControl";
 import {
   isOwnReport,
@@ -86,15 +87,18 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
         <AppText variant="bodyStrong" style={{ color: colors.text }}>
           {own ? "Your report" : report.authorDisplayName}
         </AppText>
-        {/* "just now" alone gives a screen-reader user nothing to anchor it
-            to, so the node says what the time is about. */}
-        <AppText
-          variant="label"
-          style={{ color: colors.textMuted }}
-          accessibilityLabel={`Reported ${observed}`}
-        >
-          {observed}
-        </AppText>
+        <View style={styles.headerRight}>
+          {/* "just now" alone gives a screen-reader user nothing to anchor it
+              to, so the node says what the time is about. */}
+          <AppText
+            variant="label"
+            style={{ color: colors.textMuted }}
+            accessibilityLabel={`Reported ${observed}`}
+          >
+            {observed}
+          </AppText>
+          <ReportCardMenu reportId={report._id} disabled={own} />
+        </View>
       </View>
 
       {report.summary ? (
@@ -195,6 +199,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  headerRight: {
+    flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
   },
