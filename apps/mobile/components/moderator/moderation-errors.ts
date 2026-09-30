@@ -10,7 +10,12 @@ export type ModerationErrorKind =
   | "forbidden"
   | "unknownReport"
   | "alreadyHandled"
+  | "alreadyRemoved"
+  | "noteTooLong"
   | "generic";
+
+/** What the moderator was trying to do; only the generic copy depends on it. */
+export type ModerationAction = "dismiss" | "remove";
 
 export function classifyModerationError(error: unknown): ModerationErrorKind {
   const message =
@@ -24,10 +29,15 @@ export function classifyModerationError(error: unknown): ModerationErrorKind {
   if (message.includes("Forbidden:")) return "forbidden";
   if (message.includes("Unknown report:")) return "unknownReport";
   if (message.includes("No open flags on this report")) return "alreadyHandled";
+  if (message.includes("Report already removed")) return "alreadyRemoved";
+  if (message.includes("Note too long")) return "noteTooLong";
   return "generic";
 }
 
-export function moderationErrorMessage(kind: ModerationErrorKind): string {
+export function moderationErrorMessage(
+  kind: ModerationErrorKind,
+  action: ModerationAction = "dismiss",
+): string {
   switch (kind) {
     case "unauthenticated":
       return "Sign in to moderate reports.";
@@ -37,7 +47,13 @@ export function moderationErrorMessage(kind: ModerationErrorKind): string {
       return "This report no longer exists.";
     case "alreadyHandled":
       return "These flags were already handled.";
+    case "alreadyRemoved":
+      return "This report was already removed.";
+    case "noteTooLong":
+      return "That note is too long. Shorten it and try again.";
     case "generic":
-      return "We couldn't dismiss this flag. Please try again.";
+      return action === "remove"
+        ? "We couldn't remove this report. Please try again."
+        : "We couldn't dismiss this flag. Please try again.";
   }
 }
