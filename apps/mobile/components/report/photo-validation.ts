@@ -4,6 +4,8 @@ import {
   MAX_PHOTO_BYTES,
 } from "@packages/backend/convex/reportLimits";
 
+import { STRINGS } from "@/constants/strings";
+
 /**
  * US-09 — the client-side check a photo passes before it is uploaded.
  *
@@ -43,11 +45,11 @@ export function validatePhoto(photo: {
 export function photoValidationMessage(error: PhotoValidationError): string {
   switch (error) {
     case "empty":
-      return "That photo couldn't be read. Try a different one.";
+      return STRINGS.report.photo.unreadable;
     case "tooLarge":
-      return `That photo is over ${MAX_PHOTO_BYTES / (1024 * 1024)} MB. Try a different one.`;
+      return STRINGS.report.photo.tooLarge(MAX_PHOTO_BYTES / (1024 * 1024));
     case "unsupportedType":
-      return "That file type isn't supported. Use a JPEG, PNG or WebP photo.";
+      return STRINGS.report.photo.unsupportedType;
   }
 }
 
@@ -61,7 +63,9 @@ export function photoValidationMessage(error: PhotoValidationError): string {
  */
 export function defaultCaption(placeName: string | undefined): string {
   const name = placeName?.trim();
-  const caption = name ? `Photo taken at ${name}` : "Photo taken at this place";
+  const caption = name
+    ? STRINGS.report.photo.defaultCaption(name)
+    : STRINGS.report.photo.defaultCaptionNoPlace;
   return caption.slice(0, MAX_CAPTION_LENGTH);
 }
 

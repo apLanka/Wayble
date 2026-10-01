@@ -5,6 +5,7 @@ import { AttributeRow } from "@/components/place/AttributeRow";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { radii, spacing } from "@/constants/theme";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { ReportDraft } from "./report-draft";
 import { selectedAttributes } from "./report-draft";
@@ -36,7 +37,7 @@ export function ConfirmStep({
   return (
     <View style={styles.container}>
       <AppText variant="title" accessibilityRole="header">
-        Check your report
+        {STRINGS.report.confirm.title}
       </AppText>
       <AppText style={{ color: colors.textMuted }}>
         {draft.category} · {attributes.length} attribute
@@ -62,12 +63,14 @@ export function ConfirmStep({
       {draft.summary.trim().length > 0 ? (
         <View style={styles.summaryBlock}>
           <AppText variant="label" style={{ color: colors.textMuted }}>
-            Your note
+            {STRINGS.report.confirm.noteTitle}
           </AppText>
           <AppText
             style={{ color: colors.text }}
             accessibilityRole="text"
-            accessibilityLabel={`Your note: ${draft.summary}`}
+            accessibilityLabel={STRINGS.report.confirm.summaryLabel(
+              draft.summary,
+            )}
           >
             {draft.summary}
           </AppText>
@@ -77,7 +80,7 @@ export function ConfirmStep({
       {draft.photo ? (
         <View style={styles.summaryBlock}>
           <AppText variant="label" style={{ color: colors.textMuted }}>
-            Your photo
+            {STRINGS.report.photo.confirmTitle}
           </AppText>
           {/* Labelled with the caption alone: that is exactly what a screen
               reader user will hear on the place screen once this is saved. */}
@@ -97,8 +100,8 @@ export function ConfirmStep({
 
       <TouchTarget
         accessibilityRole="button"
-        accessibilityLabel="Submit report"
-        accessibilityHint="Saves your accessibility report for this place."
+        accessibilityLabel={STRINGS.report.confirm.submit}
+        accessibilityHint={STRINGS.report.confirm.submitHint}
         accessibilityState={{ disabled: isSubmitting, busy: isSubmitting }}
         disabled={isSubmitting}
         onPress={onSubmit}
@@ -109,10 +112,10 @@ export function ConfirmStep({
       >
         <AppText variant="bodyStrong" style={{ color: colors.onPrimary }}>
           {isUploadingPhoto
-            ? "Uploading photo…"
+            ? STRINGS.report.confirm.uploadingPhoto
             : isSubmitting
-              ? "Submitting…"
-              : "Submit report"}
+              ? STRINGS.report.confirm.submitting
+              : STRINGS.report.confirm.submit}
         </AppText>
       </TouchTarget>
     </View>

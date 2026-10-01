@@ -13,6 +13,7 @@ import { UPLOAD_FAILED_PREFIX } from "./upload-photo";
  * test in this file fails rather than the user silently seeing raw jargon.
  */
 
+import { STRINGS } from "@/constants/strings";
 export type ReportErrorKind =
   | "duplicate"
   | "unauthenticated"
@@ -67,22 +68,20 @@ export function classifyReportError(error: unknown): ReportErrorKind {
 export function reportErrorMessage(kind: ReportErrorKind): string {
   switch (kind) {
     case "duplicate":
-      return "You already reported on this place today. You can add another report tomorrow.";
+      return STRINGS.errors.report.duplicate;
     case "unauthenticated":
-      return "Sign in to submit a report.";
+      return STRINGS.errors.report.unauthenticated;
     case "summaryTooLong":
-      return `Keep your summary to ${MAX_SUMMARY_LENGTH} characters or fewer.`;
+      return STRINGS.errors.report.summaryTooLong(MAX_SUMMARY_LENGTH);
     case "observationTime":
-      return "Your device clock looks wrong. Turn on automatic date and time, then try again.";
+      return STRINGS.errors.report.observationTime;
     case "photoCaption":
-      return `Describe your photo in ${MAX_CAPTION_LENGTH} characters or fewer.`;
+      return STRINGS.errors.report.photoCaption(MAX_CAPTION_LENGTH);
     case "photoRejected":
-      return "We couldn't use that photo. Go back, remove it or choose a different one, then try again.";
+      return STRINGS.errors.report.photoRejected;
     case "uploadFailed":
-      // Unlike `generic`, the cause here is known to be the transfer, so
-      // naming the connection is a real lead rather than a guess.
-      return "We couldn't upload your photo. Check your connection and try again.";
+      return STRINGS.errors.report.uploadFailed;
     case "generic":
-      return "We couldn't submit your report. Please try again.";
+      return STRINGS.errors.report.generic;
   }
 }

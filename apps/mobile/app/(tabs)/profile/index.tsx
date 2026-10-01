@@ -12,6 +12,7 @@ import { ProfileNavRow } from "@/components/profile/ProfileNavRow";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { getAccessibilityNeedsSummary } from "@/utils/get-accessibility-needs-summary";
@@ -60,7 +61,7 @@ export default function ProfileScreen() {
       await updateProfile({ displayName: name });
       setIsEditModalVisible(false);
     } catch {
-      setNameError("Couldn't save your name. Check your connection.");
+      setNameError(STRINGS.errors.nameSaveFailed);
     } finally {
       setIsSavingName(false);
     }
@@ -72,7 +73,7 @@ export default function ProfileScreen() {
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={appTheme.colors.primary} />
           <AppText style={{ color: appTheme.colors.textMuted }}>
-            Loading profile…
+            {STRINGS.profile.loading}
           </AppText>
         </View>
       </Screen>
@@ -81,15 +82,15 @@ export default function ProfileScreen() {
 
   const isGuest = currentUser === null;
   const displayName = isGuest
-    ? "Guest"
-    : currentUser.displayName || currentUser.name || "User";
+    ? STRINGS.common.guest
+    : currentUser.displayName || currentUser.name || STRINGS.common.user;
 
   return (
     <Screen>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        accessibilityLabel="Profile"
+        accessibilityLabel={STRINGS.profile.title}
       >
         <ProfileHeader
           displayName={displayName}
@@ -107,19 +108,28 @@ export default function ProfileScreen() {
         />
 
         <ProfileNavRow
-          title="My accessibility needs"
+          title={STRINGS.profile.needsRowTitle}
           subtitle={needsSummary}
-          accessibilityHint="Opens the screen where you choose the accessibility features you need"
+          accessibilityHint={STRINGS.profile.needsLinkHint}
           onPress={() => router.push("/profile/accessibility-needs")}
         />
+
+        {!isGuest && currentUser.role === "moderator" ? (
+          <ProfileNavRow
+            title={STRINGS.profile.moderationQueue.title}
+            subtitle={STRINGS.profile.moderationQueue.subtitle}
+            accessibilityHint={STRINGS.profile.moderationQueue.hint}
+            onPress={() => router.push("/moderator")}
+          />
+        ) : null}
 
         {isGuest ? (
           <GuestProfilePrompt />
         ) : (
           <TouchTarget
-            accessibilityLabel="Sign out of your account"
+            accessibilityLabel={STRINGS.profile.signOut.label}
             accessibilityRole="button"
-            accessibilityHint="Signs you out and returns to the sign in screen"
+            accessibilityHint={STRINGS.profile.signOut.hint}
             onPress={handleSignOut}
             style={[
               styles.signOutButton,
@@ -133,7 +143,7 @@ export default function ProfileScreen() {
               variant="bodyStrong"
               style={{ color: appTheme.colors.danger }}
             >
-              Sign Out
+              {STRINGS.profile.signOut.button}
             </AppText>
           </TouchTarget>
         )}

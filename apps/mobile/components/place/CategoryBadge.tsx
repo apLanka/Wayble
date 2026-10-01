@@ -6,6 +6,7 @@ import {
   PLACE_CATEGORY_LABELS,
   PLACE_CATEGORY_COLORS,
 } from "@/constants/accessibility-metadata";
+import { STRINGS } from "@/constants/strings";
 
 type Props = {
   category: string;
@@ -24,7 +25,7 @@ export function CategoryBadge({ category }: Props) {
       style={[styles.badge, { backgroundColor: bgColor }]}
       accessible
       accessibilityRole="text"
-      accessibilityLabel={`Category: ${label}`}
+      accessibilityLabel={STRINGS.map.categoryLabel(label)}
     >
       <AppText style={styles.label}>{label}</AppText>
     </View>

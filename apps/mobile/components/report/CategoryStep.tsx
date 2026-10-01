@@ -7,6 +7,7 @@ import {
   CATEGORY_DISPLAY_ORDER,
 } from "@/constants/accessibility-metadata";
 import { radii, spacing } from "@/constants/theme";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
 type Props = {
@@ -29,10 +30,10 @@ export function CategoryStep({ selected, onSelect }: Props) {
   return (
     <View style={styles.container}>
       <AppText variant="title" accessibilityRole="header">
-        What would you like to report?
+        {STRINGS.report.category.title}
       </AppText>
       <AppText style={{ color: colors.textMuted }}>
-        Pick a group. You will confirm the exact details in the next step.
+        {STRINGS.report.category.body}
       </AppText>
 
       {/* Do NOT add `accessible` to this container. It is not the fix for
@@ -47,14 +48,14 @@ export function CategoryStep({ selected, onSelect }: Props) {
           count instead, which is the part that does reach a screen reader. */}
       <View
         accessibilityRole="radiogroup"
-        accessibilityLabel="Accessibility group"
+        accessibilityLabel={STRINGS.report.category.groupLabel}
         style={styles.list}
       >
         {CATEGORY_DISPLAY_ORDER.filter(
           (category) => (ATTRIBUTE_KEYS_BY_CATEGORY[category]?.length ?? 0) > 0,
         ).map((category) => {
           const count = ATTRIBUTE_KEYS_BY_CATEGORY[category]?.length ?? 0;
-          const countLabel = `${count} attribute${count === 1 ? "" : "s"}`;
+          const countLabel = STRINGS.common.countLabel(count, "attribute");
           const isSelected = selected === category;
           return (
             <TouchTarget
@@ -62,7 +63,10 @@ export function CategoryStep({ selected, onSelect }: Props) {
               accessibilityRole="radio"
               accessibilityState={{ checked: isSelected }}
               accessibilityLabel={category}
-              accessibilityHint={`${countLabel}. Double tap to report on ${category.toLowerCase()}.`}
+              accessibilityHint={STRINGS.report.category.hint(
+                countLabel,
+                category,
+              )}
               onPress={() => onSelect(category)}
               style={[
                 styles.pill,

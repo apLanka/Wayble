@@ -38,6 +38,7 @@ import {
 } from "@/components/report/report-errors";
 import { uploadPhoto } from "@/components/report/upload-photo";
 import { radii, spacing } from "@/constants/theme";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
 /**
@@ -135,7 +136,7 @@ export default function ReportScreen() {
     const title = stepTitle(step);
     if (title) {
       AccessibilityInfo.announceForAccessibility(
-        `Step ${step + 1} of ${REPORT_STEPS.length}: ${title}`,
+        STRINGS.announcements.stepOf(step + 1, REPORT_STEPS.length, title),
       );
     }
   }, []);
@@ -153,7 +154,7 @@ export default function ReportScreen() {
         dispatch({ type: "back" });
         const title = stepTitle(draft.step - 1);
         AccessibilityInfo.announceForAccessibility(
-          `Step ${draft.step} of ${REPORT_STEPS.length}: ${title}`,
+          STRINGS.announcements.stepOf(draft.step, REPORT_STEPS.length, title),
         );
         return true;
       },
@@ -215,7 +216,7 @@ export default function ReportScreen() {
         params: { id: placeIdArg },
       });
       AccessibilityInfo.announceForAccessibility(
-        "Report submitted. Thank you.",
+        STRINGS.announcements.reportSubmitted,
       );
     } catch (caught) {
       // Convex reverts the optimistic patch on failure; all that is left is
@@ -250,12 +251,14 @@ export default function ReportScreen() {
   if (currentUser === undefined) {
     return (
       <>
-        <Stack.Screen options={{ title: "Report accessibility" }} />
+        <Stack.Screen
+          options={{ title: STRINGS.navigation.titles.reportAccessibility }}
+        />
         <Screen>
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={colors.primary} />
             <AppText style={[styles.centeredText, { color: colors.textMuted }]}>
-              Checking your account…
+              {STRINGS.report.account.checking}
             </AppText>
           </View>
         </Screen>
@@ -266,19 +269,20 @@ export default function ReportScreen() {
   if (currentUser === null) {
     return (
       <>
-        <Stack.Screen options={{ title: "Report accessibility" }} />
+        <Stack.Screen
+          options={{ title: STRINGS.navigation.titles.reportAccessibility }}
+        />
         <Screen>
           <View style={styles.centered}>
             <AppText variant="title" accessibilityRole="header">
-              Sign in to submit a report
+              {STRINGS.report.account.signedOutTitle}
             </AppText>
             <AppText style={[styles.centeredText, { color: colors.textMuted }]}>
-              Reports are tied to your account so other people can confirm or
-              dispute what you observed.
+              {STRINGS.report.account.signedOutBody}
             </AppText>
             <TouchTarget
               accessibilityRole="button"
-              accessibilityLabel="Go to sign in"
+              accessibilityLabel={STRINGS.report.account.signInLabel}
               onPress={() => router.replace("/sign-in")}
               style={[
                 styles.primaryButton,
@@ -286,7 +290,7 @@ export default function ReportScreen() {
               ]}
             >
               <AppText variant="bodyStrong" style={{ color: colors.onPrimary }}>
-                Sign in
+                {STRINGS.common.signIn}
               </AppText>
             </TouchTarget>
           </View>
@@ -300,7 +304,7 @@ export default function ReportScreen() {
       <Screen>
         <View style={styles.centered}>
           <AppText style={{ color: colors.danger }}>
-            This report form is missing a place. Go back and try again.
+            {STRINGS.report.account.missingPlace}
           </AppText>
         </View>
       </Screen>
@@ -309,7 +313,9 @@ export default function ReportScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Report accessibility" }} />
+      <Stack.Screen
+        options={{ title: STRINGS.navigation.titles.reportAccessibility }}
+      />
       <Screen>
         <View style={styles.header}>
           <StepIndicator step={step} />
@@ -318,7 +324,7 @@ export default function ReportScreen() {
               above it instead of an implied one. */}
           {place?.name ? (
             <AppText variant="label" style={{ color: colors.textMuted }}>
-              Reporting on {place.name}
+              {STRINGS.report.account.reportingOn(place.name)}
             </AppText>
           ) : null}
         </View>
@@ -402,7 +408,7 @@ export default function ReportScreen() {
                 `ConfirmStep` already dims its own submit for that reason. */}
             <TouchTarget
               accessibilityRole="button"
-              accessibilityLabel="Go back a step"
+              accessibilityLabel={STRINGS.report.backLabel}
               disabled={isSubmitting || step === 0}
               onPress={() => goTo(step - 1)}
               style={[
@@ -414,16 +420,15 @@ export default function ReportScreen() {
               ]}
             >
               <AppText variant="bodyStrong" style={{ color: colors.text }}>
-                Back
+                {STRINGS.report.back}
               </AppText>
             </TouchTarget>
             {step < 3 ? (
               <TouchTarget
                 accessibilityRole="button"
-                accessibilityLabel={`Continue to ${stepTitle(
-                  step + 1,
-                  "next step",
-                )}`}
+                accessibilityLabel={STRINGS.report.continueToLabel(
+                  stepTitle(step + 1, STRINGS.report.nextStepFallback),
+                )}
                 accessibilityState={{ disabled: !canAdvance(safeDraft) }}
                 disabled={!canAdvance(safeDraft)}
                 onPress={() => goTo(step + 1)}
@@ -445,7 +450,7 @@ export default function ReportScreen() {
                       : colors.textMuted,
                   }}
                 >
-                  Next
+                  {STRINGS.report.next}
                 </AppText>
               </TouchTarget>
             ) : null}

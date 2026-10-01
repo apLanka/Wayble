@@ -11,6 +11,7 @@ import {
 
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { usePhotoPicker, type PhotoSource } from "@/hooks/use-photo-picker";
@@ -57,9 +58,7 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
           type: "setPhoto",
           photo: { ...result.photo, caption: defaultCaption(placeName) },
         });
-        AccessibilityInfo.announceForAccessibility(
-          "Photo added. Describe what it shows below.",
-        );
+        AccessibilityInfo.announceForAccessibility(STRINGS.report.photo.added);
         return;
       case "canceled":
         return;
@@ -68,8 +67,8 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
         // way out offered. While it can still ask, trying again is enough.
         showError({
           message: result.canAskAgain
-            ? "Wayble needs camera access to take a photo."
-            : "Camera access is turned off for Wayble. You can turn it on in Settings.",
+            ? STRINGS.report.photo.cameraNeeded
+            : STRINGS.report.photo.cameraBlocked,
           offerSettings: !result.canAskAgain,
         });
         return;
@@ -81,7 +80,7 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
         return;
       case "failed":
         showError({
-          message: "We couldn't load that photo. Please try again.",
+          message: STRINGS.report.photo.loadFailed,
           offerSettings: false,
         });
         return;
@@ -91,7 +90,7 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
   const handleRemove = () => {
     setError(null);
     dispatch({ type: "removePhoto" });
-    AccessibilityInfo.announceForAccessibility("Photo removed.");
+    AccessibilityInfo.announceForAccessibility(STRINGS.report.photo.removed);
   };
 
   const captionMissing = photo !== null && photo.caption.trim().length === 0;
@@ -99,11 +98,10 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
   return (
     <View style={styles.container}>
       <AppText variant="bodyStrong" accessibilityRole="header">
-        Add a photo (optional)
+        {STRINGS.report.photo.title}
       </AppText>
       <AppText style={{ color: colors.textMuted }}>
-        A photo of the entrance, lift or bathroom helps the next person judge it
-        for themselves.
+        {STRINGS.report.photo.body}
       </AppText>
 
       {photo ? (
@@ -115,7 +113,7 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
             accessible
             accessibilityRole="image"
             accessibilityLabel={
-              photo.caption.trim() || "Attached photo, no description yet"
+              photo.caption.trim() || STRINGS.report.photo.noCaptionLabel
             }
           />
 
@@ -125,20 +123,20 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
               nativeID="photo-caption-label"
               style={{ color: colors.textMuted }}
             >
-              Describe the photo (required)
+              {STRINGS.report.photo.captionTitle}
             </AppText>
             <TextInput
               value={photo.caption}
               onChangeText={(text) =>
                 dispatch({ type: "setPhotoCaption", caption: text })
               }
-              placeholder="For example: ramp to the side entrance, no handrail."
+              placeholder={STRINGS.report.photo.captionPlaceholder}
               placeholderTextColor={colors.textMuted}
               maxLength={MAX_CAPTION_LENGTH}
               multiline
-              accessibilityLabel="Describe the photo"
+              accessibilityLabel={STRINGS.report.photo.captionLabel}
               accessibilityLabelledBy="photo-caption-label"
-              accessibilityHint="Required. Read aloud to people using a screen reader."
+              accessibilityHint={STRINGS.report.photo.captionHint}
               style={[
                 styles.input,
                 {
@@ -156,34 +154,34 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
                 accessibilityLiveRegion="polite"
                 style={{ color: colors.danger }}
               >
-                Add a short description of the photo to continue.
+                {STRINGS.report.photo.captionMissing}
               </AppText>
             ) : null}
           </View>
 
           <TouchTarget
             accessibilityRole="button"
-            accessibilityLabel="Remove photo"
-            accessibilityHint="Takes the photo off this report. You can add another."
+            accessibilityLabel={STRINGS.report.photo.remove}
+            accessibilityHint={STRINGS.report.photo.removeHint}
             onPress={handleRemove}
             style={[styles.secondaryButton, { borderColor: colors.border }]}
           >
             <AppText variant="bodyStrong" style={{ color: colors.text }}>
-              Remove photo
+              {STRINGS.report.photo.remove}
             </AppText>
           </TouchTarget>
         </View>
       ) : (
         <View style={styles.buttonRow}>
           <SourceButton
-            label="Take photo"
-            hint="Opens the camera to photograph this place"
+            label={STRINGS.report.photo.takePhoto}
+            hint={STRINGS.report.photo.takePhotoHint}
             disabled={isProcessing}
             onPress={() => void handlePick("camera")}
           />
           <SourceButton
-            label="Choose from library"
-            hint="Opens your photo library to pick a photo"
+            label={STRINGS.report.photo.chooseFromLibrary}
+            hint={STRINGS.report.photo.chooseFromLibraryHint}
             disabled={isProcessing}
             onPress={() => void handlePick("library")}
           />
@@ -194,7 +192,7 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
         <View style={styles.processing} accessibilityLiveRegion="polite">
           <ActivityIndicator color={colors.primary} />
           <AppText style={{ color: colors.textMuted }}>
-            Preparing photo…
+            {STRINGS.report.photo.preparing}
           </AppText>
         </View>
       ) : null}
@@ -214,13 +212,13 @@ export function PhotoEvidencePicker({ photo, placeName, dispatch }: Props) {
           {error.offerSettings ? (
             <TouchTarget
               accessibilityRole="button"
-              accessibilityLabel="Open Settings"
-              accessibilityHint="Opens Wayble's settings, where you can allow camera access"
+              accessibilityLabel={STRINGS.report.photo.openSettings}
+              accessibilityHint={STRINGS.report.photo.openSettingsHint}
               onPress={() => void Linking.openSettings()}
               style={styles.settingsLink}
             >
               <AppText variant="bodyStrong" style={{ color: colors.primary }}>
-                Open Settings
+                {STRINGS.report.photo.openSettings}
               </AppText>
             </TouchTarget>
           ) : null}

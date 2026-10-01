@@ -9,11 +9,11 @@ import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { ConfidenceBadge } from "@/components/place/ConfidenceBadge";
 import { AttributeGroup } from "@/components/place/AttributeGroup";
-import { CATEGORY_LABELS } from "@/components/map/CategoryFilter";
 import {
   ATTRIBUTE_METADATA,
   CATEGORY_DISPLAY_ORDER,
 } from "@/constants/accessibility-metadata";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { Id } from "@packages/backend/convex/_generated/dataModel";
@@ -46,14 +46,14 @@ export default function PlaceDetailScreen() {
   if (place === undefined) {
     return (
       <>
-        <Stack.Screen options={{ title: "Loading…" }} />
+        <Stack.Screen options={{ title: STRINGS.common.loadingEllipsis }} />
         <Screen edges={["left", "right", "bottom"]}>
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={appTheme.colors.primary} />
             <AppText
               style={[styles.loadingText, { color: appTheme.colors.textMuted }]}
             >
-              Loading place details…
+              {STRINGS.place.notFound.loading}
             </AppText>
           </View>
         </Screen>
@@ -65,16 +65,16 @@ export default function PlaceDetailScreen() {
   if (place === null) {
     return (
       <>
-        <Stack.Screen options={{ title: "Not Found" }} />
+        <Stack.Screen options={{ title: STRINGS.navigation.titles.notFound }} />
         <Screen edges={["left", "right", "bottom"]}>
           <View style={styles.centered}>
             <AppText variant="title" style={{ color: appTheme.colors.text }}>
-              Place not found
+              {STRINGS.place.notFound.title}
             </AppText>
             <AppText
               style={[styles.loadingText, { color: appTheme.colors.textMuted }]}
             >
-              This place may have been removed or doesn't exist.
+              {STRINGS.place.notFound.body}
             </AppText>
           </View>
         </Screen>
@@ -101,7 +101,12 @@ export default function PlaceDetailScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: place.name, headerBackTitle: "Back" }} />
+      <Stack.Screen
+        options={{
+          title: place.name,
+          headerBackTitle: STRINGS.navigation.back,
+        }}
+      />
       <Screen edges={["left", "right", "bottom"]}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
@@ -147,7 +152,7 @@ export default function PlaceDetailScreen() {
                 style={[styles.sectionTitle, { color: appTheme.colors.text }]}
                 accessibilityRole="header"
               >
-                Address
+                {STRINGS.map.placeDetail.addressTitle}
               </AppText>
               <AppText style={{ color: appTheme.colors.text }}>
                 {place.address}
@@ -169,13 +174,16 @@ export default function PlaceDetailScreen() {
                     ]}
                     accessibilityRole="header"
                   >
-                    Accessibility Profile
+                    {STRINGS.map.placeDetail.profileTitle}
                   </AppText>
                   <View style={styles.accessibilityRow}>
                     {place.accessibilityCategories.map((cat: string) => {
-                      const label =
-                        CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ||
-                        `${cat} accessible`;
+                      const label = STRINGS.map.categoryAccessible(
+                        cat,
+                        STRINGS.map.categoryLabels[
+                          cat as keyof typeof STRINGS.map.categoryLabels
+                        ] ?? null,
+                      );
                       return (
                         <View
                           key={cat}
@@ -215,7 +223,7 @@ export default function PlaceDetailScreen() {
                 style={[styles.sectionTitle, { color: appTheme.colors.text }]}
                 accessibilityRole="header"
               >
-                Verified Features
+                {STRINGS.map.placeDetail.verifiedTitle}
               </AppText>
               {/* No `focusColor`, so `TouchTarget` falls back to
                   `colors.focus`. The badge sits on `primary + "20"`,
@@ -229,10 +237,10 @@ export default function PlaceDetailScreen() {
               <View style={styles.headerBadges}>
                 <TouchTarget
                   accessibilityRole="button"
-                  accessibilityLabel={`${place.reportCount} ${
-                    place.reportCount === 1 ? "report" : "reports"
-                  } on this place`}
-                  accessibilityHint="Opens the list of reports so you can confirm or dispute them"
+                  accessibilityLabel={STRINGS.place.reports.onThisPlace(
+                    place.reportCount,
+                  )}
+                  accessibilityHint={STRINGS.place.reportsLinkHint}
                   onPress={() =>
                     router.push({
                       pathname: "/place/[id]/reports",
@@ -258,8 +266,7 @@ export default function PlaceDetailScreen() {
                         fontWeight: "600",
                       }}
                     >
-                      {place.reportCount}{" "}
-                      {place.reportCount === 1 ? "report" : "reports"}
+                      {STRINGS.place.reports.header(place.reportCount)}
                     </AppText>
                   </View>
                 </TouchTarget>
@@ -282,8 +289,8 @@ export default function PlaceDetailScreen() {
 
                 <TouchTarget
                   accessibilityRole="button"
-                  accessibilityLabel="Add or correct this report"
-                  accessibilityHint="Opens the accessibility report form to add what others missed or fix a value that is wrong"
+                  accessibilityLabel={STRINGS.place.addReport.label}
+                  accessibilityHint={STRINGS.place.addReport.hint}
                   onPress={openReportForm}
                   style={[
                     styles.addReportButton,
@@ -294,18 +301,18 @@ export default function PlaceDetailScreen() {
                     variant="bodyStrong"
                     style={{ color: appTheme.colors.primary }}
                   >
-                    Add or correct this report
+                    {STRINGS.place.addReport.button}
                   </AppText>
                 </TouchTarget>
               </View>
             ) : (
               <>
                 <AppText style={{ color: appTheme.colors.textMuted }}>
-                  No accessibility features reported.
+                  {STRINGS.map.placeDetail.noFeatures}
                 </AppText>
                 <TouchTarget
                   accessibilityRole="button"
-                  accessibilityLabel="Add the first report"
+                  accessibilityLabel={STRINGS.place.addFirstReport.label}
                   onPress={openReportForm}
                   style={[
                     styles.addReportButton,
@@ -316,7 +323,7 @@ export default function PlaceDetailScreen() {
                     variant="bodyStrong"
                     style={{ color: appTheme.colors.primary }}
                   >
-                    Be the first to report
+                    {STRINGS.place.addFirstReport.button}
                   </AppText>
                 </TouchTarget>
               </>
@@ -336,8 +343,7 @@ export default function PlaceDetailScreen() {
                   { color: appTheme.colors.textMuted },
                 ]}
               >
-                Note: A feature not listed here has not been assessed — it does
-                not mean it is unavailable.
+                {STRINGS.map.placeDetail.disclaimer}
               </AppText>
             </View>
           </View>
