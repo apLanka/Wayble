@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 520" role="img" aria-label="Wayble — Every way, able.">
+  <title>Wayble — Every way, able.</title>
+  <defs>
+    <linearGradient id="back" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0D6E3C"/>
+      <stop offset="1" stop-color="#86FFC0"/>
+    </linearGradient>
+    <linearGradient id="front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#86FFC0"/>
+      <stop offset="1" stop-color="#0D6E3C"/>
+    </linearGradient>
+  </defs>
+  <!-- icon: original 1200x1080 box scaled to 0.4 -->
+  <g transform="translate(20 44) scale(0.4) translate(-200 -260)">
+    <path fill="url(#back)" fill-rule="evenodd"
+          d="M223 735A452 452 0 0 1 1127 735C1127 1065 825 1235 675 1315C525 1235 223 1065 223 735Z M675 540A195 195 0 1 0 675 930A195 195 0 1 0 675 540Z"/>
+    <path fill="url(#front)" fill-rule="evenodd"
+          d="M478 735A452 452 0 0 1 1382 735C1382 1065 1080 1235 930 1315C780 1235 478 1065 478 735Z M930 540A195 195 0 1 0 930 930A195 195 0 1 0 930 540Z"/>
+  </g>
+  <text x="560" y="305" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="700" font-size="220" letter-spacing="-4" fill="#0B6B3A">Wayble</text>
+  <text x="566" y="395" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="500" font-size="62" letter-spacing="2" fill="#425248">Every way, able.</text>
+</svg>
