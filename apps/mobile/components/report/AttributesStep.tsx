@@ -10,6 +10,7 @@ import {
   VALUE_LABELS,
 } from "@/constants/accessibility-metadata";
 import { radii, spacing } from "@/constants/theme";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { MAX_NOTE_LENGTH } from "@packages/backend/convex/reportLimits";
 import type { AccessibilityAttributeKey } from "@packages/backend/convex/accessibility";
@@ -62,7 +63,7 @@ export function AttributesStep({ category, draft, dispatch }: Props) {
         {category} details
       </AppText>
       <AppText style={{ color: colors.textMuted }}>
-        Set a value for each one. Leave anything you did not check blank.
+        {STRINGS.report.attributes.body}
       </AppText>
 
       {outstandingElsewhere.length > 0 ? (
@@ -99,20 +100,18 @@ export function AttributesStep({ category, draft, dispatch }: Props) {
  */
 function describeOutstanding(outstanding: AccessibilityAttributeKey[]): string {
   // Unreachable while the banner is gated on a non-empty list, but this
-  // string is spoken aloud, so it must not be able to produce "undefined"
-  // if a later edit renders it unconditionally.
-  if (outstanding.length === 0) return "";
-  // `missingRequiredNotes` walks the taxonomy in order, so the distinct
-  // groups come out in a stable order without needing a sort.
+  // string is spoken aloud, so it must not be able to produce "undefined" if
+  // a later edit renders it unconditionally — hence the count-first guard
+  // inside the string helper, which returns "" for a count of zero.
+  //
+  // `missingRequiredNotes` walks the taxonomy in order, so the distinct groups
+  // come out in a stable order without needing a sort. Working out *which*
+  // groups is data logic and stays here; wording the sentence, including
+  // English list joining, is in constants/strings.ts.
   const groups = [
     ...new Set(outstanding.map((key) => ATTRIBUTE_METADATA[key].category)),
   ];
-  const one = outstanding.length === 1;
-  const list =
-    groups.length === 1
-      ? groups[0]
-      : `${groups.slice(0, -1).join(", ")} and ${groups[groups.length - 1]}`;
-  return `A note is still required for ${outstanding.length} attribute${one ? "" : "s"} in ${list}. Go back and choose ${list} to add ${one ? "it" : "them"}.`;
+  return STRINGS.report.attributes.outstandingNote(outstanding.length, groups);
 }
 
 type EditorProps = {
@@ -153,7 +152,7 @@ function AttributeEditor({
 
       <View
         accessibilityRole="radiogroup"
-        accessibilityLabel={`${meta.label} value`}
+        accessibilityLabel={STRINGS.report.attributes.groupLabel(meta.label)}
         style={styles.values}
       >
         {REPORT_ATTRIBUTE_VALUES.map((value) => {
@@ -163,13 +162,16 @@ function AttributeEditor({
               key={value}
               accessibilityRole="radio"
               accessibilityState={{ checked: isSelected }}
-              accessibilityLabel={`${meta.label}: ${VALUE_LABELS[value] ?? value}`}
+              accessibilityLabel={STRINGS.report.attributes.valueAnnounce(
+                meta.label,
+                VALUE_LABELS[value] ?? value,
+              )}
               // No value label here: the label above already ends in it, so
               // naming it again spoke every pill's value twice.
-              // The result, not the gesture: VoiceOver and TalkBack announce
-              // how to activate on their own (WCAG audit S4-3, F6).
               accessibilityHint={
-                isSelected ? "Clears this value." : "Sets this value."
+                isSelected
+                  ? STRINGS.report.attributes.clearValueHint
+                  : STRINGS.report.attributes.setValueHint
               }
               onPress={() =>
                 dispatch(
@@ -208,22 +210,23 @@ function AttributeEditor({
             style={{ color: needsNote ? colors.danger : colors.textMuted }}
           >
             {needsNote
-              ? "Add a note — required for Partial"
-              : "Add a note (optional)"}
+              ? STRINGS.report.attributes.noteRequired
+              : STRINGS.report.attributes.noteOptional}
           </AppText>
           <TextInput
             value={note}
             onChangeText={(text) =>
               dispatch({ type: "setNote", key: attributeKey, note: text })
             }
-            placeholder="What did you see?"
+            placeholder={STRINGS.report.attributes.notePlaceholder}
             placeholderTextColor={colors.textMuted}
             maxLength={MAX_NOTE_LENGTH}
             multiline
-            accessibilityLabel={`Note for ${meta.label}`}
-            accessibilityHint={`${
-              needsNote ? "Required for Partial" : "Optional"
-            }. Up to ${MAX_NOTE_LENGTH} characters.`}
+            accessibilityLabel={STRINGS.report.attributes.noteLabel(meta.label)}
+            accessibilityHint={STRINGS.report.attributes.noteHint(
+              needsNote,
+              MAX_NOTE_LENGTH,
+            )}
             accessibilityLabelledBy={`note-label-${attributeKey}`}
             style={[
               styles.input,

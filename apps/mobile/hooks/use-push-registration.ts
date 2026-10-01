@@ -1,3 +1,5 @@
+import { STRINGS } from "@/constants/strings";
+
 import { api } from "@packages/backend/convex/_generated/api";
 import { useMutation } from "convex/react";
 import Constants from "expo-constants";
@@ -12,7 +14,7 @@ type PermissionState = "loading" | "granted" | "denied" | "undetermined";
 async function ensureAndroidChannel() {
   if (Platform.OS !== "android") return;
   await Notifications.setNotificationChannelAsync("verify-nearby", {
-    name: "Nearby verification requests",
+    name: STRINGS.permissions.notification.channelName,
     importance: Notifications.AndroidImportance.DEFAULT,
   });
 }

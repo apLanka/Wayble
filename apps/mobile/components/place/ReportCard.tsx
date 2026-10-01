@@ -5,6 +5,7 @@ import {
   ATTRIBUTE_METADATA,
   VALUE_LABELS,
 } from "@/constants/accessibility-metadata";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { formatRelativeTime } from "@/utils/format-relative-time";
@@ -93,7 +94,7 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
           <AppText
             variant="label"
             style={{ color: colors.textMuted }}
-            accessibilityLabel={`Reported ${observed}`}
+            accessibilityLabel={STRINGS.place.reportedOn(observed)}
           >
             {observed}
           </AppText>
@@ -134,7 +135,7 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
             // about why, and `getPlace` already preserves notes down to this
             // component, so the same report reads differently here than on the
             // place detail screen would be a regression.
-            const note = attribute.note ? `. Note: ${attribute.note}` : "";
+            const note = attribute.note ?? null;
             // `submitReport` rejects duplicate keys, so the key is unique
             // within one report and safe as a list key.
             return (
@@ -149,7 +150,11 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
                 style={styles.chipColumn}
                 accessible
                 accessibilityRole="text"
-                accessibilityLabel={`${label}: ${valueLabel}${note}`}
+                accessibilityLabel={STRINGS.place.attributeLabel(
+                  label,
+                  valueLabel,
+                  note,
+                )}
               >
                 <View
                   style={[
@@ -180,7 +185,7 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
         // The tally is folded into the reason because `VerifyControl` shows
         // this string *instead of* the tally. Without it, a screen-reader user
         // on their own report would hear the reason and no counts at all.
-        disabledReason={`You can't verify your own report · ${tallySummary(tally)}`}
+        disabledReason={STRINGS.place.ownReportNote(tallySummary(tally))}
         onVote={onVote}
       />
     </View>

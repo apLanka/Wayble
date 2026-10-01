@@ -20,6 +20,7 @@ import {
   type Verdict,
 } from "@/components/place/verification-tally";
 import { AppText } from "@/components/ui/app-text";
+import { STRINGS } from "@/constants/strings";
 import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { radii, spacing } from "@/constants/theme";
@@ -111,7 +112,9 @@ export default function PlaceReportsScreen() {
       // After the await, not before: the optimistic patch is already visible
       // and the tally text is what changed, so that is what to announce.
       AccessibilityInfo.announceForAccessibility(
-        verdict === "confirm" ? "Report confirmed." : "Report disputed.",
+        verdict === "confirm"
+          ? STRINGS.announcements.reportConfirmed
+          : STRINGS.announcements.reportDisputed,
       );
     } catch (caught) {
       if (attempt !== latestAttempt.current) return;
@@ -133,20 +136,24 @@ export default function PlaceReportsScreen() {
   if (currentUser === null) {
     return (
       <>
-        <Stack.Screen options={{ title: "Reports", headerBackTitle: "Back" }} />
+        <Stack.Screen
+          options={{
+            title: STRINGS.place.reports.title,
+            headerBackTitle: STRINGS.navigation.back,
+          }}
+        />
         <Screen edges={["left", "right", "bottom"]}>
           <View style={styles.centered}>
             <AppText variant="title" accessibilityRole="header">
-              Sign in to verify a report
+              {STRINGS.place.reports.signedOutTitle}
             </AppText>
             <AppText style={[styles.centeredText, { color: colors.textMuted }]}>
-              Confirming or disputing a report is tied to your account, so
-              people know who agreed with what.
+              {STRINGS.place.reports.signedOutBody}
             </AppText>
             <TouchTarget
               accessibilityRole="button"
-              accessibilityLabel="Go to sign in"
-              accessibilityHint="Opens the sign-in screen. Signing in lets you confirm or dispute reports."
+              accessibilityLabel={STRINGS.report.account.signInLabel}
+              accessibilityHint={STRINGS.report.account.verifySignInHint}
               onPress={() => router.replace("/sign-in")}
               style={[
                 styles.primaryButton,
@@ -154,7 +161,7 @@ export default function PlaceReportsScreen() {
               ]}
             >
               <AppText variant="bodyStrong" style={{ color: colors.onPrimary }}>
-                Sign in
+                {STRINGS.common.signIn}
               </AppText>
             </TouchTarget>
           </View>
@@ -175,12 +182,17 @@ export default function PlaceReportsScreen() {
   if (currentUser === undefined || reports === undefined) {
     return (
       <>
-        <Stack.Screen options={{ title: "Reports", headerBackTitle: "Back" }} />
+        <Stack.Screen
+          options={{
+            title: STRINGS.place.reports.title,
+            headerBackTitle: STRINGS.navigation.back,
+          }}
+        />
         <Screen edges={["left", "right", "bottom"]}>
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={colors.primary} />
             <AppText style={[styles.centeredText, { color: colors.textMuted }]}>
-              Loading reports…
+              {STRINGS.place.reports.loading}
             </AppText>
           </View>
         </Screen>
@@ -190,7 +202,12 @@ export default function PlaceReportsScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Reports", headerBackTitle: "Back" }} />
+      <Stack.Screen
+        options={{
+          title: STRINGS.place.reports.title,
+          headerBackTitle: STRINGS.navigation.back,
+        }}
+      />
       <Screen edges={["left", "right", "bottom"]}>
         {/* The banner is a sibling of the list, not part of its header. A vote
             can fail on a card below the fold, and inside `ListHeaderComponent`
@@ -213,12 +230,12 @@ export default function PlaceReportsScreen() {
             contentContainerStyle={styles.listContent}
             ListHeaderComponent={
               <AppText variant="title" accessibilityRole="header">
-                {reports.length} {reports.length === 1 ? "report" : "reports"}
+                {STRINGS.place.reports.header(reports.length)}
               </AppText>
             }
             ListEmptyComponent={
               <AppText style={{ color: colors.textMuted }}>
-                No reports on this place yet.
+                {STRINGS.place.reports.empty}
               </AppText>
             }
             renderItem={({ item }) => (

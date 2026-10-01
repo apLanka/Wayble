@@ -12,6 +12,7 @@ import {
 import { useMutation } from "convex/react";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { api } from "@packages/backend/convex/_generated/api";
@@ -22,12 +23,12 @@ type FlagReason =
   "inaccurate" | "spam" | "abusive" | "privacy" | "duplicate" | "other";
 
 const REASONS: { reason: FlagReason; label: string }[] = [
-  { reason: "inaccurate", label: "Inaccurate" },
-  { reason: "spam", label: "Spam" },
-  { reason: "abusive", label: "Abusive" },
-  { reason: "privacy", label: "Privacy concern" },
-  { reason: "duplicate", label: "Duplicate" },
-  { reason: "other", label: "Other" },
+  { reason: "inaccurate", label: STRINGS.place.reportMenu.reasons.inaccurate },
+  { reason: "spam", label: STRINGS.place.reportMenu.reasons.spam },
+  { reason: "abusive", label: STRINGS.place.reportMenu.reasons.abusive },
+  { reason: "privacy", label: STRINGS.place.reportMenu.reasons.privacy },
+  { reason: "duplicate", label: STRINGS.place.reportMenu.reasons.duplicate },
+  { reason: "other", label: STRINGS.place.reportMenu.reasons.other },
 ];
 
 type Props = {
@@ -74,7 +75,9 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
       // Modal is already gone by the time this fires, so a sighted user has
       // no visible confirmation left on screen — the announcement is the
       // only feedback they get that the flag landed.
-      AccessibilityInfo.announceForAccessibility("Report flagged.");
+      AccessibilityInfo.announceForAccessibility(
+        STRINGS.place.reportMenu.flagged,
+      );
     } catch (caught) {
       setIsSubmitting(false);
       const message = flagErrorMessage(classifyFlagError(caught));
@@ -89,15 +92,15 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
     <>
       <TouchTarget
         accessibilityRole="button"
-        accessibilityLabel="Report options"
-        accessibilityHint="Opens a menu to flag this report as inaccurate or inappropriate"
+        accessibilityLabel={STRINGS.place.reportMenu.options}
+        accessibilityHint={STRINGS.place.reportMenu.optionsHint}
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={openPicker}
         style={[styles.kebab, { opacity: disabled ? 0.5 : 1 }]}
       >
         <AppText style={[styles.kebabText, { color: colors.primary }]}>
-          ⋮
+          {STRINGS.place.reportMenu.kebab}
         </AppText>
       </TouchTarget>
 
@@ -111,8 +114,8 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
           <Pressable
             style={styles.backdrop}
             accessibilityRole="button"
-            accessibilityLabel="Close report reason menu"
-            accessibilityHint="Closes the menu without flagging"
+            accessibilityLabel={STRINGS.place.reportMenu.closeMenu}
+            accessibilityHint={STRINGS.place.reportMenu.closeMenuHint}
             onPress={() => setPickerVisible(false)}
           />
           <View
@@ -122,14 +125,14 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
             ]}
           >
             <AppText variant="bodyStrong" accessibilityRole="header">
-              Report this report as…
+              {STRINGS.place.reportMenu.pickerTitle}
             </AppText>
             {REASONS.map(({ reason, label }) => (
               <TouchTarget
                 key={reason}
                 accessibilityRole="button"
-                accessibilityLabel={`Report as ${label}`}
-                accessibilityHint="Asks you to confirm before the report is flagged"
+                accessibilityLabel={STRINGS.place.reportMenu.reasonLabel(label)}
+                accessibilityHint={STRINGS.place.reportMenu.reasonHint}
                 onPress={() => pickReason(reason)}
                 style={styles.reasonRow}
               >
@@ -155,8 +158,8 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
           <Pressable
             style={styles.backdrop}
             accessibilityRole="button"
-            accessibilityLabel="Cancel flagging this report"
-            accessibilityHint="Closes without flagging the report"
+            accessibilityLabel={STRINGS.place.reportMenu.cancelFlagging}
+            accessibilityHint={STRINGS.place.reportMenu.cancelHint}
             onPress={cancelConfirm}
           />
           <View
@@ -166,7 +169,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
             ]}
           >
             <AppText variant="bodyStrong" accessibilityRole="header">
-              Flag this report as {pendingLabel}?
+              {STRINGS.place.reportMenu.confirmTitle(pendingLabel ?? "")}
             </AppText>
             {error ? (
               <AppText
@@ -180,8 +183,8 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
             <View style={styles.actions}>
               <TouchTarget
                 accessibilityRole="button"
-                accessibilityLabel="Cancel"
-                accessibilityHint="Closes without flagging the report"
+                accessibilityLabel={STRINGS.place.reportMenu.cancel}
+                accessibilityHint={STRINGS.place.reportMenu.cancelHint}
                 disabled={isSubmitting}
                 onPress={cancelConfirm}
                 style={[
@@ -193,12 +196,14 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
                   },
                 ]}
               >
-                <AppText variant="bodyStrong">Cancel</AppText>
+                <AppText variant="bodyStrong">
+                  {STRINGS.place.reportMenu.cancel}
+                </AppText>
               </TouchTarget>
               <TouchTarget
                 accessibilityRole="button"
-                accessibilityLabel="Confirm flagging this report"
-                accessibilityHint="Flags this report for review"
+                accessibilityLabel={STRINGS.place.reportMenu.confirmFlagging}
+                accessibilityHint={STRINGS.place.reportMenu.confirmFlaggingHint}
                 accessibilityState={{ disabled: isSubmitting }}
                 disabled={isSubmitting}
                 focusColor={colors.onPrimary}
@@ -212,7 +217,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
                     variant="bodyStrong"
                     style={{ color: colors.onPrimary }}
                   >
-                    Flag
+                    {STRINGS.place.reportMenu.flag}
                   </AppText>
                 )}
               </TouchTarget>
