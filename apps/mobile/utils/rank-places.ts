@@ -10,6 +10,7 @@ import {
 // Relative, not `@/`: Vitest here has no path-alias config, and this module is
 // tested directly.
 import { ATTRIBUTE_METADATA } from "../constants/accessibility-metadata";
+import { STRINGS } from "../constants/strings";
 
 /**
  * US-16 — order a results list by how well each place meets the user's needs,
@@ -96,12 +97,12 @@ export function matchExplanation(
   return {
     short: shortText(match, counted),
     accessibilityLabel: [
-      "Ranked by your needs.",
-      sentence("Meets", met),
-      sentence("Partly meets", partial),
-      sentence("Does not have", unmet),
-      sentence("No information on", unknown),
-      sentence("Not applicable here", notApplicable),
+      STRINGS.map.match.rankedByNeeds,
+      sentence(STRINGS.map.match.leadMet, met),
+      sentence(STRINGS.map.match.leadPartial, partial),
+      sentence(STRINGS.map.match.leadUnmet, unmet),
+      sentence(STRINGS.map.match.leadUnknown, unknown),
+      sentence(STRINGS.map.match.leadNotApplicable, notApplicable),
     ]
       .filter(Boolean)
       .join(" "),
@@ -111,24 +112,28 @@ export function matchExplanation(
 function shortText(match: MatchResult, counted: number): string {
   const { met, partial, unmet } = match;
 
-  if (counted === 0) return "Your needs don't apply here";
+  if (counted === 0) return STRINGS.map.match.noneApply;
   if (met.length + partial.length + unmet.length === 0) {
-    return "No info on your needs";
+    return STRINGS.map.match.noInfo;
   }
   if (met.length === counted) {
-    return counted === 1 ? "Meets your need" : `Meets all ${counted} needs`;
+    return counted === 1
+      ? STRINGS.map.match.meetsOne
+      : STRINGS.map.match.meetsAll(counted);
   }
 
-  let text = `${met.length} of ${counted} needs met`;
-  if (partial.length > 0) text += `, ${partial.length} partly`;
-  if (unmet.length === 1) text += ` · No ${label(unmet[0]!)}`;
-  else if (unmet.length > 1) text += ` · ${unmet.length} missing`;
+  let text = STRINGS.map.match.metOf(met.length, counted);
+  if (partial.length > 0) text += STRINGS.map.match.partly(partial.length);
+  if (unmet.length === 1)
+    text += STRINGS.map.match.missingOne(label(unmet[0]!));
+  else if (unmet.length > 1)
+    text += STRINGS.map.match.missingMany(unmet.length);
   return text;
 }
 
 function sentence(lead: string, keys: AccessibilityAttributeKey[]): string {
   if (keys.length === 0) return "";
-  return `${lead}: ${keys.map(label).join(", ")}.`;
+  return STRINGS.map.match.sentence(lead, keys.map(label));
 }
 
 function label(key: AccessibilityAttributeKey): string {

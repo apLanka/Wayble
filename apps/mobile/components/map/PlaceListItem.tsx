@@ -5,6 +5,7 @@ import { TouchTarget } from "@/components/ui/touch-target";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { CATEGORY_COLORS } from "./CategoryFilter";
 import { formatDistance } from "@/utils/format-distance";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import type { MatchExplanation } from "@/utils/rank-places";
 
@@ -34,14 +35,21 @@ export function PlaceListItem({
   // Combine into a single label so screen readers read it continuously. The
   // match reason is appended rather than given its own node, so the row stays
   // one stop for a screen reader and the reason is heard with the place.
-  const a11yLabel = `${name}, ${category}${distanceStr ? `, ${distanceStr} away` : ""}${matchExplanation ? `. ${matchExplanation.accessibilityLabel}` : ""}`;
+  const placeLabel = STRINGS.map.placeRowLabel(
+    name,
+    category,
+    distanceStr || null,
+  );
+  const a11yLabel = matchExplanation
+    ? `${placeLabel}. ${matchExplanation.accessibilityLabel}`
+    : placeLabel;
 
   return (
     <TouchTarget
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={a11yLabel}
-      accessibilityHint="Opens this place's accessibility details"
+      accessibilityHint={STRINGS.map.placeRowHint}
       style={[
         styles.container,
         {

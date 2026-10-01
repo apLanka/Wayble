@@ -3,23 +3,25 @@ import { StyleSheet, View } from "react-native";
 import { AppText } from "@/components/ui/app-text";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { STRINGS } from "@/constants/strings";
 import { REPORT_STEPS, type ReportStep } from "./report-draft";
 
 /**
  * The display name for each `REPORT_STEPS` entry.
  *
- * Keyed on `ReportStep` rather than `string`, so renaming a step id is a
- * `tsc` error. Keyed on `string` it compiled silently: the lookup missed and
- * the route's forward announcement — which is gated on a non-empty title —
- * simply stopped firing, while the ungated callers still announced a
+ * Annotated `Record<ReportStep, string>` rather than `string`, so renaming a
+ * step id is a `tsc` error. Keyed on `string` it compiled silently: the lookup
+ * missed and the route's forward announcement — which is gated on a non-empty
+ * title — simply stopped firing, while the ungated callers still announced a
  * truncated "Step 2 of 4: ".
+ *
+ * The annotation preserves the *missing-key* half of that check. It does not
+ * preserve the excess-key half: the value comes from a module, not a fresh
+ * literal, so TypeScript applies no excess-property check here. A stale
+ * `stepTitles` entry would therefore not be caught by `tsc` — the
+ * `stepTitles` test in `strings.test.ts` pins the key set for that.
  */
-export const STEP_TITLES: Record<ReportStep, string> = {
-  category: "Category",
-  attributes: "Attributes",
-  notes: "Notes",
-  confirm: "Confirm",
-};
+const STEP_TITLES: Record<ReportStep, string> = STRINGS.report.stepTitles;
 
 /**
  * The title for a zero-based step index, or `fallback` if the index is out of
@@ -75,7 +77,7 @@ export function StepIndicator({ step }: Props) {
     <View
       accessible
       accessibilityRole="progressbar"
-      accessibilityLabel={`Step ${position} of ${REPORT_STEPS.length}`}
+      accessibilityLabel={STRINGS.report.stepOf(position, REPORT_STEPS.length)}
       accessibilityValue={{
         min: 1,
         max: REPORT_STEPS.length,
@@ -88,7 +90,7 @@ export function StepIndicator({ step }: Props) {
         variant="label"
         style={[styles.label, { color: colors.textMuted }]}
       >
-        Step {position} of {REPORT_STEPS.length} — {title}
+        {STRINGS.report.stepOfWithTitle(position, REPORT_STEPS.length, title)}
       </AppText>
       <View style={styles.track}>
         {REPORT_STEPS.map((name, segment) => (
