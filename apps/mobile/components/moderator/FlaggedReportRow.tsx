@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
@@ -29,15 +29,16 @@ export type FlaggedReport = {
 
 type Props = {
   item: FlaggedReport;
-  isDismissing: boolean;
-  onDismiss: (reportId: string) => void;
+  onDismiss: (item: FlaggedReport) => void;
+  onRemove: (item: FlaggedReport) => void;
 };
 
 /**
  * One flagged report: where, what was said, why it was flagged, how often.
- * Owns no query state — it reports intent upward through `onDismiss`.
+ * Owns no query state — both buttons report intent upward, and the screen
+ * confirms the decision (with an optional note) in `ResolveDialog`.
  */
-export function FlaggedReportRow({ item, isDismissing, onDismiss }: Props) {
+export function FlaggedReportRow({ item, onDismiss, onRemove }: Props) {
   const { appTheme } = useAppTheme();
   const { colors } = appTheme;
 
@@ -80,22 +81,28 @@ export function FlaggedReportRow({ item, isDismissing, onDismiss }: Props) {
         </AppText>
       </View>
 
-      <TouchTarget
-        accessibilityRole="button"
-        accessibilityLabel={`Dismiss flags on ${item.placeName}`}
-        accessibilityState={{ disabled: isDismissing, busy: isDismissing }}
-        disabled={isDismissing}
-        onPress={() => onDismiss(item.reportId)}
-        style={[styles.dismiss, { borderColor: colors.primary }]}
-      >
-        {isDismissing ? (
-          <ActivityIndicator color={colors.primary} />
-        ) : (
+      <View style={styles.actions}>
+        <TouchTarget
+          accessibilityRole="button"
+          accessibilityLabel={`Dismiss flags on ${item.placeName}`}
+          onPress={() => onDismiss(item)}
+          style={[styles.button, { borderColor: colors.primary }]}
+        >
           <AppText variant="bodyStrong" style={{ color: colors.primary }}>
             Dismiss
           </AppText>
-        )}
-      </TouchTarget>
+        </TouchTarget>
+        <TouchTarget
+          accessibilityRole="button"
+          accessibilityLabel={`Remove report at ${item.placeName}`}
+          onPress={() => onRemove(item)}
+          style={[styles.button, { borderColor: colors.danger }]}
+        >
+          <AppText variant="bodyStrong" style={{ color: colors.danger }}>
+            Remove
+          </AppText>
+        </TouchTarget>
+      </View>
     </View>
   );
 }
@@ -119,7 +126,12 @@ const styles = StyleSheet.create({
   placeName: {
     flex: 1,
   },
-  dismiss: {
+  actions: {
+    flexDirection: "row",
+    gap: spacing.md,
+  },
+  button: {
+    flex: 1,
     minHeight: 44,
     borderWidth: 1,
     borderRadius: radii.md,
