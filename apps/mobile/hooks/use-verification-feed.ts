@@ -86,5 +86,6 @@ export function useVerificationFeed() {
     // `undefined` = still loading; `[]` = nothing near you yet.
     items: placeIds.length === 0 && nearby !== undefined ? [] : feed,
     currentUserId: currentUser?._id,
+    nearbyPlaces: nearby,
   };
 }

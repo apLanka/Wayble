@@ -9,6 +9,7 @@
  */
 
 import type * as accessibility from "../accessibility.js";
+import type * as activityLogs from "../activityLogs.js";
 import type * as auth from "../auth.js";
 import type * as confidence from "../confidence.js";
 import type * as crons from "../crons.js";
@@ -38,6 +39,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   accessibility: typeof accessibility;
+  activityLogs: typeof activityLogs;
   auth: typeof auth;
   confidence: typeof confidence;
   crons: typeof crons;

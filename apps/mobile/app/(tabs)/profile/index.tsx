@@ -113,6 +113,13 @@ export default function ProfileScreen() {
           onPress={() => router.push("/profile/accessibility-needs")}
         />
 
+        <ProfileNavRow
+          title="Nearby verifications"
+          subtitle="Live feed of community confirmations and disputes near you"
+          accessibilityHint="Opens the live feed of community verifications near you"
+          onPress={() => router.push("/profile/verifications")}
+        />
+
         {!isGuest && currentUser.role === "moderator" ? (
           <ProfileNavRow
             title="Moderation queue"
