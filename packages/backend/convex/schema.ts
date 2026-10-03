@@ -242,6 +242,7 @@ export default defineSchema({
     imageAlt: v.optional(v.string()),
     helpfulCount: v.optional(v.number()),
     helpfulUserIds: v.optional(v.array(v.id("users"))),
+    commentsCount: v.optional(v.number()),
     tags: v.optional(v.array(v.string())),
     visitedAt: v.number(),
     createdAt: v.number(),
@@ -250,4 +251,13 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_user_and_visitedAt", ["userId", "visitedAt"])
     .index("by_createdAt", ["createdAt"]),
+
+  activityComments: defineTable({
+    logId: v.id("activityLogs"),
+    userId: v.id("users"),
+    text: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_log", ["logId"])
+    .index("by_log_and_createdAt", ["logId", "createdAt"]),
 });

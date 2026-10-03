@@ -16,6 +16,7 @@ interface CommunityPostCardProps {
   item: ActivityLogItem;
   currentUserId?: string;
   onToggleHelpful?: (id: ActivityLogItem["_id"]) => void;
+  onPressComment?: (item: ActivityLogItem) => void;
   onEdit?: (item: ActivityLogItem) => void;
   onDelete?: (item: ActivityLogItem) => void;
 }
@@ -24,6 +25,7 @@ export function CommunityPostCard({
   item,
   currentUserId,
   onToggleHelpful,
+  onPressComment,
   onEdit,
   onDelete,
 }: CommunityPostCardProps) {
@@ -253,7 +255,8 @@ export function CommunityPostCard({
 
           <TouchTarget
             accessibilityRole="button"
-            accessibilityLabel="Comments on this post"
+            accessibilityLabel={`${item.commentsCount ?? 0} comments on this post. Tap to view and post comments`}
+            onPress={() => onPressComment?.(item)}
             style={styles.actionButton}
           >
             <AppSymbol
@@ -261,6 +264,14 @@ export function CommunityPostCard({
               size={20}
               tintColor={colors.text}
             />
+            {(item.commentsCount ?? 0) > 0 ? (
+              <AppText
+                variant="bodyStrong"
+                style={[styles.actionCounter, { color: colors.text }]}
+              >
+                {item.commentsCount}
+              </AppText>
+            ) : null}
           </TouchTarget>
         </View>
 
@@ -353,6 +364,27 @@ export function CommunityPostCard({
             </View>
           </View>
         )}
+
+        {/* Instagram-style comment prompt row */}
+        <TouchTarget
+          accessibilityRole="button"
+          accessibilityLabel={
+            (item.commentsCount ?? 0) > 0
+              ? `View all ${item.commentsCount} comments`
+              : "Add an accessibility comment"
+          }
+          onPress={() => onPressComment?.(item)}
+          style={styles.commentPromptRow}
+        >
+          <AppText
+            variant="label"
+            style={[styles.commentPromptText, { color: colors.textMuted }]}
+          >
+            {(item.commentsCount ?? 0) > 0
+              ? `View all ${item.commentsCount} comments…`
+              : "Add an accessibility comment…"}
+          </AppText>
+        </TouchTarget>
       </View>
     </View>
   );
@@ -364,6 +396,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     overflow: "hidden",
     marginBottom: spacing.md,
+  },
+  commentPromptRow: {
+    paddingTop: spacing.xs,
+    minHeight: 32,
+    justifyContent: "center",
+  },
+  commentPromptText: {
+    fontSize: 13,
   },
   header: {
     flexDirection: "row",

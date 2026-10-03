@@ -18,6 +18,7 @@ export interface ActivityLogItem {
   imageAlt?: string;
   helpfulCount?: number;
   helpfulUserIds?: Id<"users">[];
+  commentsCount?: number;
   tags?: string[];
   authorName?: string;
   authorAvatar?: string;

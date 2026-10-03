@@ -9,6 +9,7 @@ import {
   type ActivityLogItem,
 } from "@/components/activity/activity-helpers";
 import { ActivityLogModal } from "@/components/activity/ActivityLogModal";
+import { CommentsModal } from "@/components/activity/CommentsModal";
 import { CommunityPostCard } from "@/components/activity/CommunityPostCard";
 import { AppSymbol } from "@/components/ui/app-symbol";
 import { AppText } from "@/components/ui/app-text";
@@ -42,6 +43,11 @@ export function FeedScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ActivityLogItem | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Modal state for viewing/adding comments
+  const [commentingPost, setCommentingPost] = useState<ActivityLogItem | null>(
+    null,
+  );
 
   const handleOpenCreate = () => {
     setEditingItem(null);
@@ -212,6 +218,7 @@ export function FeedScreen() {
                   item={item as ActivityLogItem}
                   currentUserId={currentUser?._id}
                   onToggleHelpful={handleToggleHelpful}
+                  onPressComment={(post) => setCommentingPost(post)}
                   onEdit={handleOpenEdit}
                   onDelete={handleDeletePost}
                 />
@@ -232,6 +239,14 @@ export function FeedScreen() {
               setEditingItem(null);
             }}
             onSave={handleSaveLog}
+          />
+
+          {/* Modal for viewing and posting comments */}
+          <CommentsModal
+            visible={commentingPost !== null}
+            log={commentingPost}
+            currentUserId={currentUser?._id}
+            onClose={() => setCommentingPost(null)}
           />
         </View>
       </Screen>

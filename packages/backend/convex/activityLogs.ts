@@ -54,6 +54,7 @@ export const createLog = mutation({
       imageAlt: args.imageAlt?.trim() || undefined,
       helpfulCount: 0,
       helpfulUserIds: [],
+      commentsCount: 0,
       tags: args.tags ?? [],
       visitedAt,
       createdAt: now,
@@ -117,6 +118,7 @@ export const listPublicFeed = query({
           authorAvatar,
           isHelpful,
           helpfulCount: log.helpfulCount ?? helpfulUserIds.length,
+          commentsCount: log.commentsCount ?? 0,
         };
       }),
     );
@@ -161,6 +163,125 @@ export const toggleHelpful = mutation({
       helpfulCount: updatedCount,
       isHelpful: isHelpfulNow,
     };
+  },
+});
+
+export const addComment = mutation({
+  args: {
+    logId: v.id("activityLogs"),
+    text: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthenticated: must be logged in to comment");
+    }
+
+    const trimmedText = args.text.trim();
+    if (!trimmedText) {
+      throw new Error("Comment cannot be empty");
+    }
+
+    if (trimmedText.length > 500) {
+      throw new Error("Comment cannot exceed 500 characters");
+    }
+
+    const log = await ctx.db.get(args.logId);
+    if (!log) {
+      throw new Error("Activity log not found");
+    }
+
+    const now = Date.now();
+    const commentId = await ctx.db.insert("activityComments", {
+      logId: args.logId,
+      userId,
+      text: trimmedText,
+      createdAt: now,
+    });
+
+    const currentCount = log.commentsCount ?? 0;
+    await ctx.db.patch(args.logId, {
+      commentsCount: currentCount + 1,
+    });
+
+    return commentId;
+  },
+});
+
+export const listComments = query({
+  args: {
+    logId: v.id("activityLogs"),
+  },
+  handler: async (ctx, args) => {
+    const log = await ctx.db.get(args.logId);
+    if (!log) return [];
+
+    const comments = await ctx.db
+      .query("activityComments")
+      .withIndex("by_log", (q) => q.eq("logId", args.logId))
+      .collect();
+
+    comments.sort((a, b) => a.createdAt - b.createdAt);
+
+    const currentUserId = await getAuthUserId(ctx);
+
+    return await Promise.all(
+      comments.map(async (comment) => {
+        const author = await ctx.db.get(comment.userId);
+        const authorName =
+          author?.displayName || author?.name || "Community Member";
+        const authorAvatar = author?.avatarUrl || author?.image;
+        const isPostOwner = comment.userId === log.userId;
+        const canDelete =
+          currentUserId !== null &&
+          (comment.userId === currentUserId || log.userId === currentUserId);
+
+        return {
+          ...comment,
+          authorName,
+          authorAvatar,
+          isPostOwner,
+          canDelete,
+        };
+      }),
+    );
+  },
+});
+
+export const removeComment = mutation({
+  args: {
+    commentId: v.id("activityComments"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthenticated: must be logged in to delete a comment");
+    }
+
+    const comment = await ctx.db.get(args.commentId);
+    if (!comment) {
+      throw new Error("Comment not found");
+    }
+
+    const log = await ctx.db.get(comment.logId);
+
+    // User can delete if they wrote the comment OR if they are the post owner
+    const isCommentAuthor = comment.userId === userId;
+    const isPostOwner = log?.userId === userId;
+
+    if (!isCommentAuthor && !isPostOwner) {
+      throw new Error("Unauthorized to delete this comment");
+    }
+
+    await ctx.db.delete(args.commentId);
+
+    if (log && (log.commentsCount ?? 0) > 0) {
+      await ctx.db.patch(log._id, {
+        commentsCount: Math.max(0, (log.commentsCount ?? 1) - 1),
+      });
+    }
+
+    return args.commentId;
   },
 });
 
@@ -263,6 +384,15 @@ export const removeLog = mutation({
       throw new Error(
         "Unauthorized: cannot delete another user's activity log",
       );
+    }
+
+    // Cascade delete any comments on this log
+    const comments = await ctx.db
+      .query("activityComments")
+      .withIndex("by_log", (q) => q.eq("logId", args.id))
+      .collect();
+    for (const comment of comments) {
+      await ctx.db.delete(comment._id);
     }
 
     await ctx.db.delete(args.id);

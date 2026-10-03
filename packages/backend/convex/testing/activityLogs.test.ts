@@ -331,4 +331,121 @@ describe("activityLogs CRUD backend", () => {
     expect(feed[0]!.helpfulCount).toBe(0);
     expect(feed[0]!.isHelpful).toBe(false);
   });
+
+  test("comments: add, list, delete, and cascade deletion", async () => {
+    const t = setup();
+    const postOwnerId = await seedUser(t, "owner@example.com", "Post Owner");
+    const commenterId = await seedUser(t, "commenter@example.com", "Commenter");
+    const strangerId = await seedUser(t, "stranger@example.com", "Stranger");
+
+    const asOwner = t.withIdentity({ subject: postOwnerId });
+    const asCommenter = t.withIdentity({ subject: commenterId });
+    const asStranger = t.withIdentity({ subject: strangerId });
+
+    const logId = await asOwner.mutation(api.activityLogs.createLog, {
+      placeName: "Public Library",
+      title: "Tactile paving installed",
+      accessibilityRating: "accessible",
+    });
+
+    // 1. Unauthenticated comment rejected
+    await expect(
+      t.mutation(api.activityLogs.addComment, {
+        logId,
+        text: "Unauth comment",
+      }),
+    ).rejects.toThrow(/Unauthenticated/);
+
+    // 2. Empty comment rejected
+    await expect(
+      asCommenter.mutation(api.activityLogs.addComment, {
+        logId,
+        text: "   ",
+      }),
+    ).rejects.toThrow(/Comment cannot be empty/);
+
+    // 3. Other user can add comment
+    const comment1Id = await asCommenter.mutation(api.activityLogs.addComment, {
+      logId,
+      text: "Thanks for verifying! Is the elevator working too?",
+    });
+    expect(comment1Id).toBeDefined();
+
+    // 4. Post owner can also add comment
+    const comment2Id = await asOwner.mutation(api.activityLogs.addComment, {
+      logId,
+      text: "Yes, the elevator is fully functional right by the main lobby!",
+    });
+    expect(comment2Id).toBeDefined();
+
+    // 5. listPublicFeed shows updated commentsCount
+    const feed = await asStranger.query(api.activityLogs.listPublicFeed, {});
+    expect(feed[0]!.commentsCount).toBe(2);
+
+    // 6. listComments returns both comments in order with correct metadata
+    const commentsForOwner = await asOwner.query(
+      api.activityLogs.listComments,
+      {
+        logId,
+      },
+    );
+    expect(commentsForOwner).toHaveLength(2);
+
+    // Comment 1 from Commenter
+    expect(commentsForOwner[0]!.text).toBe(
+      "Thanks for verifying! Is the elevator working too?",
+    );
+    expect(commentsForOwner[0]!.authorName).toBe("Commenter");
+    expect(commentsForOwner[0]!.isPostOwner).toBe(false);
+    expect(commentsForOwner[0]!.canDelete).toBe(true); // Post owner can delete comments on their post
+
+    // Comment 2 from Post Owner
+    expect(commentsForOwner[1]!.text).toBe(
+      "Yes, the elevator is fully functional right by the main lobby!",
+    );
+    expect(commentsForOwner[1]!.authorName).toBe("Post Owner");
+    expect(commentsForOwner[1]!.isPostOwner).toBe(true); // Marked as post owner
+    expect(commentsForOwner[1]!.canDelete).toBe(true);
+
+    // Stranger view of comments
+    const commentsForStranger = await asStranger.query(
+      api.activityLogs.listComments,
+      { logId },
+    );
+    expect(commentsForStranger[0]!.canDelete).toBe(false);
+    expect(commentsForStranger[1]!.canDelete).toBe(false);
+
+    // 7. Stranger cannot delete Commenter's comment
+    await expect(
+      asStranger.mutation(api.activityLogs.removeComment, {
+        commentId: comment1Id,
+      }),
+    ).rejects.toThrow(/Unauthorized/);
+
+    // 8. Commenter can delete their own comment
+    await asCommenter.mutation(api.activityLogs.removeComment, {
+      commentId: comment1Id,
+    });
+
+    const afterDeleteComments = await asOwner.query(
+      api.activityLogs.listComments,
+      { logId },
+    );
+    expect(afterDeleteComments).toHaveLength(1);
+    expect(afterDeleteComments[0]!._id).toBe(comment2Id);
+
+    const updatedFeed = await asStranger.query(
+      api.activityLogs.listPublicFeed,
+      {},
+    );
+    expect(updatedFeed[0]!.commentsCount).toBe(1);
+
+    // 9. Deleting the activity log cascades comment deletion
+    await asOwner.mutation(api.activityLogs.removeLog, { id: logId });
+    const remainingComments = await asOwner.query(
+      api.activityLogs.listComments,
+      { logId },
+    );
+    expect(remainingComments).toHaveLength(0);
+  });
 });
