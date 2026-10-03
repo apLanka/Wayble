@@ -10,6 +10,10 @@ export default function ProfileStackLayout() {
         name="accessibility-needs"
         options={{ title: STRINGS.navigation.titles.accessibilityNeeds }}
       />
+      <Stack.Screen
+        name="verifications"
+        options={{ title: "Nearby Verifications" }}
+      />
     </Stack>
   );
 }

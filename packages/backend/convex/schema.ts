@@ -62,6 +62,12 @@ export const flagStatusValidator = v.union(
   v.literal("dismissed"),
 );
 
+export const activityRatingValidator = v.union(
+  v.literal("accessible"),
+  v.literal("partially_accessible"),
+  v.literal("inaccessible"),
+);
+
 const notificationKindValidator = v.literal("verify_nearby");
 
 const notificationReasonValidator = v.union(
@@ -223,4 +229,35 @@ export default defineSchema({
     .index("by_user_and_scheduledAt", ["userId", "scheduledAt"])
     .index("by_user_and_place", ["userId", "placeId"])
     .index("by_status_and_scheduledAt", ["status", "scheduledAt"]),
+
+  activityLogs: defineTable({
+    userId: v.id("users"),
+    placeId: v.optional(v.id("places")),
+    placeName: v.string(),
+    title: v.string(),
+    notes: v.optional(v.string()),
+    category: v.optional(placeCategoryValidator),
+    accessibilityRating: activityRatingValidator,
+    imageUrl: v.optional(v.string()),
+    imageAlt: v.optional(v.string()),
+    helpfulCount: v.optional(v.number()),
+    helpfulUserIds: v.optional(v.array(v.id("users"))),
+    commentsCount: v.optional(v.number()),
+    tags: v.optional(v.array(v.string())),
+    visitedAt: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_visitedAt", ["userId", "visitedAt"])
+    .index("by_createdAt", ["createdAt"]),
+
+  activityComments: defineTable({
+    logId: v.id("activityLogs"),
+    userId: v.id("users"),
+    text: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_log", ["logId"])
+    .index("by_log_and_createdAt", ["logId", "createdAt"]),
 });
