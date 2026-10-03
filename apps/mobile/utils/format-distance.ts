@@ -1,7 +1,9 @@
+import { STRINGS } from "@/constants/strings";
+
 export function formatDistance(meters: number): string {
   if (meters < 1000) {
-    return `${Math.round(meters)}m`;
+    return STRINGS.common.distanceMetres(meters);
   }
   const km = meters / 1000;
-  return `${km.toFixed(1)}km`;
+  return STRINGS.common.distanceKilometres(km);
 }

@@ -1,3 +1,5 @@
+import { STRINGS } from "@/constants/strings";
+
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
@@ -20,26 +22,26 @@ export function formatRelativeTime(
 ): string {
   const elapsed = now - timestamp;
 
-  if (elapsed < MINUTE) return "just now";
+  if (elapsed < MINUTE) return STRINGS.common.relativeTime.justNow;
 
   if (elapsed < HOUR) {
     const minutes = Math.floor(elapsed / MINUTE);
-    return `${minutes} min ago`;
+    return STRINGS.common.relativeTime.minutes(minutes);
   }
 
   if (elapsed < DAY) {
     const hours = Math.floor(elapsed / HOUR);
-    return `${hours} h ago`;
+    return STRINGS.common.relativeTime.hours(hours);
   }
 
   if (elapsed < WEEK) {
     const days = Math.floor(elapsed / DAY);
-    return `${days} d ago`;
+    return STRINGS.common.relativeTime.days(days);
   }
 
   if (elapsed < MONTH) {
     const weeks = Math.floor(elapsed / WEEK);
-    return `${weeks} w ago`;
+    return STRINGS.common.relativeTime.weeks(weeks);
   }
 
   return new Date(timestamp).toLocaleDateString();

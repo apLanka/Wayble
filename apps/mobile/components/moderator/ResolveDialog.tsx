@@ -12,6 +12,7 @@ import {
 
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { MAX_MODERATOR_NOTE_LENGTH } from "./moderation-history";
@@ -31,16 +32,8 @@ const COPY: Record<
   ModerationAction,
   { title: string; body: string; confirm: string }
 > = {
-  dismiss: {
-    title: "Dismiss flags",
-    body: "The report stays visible. The flags are closed as unfounded.",
-    confirm: "Dismiss",
-  },
-  remove: {
-    title: "Remove report",
-    body: "The report is hidden from everyone and the flags are upheld. This can't be undone from the app.",
-    confirm: "Remove",
-  },
+  dismiss: STRINGS.moderator.dialog.dismiss,
+  remove: STRINGS.moderator.dialog.remove,
 };
 
 /**
@@ -82,7 +75,7 @@ export function ResolveDialog({
         <Pressable
           style={styles.backdrop}
           accessibilityRole="button"
-          accessibilityLabel="Close dialog"
+          accessibilityLabel={STRINGS.moderator.dialog.closeLabel}
           onPress={isSubmitting ? undefined : onClose}
         />
         <View
@@ -100,12 +93,12 @@ export function ResolveDialog({
           <TextInput
             value={note}
             onChangeText={setNote}
-            placeholder="Add a note (optional)"
+            placeholder={STRINGS.moderator.dialog.notePlaceholder}
             placeholderTextColor={colors.textMuted}
             editable={!isSubmitting}
             multiline
             maxLength={MAX_MODERATOR_NOTE_LENGTH}
-            accessibilityLabel="Moderator note, optional"
+            accessibilityLabel={STRINGS.moderator.dialog.noteLabel}
             style={[
               styles.input,
               {
@@ -128,7 +121,7 @@ export function ResolveDialog({
           <View style={styles.actions}>
             <TouchTarget
               accessibilityRole="button"
-              accessibilityLabel="Cancel"
+              accessibilityLabel={STRINGS.moderator.dialog.cancel}
               disabled={isSubmitting}
               onPress={onClose}
               style={[
@@ -137,11 +130,16 @@ export function ResolveDialog({
                 { borderColor: colors.border, opacity: isSubmitting ? 0.6 : 1 },
               ]}
             >
-              <AppText variant="bodyStrong">Cancel</AppText>
+              <AppText variant="bodyStrong">
+                {STRINGS.moderator.dialog.cancel}
+              </AppText>
             </TouchTarget>
             <TouchTarget
               accessibilityRole="button"
-              accessibilityLabel={`${copy.confirm} report at ${placeName}`}
+              accessibilityLabel={STRINGS.moderator.dialog.confirmLabel(
+                copy.confirm,
+                placeName,
+              )}
               accessibilityState={{
                 disabled: isSubmitting,
                 busy: isSubmitting,

@@ -31,6 +31,20 @@ export const REPORT_ATTRIBUTE_VALUES = [
 
 export type ReportStep = (typeof REPORT_STEPS)[number];
 
+/**
+ * US-09 — a photo picked and compressed on the device, not yet uploaded.
+ *
+ * Only a local `uri`: the upload happens at submit, so the draft never holds a
+ * `storageId` and backing out of the wizard leaves nothing on the server.
+ */
+export type ReportPhoto = {
+  uri: string;
+  mimeType: string;
+  fileSize: number;
+  /** The photo's alt text. Stored verbatim, like `summary`; trimmed at submit. */
+  caption: string;
+};
+
 export type ReportDraft = {
   /** Zero-based index into REPORT_STEPS. */
   step: number;
@@ -40,6 +54,7 @@ export type ReportDraft = {
   >;
   notes: Partial<Record<AccessibilityAttributeKey, string>>;
   summary: string;
+  photo: ReportPhoto | null;
 };
 
 export type DraftAction =
@@ -52,6 +67,9 @@ export type DraftAction =
   | { type: "clearValue"; key: AccessibilityAttributeKey }
   | { type: "setNote"; key: AccessibilityAttributeKey; note: string }
   | { type: "setSummary"; summary: string }
+  | { type: "setPhoto"; photo: ReportPhoto }
+  | { type: "setPhotoCaption"; caption: string }
+  | { type: "removePhoto" }
   | { type: "goToStep"; step: number }
   | { type: "next" }
   | { type: "back" }
@@ -63,6 +81,7 @@ export const emptyDraft: ReportDraft = {
   selected: {},
   notes: {},
   summary: "",
+  photo: null,
 };
 
 const LAST_STEP = REPORT_STEPS.length - 1;
@@ -111,6 +130,17 @@ export function reportReducer(
       // typed and the user could never enter two words. Trimming happens
       // once, at submit.
       return { ...state, summary: action.summary };
+    case "setPhoto":
+      // Replaces any earlier photo outright, caption included: the old
+      // caption described the old photo.
+      return { ...state, photo: action.photo };
+    case "setPhotoCaption":
+      // No photo, nothing to caption. Returning the same object keeps a
+      // stray dispatch from creating a photo-less caption somewhere.
+      if (state.photo === null) return state;
+      return { ...state, photo: { ...state.photo, caption: action.caption } };
+    case "removePhoto":
+      return { ...state, photo: null };
     case "goToStep":
       return { ...state, step: clampStep(action.step) };
     case "next":
@@ -166,6 +196,10 @@ export function canAdvance(draft: ReportDraft): boolean {
       missingRequiredNotes(draft).length === 0
     );
   }
-  if (draft.step === 2) return true;
+  // The photo is optional, but one that is attached needs alt text: the
+  // server rejects a blank caption, so the wizard must not get past it.
+  if (draft.step === 2) {
+    return draft.photo === null || draft.photo.caption.trim().length > 0;
+  }
   return false;
 }

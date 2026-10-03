@@ -14,6 +14,7 @@ import {
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { FlaggedReportRow, type FlaggedReport } from "./FlaggedReportRow";
@@ -99,7 +100,7 @@ export function ModeratorQueueScreen() {
     }
   };
 
-  const title = <Stack.Screen options={{ title: "Moderation queue" }} />;
+  const title = <Stack.Screen options={{ title: STRINGS.moderator.title }} />;
 
   if (currentUser === undefined) {
     return (
@@ -121,11 +122,11 @@ export function ModeratorQueueScreen() {
         <Screen edges={["left", "right", "bottom"]}>
           <View style={styles.centered}>
             <AppText variant="title" accessibilityRole="header">
-              Sign in to continue
+              {STRINGS.moderator.signInTitle}
             </AppText>
             <TouchTarget
               accessibilityRole="button"
-              accessibilityLabel="Go to sign in"
+              accessibilityLabel={STRINGS.moderator.goToSignInLabel}
               onPress={() => router.replace("/sign-in")}
               style={[
                 styles.primaryButton,
@@ -133,7 +134,7 @@ export function ModeratorQueueScreen() {
               ]}
             >
               <AppText variant="bodyStrong" style={{ color: colors.onPrimary }}>
-                Sign in
+                {STRINGS.moderator.signInButton}
               </AppText>
             </TouchTarget>
           </View>
@@ -149,10 +150,10 @@ export function ModeratorQueueScreen() {
         <Screen edges={["left", "right", "bottom"]}>
           <View style={styles.centered}>
             <AppText variant="title" accessibilityRole="header">
-              Moderators only
+              {STRINGS.moderator.moderatorsOnlyTitle}
             </AppText>
             <AppText style={[styles.centeredText, { color: colors.textMuted }]}>
-              Your account doesn&apos;t have access to the moderation queue.
+              {STRINGS.moderator.noAccess}
             </AppText>
           </View>
         </Screen>
@@ -164,8 +165,8 @@ export function ModeratorQueueScreen() {
     <View style={styles.tabs} accessibilityRole="tablist">
       {(
         [
-          ["open", "Open"],
-          ["history", "History"],
+          ["open", STRINGS.moderator.tabOpen],
+          ["history", STRINGS.moderator.tabHistory],
         ] as const
       ).map(([key, label]) => {
         const selected = tab === key;
@@ -213,7 +214,7 @@ export function ModeratorQueueScreen() {
           {tabs}
           {tab === "open" ? (
             flagged === undefined ? (
-              loading("Loading flagged reports…")
+              loading(STRINGS.moderator.loadingFlagged)
             ) : (
               <FlatList
                 style={styles.list}
@@ -222,13 +223,12 @@ export function ModeratorQueueScreen() {
                 contentContainerStyle={styles.listContent}
                 ListHeaderComponent={
                   <AppText variant="title" accessibilityRole="header">
-                    {flagged.length} flagged{" "}
-                    {flagged.length === 1 ? "report" : "reports"}
+                    {STRINGS.moderator.flaggedHeader(flagged.length)}
                   </AppText>
                 }
                 ListEmptyComponent={
                   <AppText style={{ color: colors.textMuted }}>
-                    No flagged reports. Nothing needs review.
+                    {STRINGS.moderator.emptyQueue}
                   </AppText>
                 }
                 renderItem={({ item }) => (
@@ -241,7 +241,7 @@ export function ModeratorQueueScreen() {
               />
             )
           ) : history === undefined ? (
-            loading("Loading history…")
+            loading(STRINGS.moderator.loadingHistory)
           ) : (
             <FlatList
               style={styles.list}
@@ -250,12 +250,12 @@ export function ModeratorQueueScreen() {
               contentContainerStyle={styles.listContent}
               ListHeaderComponent={
                 <AppText variant="title" accessibilityRole="header">
-                  Past decisions
+                  {STRINGS.moderator.historyHeader}
                 </AppText>
               }
               ListEmptyComponent={
                 <AppText style={{ color: colors.textMuted }}>
-                  No decisions yet. Dismissed and removed reports show up here.
+                  {STRINGS.moderator.emptyHistory}
                 </AppText>
               }
               renderItem={({ item }) => <HistoryRow item={item} />}

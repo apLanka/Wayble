@@ -4,7 +4,7 @@ import { useLocalSearchParams } from "expo-router";
 import { useQuery } from "convex/react";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
-import { CATEGORY_LABELS } from "@/components/map/CategoryFilter";
+import { STRINGS } from "@/constants/strings";
 import { ConfidenceBadge } from "@/components/place/ConfidenceBadge";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { api } from "@packages/backend/convex/_generated/api";
@@ -28,7 +28,10 @@ export default function PlaceDetailScreen() {
   const params = useLocalSearchParams();
 
   // Safely parse params
-  const name = typeof params.name === "string" ? params.name : "Unknown Place";
+  const name =
+    typeof params.name === "string"
+      ? params.name
+      : STRINGS.map.placeDetail.unknownPlace;
   const category =
     typeof params.category === "string" ? params.category : "unknown";
   const address = typeof params.address === "string" ? params.address : null;
@@ -111,7 +114,7 @@ export default function PlaceDetailScreen() {
             style={[styles.section, { borderTopColor: appTheme.colors.border }]}
           >
             <AppText style={styles.sectionTitle} accessibilityRole="header">
-              Address
+              {STRINGS.map.placeDetail.addressTitle}
             </AppText>
             <AppText>{address}</AppText>
           </View>
@@ -123,13 +126,16 @@ export default function PlaceDetailScreen() {
           {accessibilityCategories.length > 0 && (
             <View style={{ marginBottom: 16 }}>
               <AppText style={styles.sectionTitle} accessibilityRole="header">
-                Accessibility Profile
+                {STRINGS.map.placeDetail.profileTitle}
               </AppText>
               <View style={styles.accessibilityRow}>
                 {accessibilityCategories.map((cat: string) => {
-                  const label =
-                    CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ||
-                    `${cat} accessible`;
+                  const label = STRINGS.map.categoryAccessible(
+                    cat,
+                    STRINGS.map.categoryLabels[
+                      cat as keyof typeof STRINGS.map.categoryLabels
+                    ] ?? null,
+                  );
                   return (
                     <View
                       key={cat}
@@ -165,7 +171,7 @@ export default function PlaceDetailScreen() {
           )}
 
           <AppText style={styles.sectionTitle} accessibilityRole="header">
-            Verified Features
+            {STRINGS.map.placeDetail.verifiedTitle}
           </AppText>
           {features.length > 0 ? (
             <View style={styles.featuresList}>
@@ -177,7 +183,7 @@ export default function PlaceDetailScreen() {
             </View>
           ) : (
             <AppText style={{ color: appTheme.colors.textMuted }}>
-              No accessibility features reported.
+              {STRINGS.map.placeDetail.noFeatures}
             </AppText>
           )}
 
@@ -195,8 +201,7 @@ export default function PlaceDetailScreen() {
                 { color: appTheme.colors.textMuted },
               ]}
             >
-              Note: A feature not listed here has not been assessed — it does
-              not mean it is unavailable.
+              {STRINGS.map.placeDetail.disclaimer}
             </AppText>
           </View>
         </View>

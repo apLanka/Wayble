@@ -6,6 +6,7 @@ import {
   ATTRIBUTE_ICON_EMOJI,
   ATTRIBUTE_METADATA,
 } from "@/constants/accessibility-metadata";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { AccessibilityAttributeKey } from "@packages/backend/convex/accessibility";
@@ -49,7 +50,9 @@ export function NeedsCategorySection({
         style={[styles.header, { color: appTheme.colors.textMuted }]}
       >
         {categoryName}
-        {selectedCount > 0 ? ` · ${selectedCount} selected` : ""}
+        {selectedCount > 0
+          ? STRINGS.profile.needsCategoryCount(selectedCount)
+          : ""}
       </AppText>
 
       <View
@@ -77,9 +80,10 @@ export function NeedsCategorySection({
               checked={selected.has(key)}
               onToggle={() => onToggle(key)}
               disabled={disabled}
-              accessibilityHint={`${categoryName} need. Double tap to ${
-                selected.has(key) ? "remove from" : "add to"
-              } your accessibility needs.`}
+              accessibilityHint={STRINGS.profile.needsCategoryHint(
+                categoryName,
+                selected.has(key),
+              )}
             />
           </View>
         ))}

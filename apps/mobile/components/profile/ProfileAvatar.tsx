@@ -2,6 +2,7 @@ import { Image, StyleSheet, View } from "react-native";
 
 import { AppSymbol, HOME_SYMBOLS } from "@/components/ui/app-symbol";
 import { AppText } from "@/components/ui/app-text";
+import { STRINGS } from "@/constants/strings";
 import { radii, sizing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { getInitials } from "@/utils/get-initials";
@@ -22,10 +23,8 @@ export function ProfileAvatar({
   const { appTheme } = useAppTheme();
 
   const accessibilityLabel = isGuest
-    ? "Default profile avatar"
-    : displayName
-      ? `Profile photo for ${displayName}`
-      : "Default profile avatar";
+    ? STRINGS.profile.header.defaultAvatar
+    : STRINGS.profile.profilePhotoLabel(displayName ?? null);
 
   if (isGuest) {
     return (

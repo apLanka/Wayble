@@ -6,6 +6,7 @@
  * the same split `report-draft.ts` uses for the US-08 wizard.
  */
 
+import { STRINGS } from "@/constants/strings";
 export type Verdict = "confirm" | "dispute";
 
 /**
@@ -29,17 +30,17 @@ export type VerificationTally = {
 /** The tally as a single sentence, so a screen reader reads one thing. */
 export function tallySummary(tally: VerificationTally): string {
   if (tally.confirmCount === 0 && tally.disputeCount === 0) {
-    return "No verifications yet";
+    return STRINGS.place.verification.noVerifications;
   }
 
   const parts: string[] = [];
   if (tally.confirmCount > 0) {
-    parts.push(`${tally.confirmCount} confirmed`);
+    parts.push(STRINGS.place.verification.confirmedCount(tally.confirmCount));
   }
   if (tally.disputeCount > 0) {
-    parts.push(`${tally.disputeCount} disputed`);
+    parts.push(STRINGS.place.verification.disputedCount(tally.disputeCount));
   }
-  return parts.join(" · ");
+  return parts.join(STRINGS.place.verification.tallySeparator);
 }
 
 /**

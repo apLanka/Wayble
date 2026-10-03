@@ -4,6 +4,7 @@ import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
 const ONBOARDING_STORAGE_KEY = "has_seen_onboarding";
@@ -48,7 +49,7 @@ export default function IndexRoute() {
         <ActivityIndicator
           size="large"
           color={appTheme.colors.primary}
-          accessibilityLabel="Loading, please wait"
+          accessibilityLabel={STRINGS.common.loadingWait}
         />
       </View>
     );

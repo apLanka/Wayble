@@ -5,12 +5,16 @@ import { TouchTarget } from "@/components/ui/touch-target";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { CATEGORY_COLORS } from "./CategoryFilter";
 import { formatDistance } from "@/utils/format-distance";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
+import type { MatchExplanation } from "@/utils/rank-places";
 
 interface PlaceListItemProps {
   name: string;
   category: string;
   distance?: number;
+  /** US-16: why this row sits where it does. Omitted when not ranking. */
+  matchExplanation?: MatchExplanation | null;
   onPress: () => void;
 }
 
@@ -18,6 +22,7 @@ export function PlaceListItem({
   name,
   category,
   distance,
+  matchExplanation,
   onPress,
 }: PlaceListItemProps) {
   const { appTheme } = useAppTheme();
@@ -27,14 +32,24 @@ export function PlaceListItem({
     appTheme.colors.primary;
   const distanceStr = distance !== undefined ? formatDistance(distance) : "";
 
-  // Combine into a single label so screen readers read it continuously.
-  const a11yLabel = `${name}, ${category}${distanceStr ? `, ${distanceStr} away` : ""}`;
+  // Combine into a single label so screen readers read it continuously. The
+  // match reason is appended rather than given its own node, so the row stays
+  // one stop for a screen reader and the reason is heard with the place.
+  const placeLabel = STRINGS.map.placeRowLabel(
+    name,
+    category,
+    distanceStr || null,
+  );
+  const a11yLabel = matchExplanation
+    ? `${placeLabel}. ${matchExplanation.accessibilityLabel}`
+    : placeLabel;
 
   return (
     <TouchTarget
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={a11yLabel}
+      accessibilityHint={STRINGS.map.placeRowHint}
       style={[
         styles.container,
         {
@@ -49,15 +64,28 @@ export function PlaceListItem({
           importantForAccessibility="no"
         />
         <View style={styles.textContainer}>
-          <AppText style={styles.name} numberOfLines={1}>
-            {name}
-          </AppText>
+          {/* Name and category wrap rather than truncate (WCAG 1.4.4): at
+              large text sizes a one-line cap cuts the place's own name. */}
+          <AppText style={styles.name}>{name}</AppText>
           <AppText
             style={[styles.category, { color: appTheme.colors.textMuted }]}
-            numberOfLines={1}
           >
             {category}
           </AppText>
+          {matchExplanation ? (
+            <View
+              style={[
+                styles.matchChip,
+                { backgroundColor: appTheme.colors.surfaceElevated },
+              ]}
+            >
+              <AppText
+                style={[styles.matchText, { color: appTheme.colors.text }]}
+              >
+                {matchExplanation.short}
+              </AppText>
+            </View>
+          ) : null}
         </View>
       </View>
       {distanceStr ? (
@@ -105,5 +133,15 @@ const styles = StyleSheet.create({
   },
   distance: {
     fontSize: 14,
+  },
+  matchChip: {
+    alignSelf: "flex-start",
+    borderRadius: radii.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    marginTop: spacing.xs,
+  },
+  matchText: {
+    fontSize: 13,
   },
 });

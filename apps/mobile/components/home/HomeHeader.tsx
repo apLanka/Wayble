@@ -6,6 +6,7 @@ import waybleAppIcon from "@/assets/images/app-icon/wayble-app-icon.png";
 import { AppSymbol, HOME_SYMBOLS } from "@/components/ui/app-symbol";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { getTimeGreeting } from "@/utils/get-time-greeting";
@@ -18,9 +19,10 @@ export function HomeHeader({ displayName }: HomeHeaderProps) {
   const { appTheme } = useAppTheme();
   const router = useRouter();
 
-  const greeting = displayName
-    ? `${getTimeGreeting()}, ${displayName}`
-    : "Welcome to Wayble";
+  const greeting = STRINGS.home.profileGreeting(
+    getTimeGreeting(),
+    displayName ?? null,
+  );
 
   return (
     <View style={styles.container}>
@@ -31,7 +33,7 @@ export function HomeHeader({ displayName }: HomeHeaderProps) {
             style={styles.logo}
             resizeMode="cover"
             accessibilityRole="image"
-            accessibilityLabel="Wayble logo"
+            accessibilityLabel={STRINGS.home.a11y.logo}
           />
           <AppText
             variant="title"
@@ -44,8 +46,8 @@ export function HomeHeader({ displayName }: HomeHeaderProps) {
         <TouchTarget
           onPress={() => router.push("/profile")}
           accessibilityRole="button"
-          accessibilityLabel="Open profile"
-          accessibilityHint="Opens your profile and accessibility needs"
+          accessibilityLabel={STRINGS.home.a11y.openProfile}
+          accessibilityHint={STRINGS.home.a11y.openProfileHint}
           style={styles.profileButton}
         >
           <AppSymbol
@@ -56,7 +58,7 @@ export function HomeHeader({ displayName }: HomeHeaderProps) {
         </TouchTarget>
       </View>
       <AppText style={{ color: appTheme.colors.textMuted }}>
-        Find a better way to get there.
+        {STRINGS.common.tagline}
       </AppText>
     </View>
   );

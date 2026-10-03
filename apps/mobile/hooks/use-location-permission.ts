@@ -1,3 +1,5 @@
+import { STRINGS } from "@/constants/strings";
+
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 
@@ -17,7 +19,7 @@ export function useLocationPermission() {
         await fetchLocation();
       }
     } catch {
-      setErrorMsg("Failed to check location status.");
+      setErrorMsg(STRINGS.errors.location.checkStatusFailed);
     } finally {
       setIsLoading(false);
     }
@@ -32,7 +34,7 @@ export function useLocationPermission() {
       return loc;
     } catch (e) {
       console.log("Fetch location error:", e);
-      setErrorMsg("Failed to get current location.");
+      setErrorMsg(STRINGS.errors.location.getCurrentFailed);
       return null;
     }
   };
@@ -49,7 +51,7 @@ export function useLocationPermission() {
       }
       return null;
     } catch {
-      setErrorMsg("Failed to request permission.");
+      setErrorMsg(STRINGS.errors.location.requestFailed);
       return null;
     } finally {
       setIsLoading(false);

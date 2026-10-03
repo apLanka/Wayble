@@ -1,9 +1,11 @@
+import { Image } from "expo-image";
 import { StyleSheet, View } from "react-native";
 
 import { AttributeRow } from "@/components/place/AttributeRow";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { radii, spacing } from "@/constants/theme";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { ReportDraft } from "./report-draft";
 import { selectedAttributes } from "./report-draft";
@@ -11,6 +13,8 @@ import { selectedAttributes } from "./report-draft";
 type Props = {
   draft: ReportDraft;
   isSubmitting: boolean;
+  /** True during the photo upload that precedes the submit itself. */
+  isUploadingPhoto: boolean;
   onSubmit: () => void;
 };
 
@@ -20,7 +24,12 @@ type Props = {
  * Recaps with the same `AttributeRow` used on the place detail screen, so
  * what the user approves here is literally what they will see there.
  */
-export function ConfirmStep({ draft, isSubmitting, onSubmit }: Props) {
+export function ConfirmStep({
+  draft,
+  isSubmitting,
+  isUploadingPhoto,
+  onSubmit,
+}: Props) {
   const { appTheme } = useAppTheme();
   const { colors } = appTheme;
   const attributes = selectedAttributes(draft);
@@ -28,7 +37,7 @@ export function ConfirmStep({ draft, isSubmitting, onSubmit }: Props) {
   return (
     <View style={styles.container}>
       <AppText variant="title" accessibilityRole="header">
-        Check your report
+        {STRINGS.report.confirm.title}
       </AppText>
       <AppText style={{ color: colors.textMuted }}>
         {draft.category} · {attributes.length} attribute
@@ -54,22 +63,45 @@ export function ConfirmStep({ draft, isSubmitting, onSubmit }: Props) {
       {draft.summary.trim().length > 0 ? (
         <View style={styles.summaryBlock}>
           <AppText variant="label" style={{ color: colors.textMuted }}>
-            Your note
+            {STRINGS.report.confirm.noteTitle}
           </AppText>
           <AppText
             style={{ color: colors.text }}
             accessibilityRole="text"
-            accessibilityLabel={`Your note: ${draft.summary}`}
+            accessibilityLabel={STRINGS.report.confirm.summaryLabel(
+              draft.summary,
+            )}
           >
             {draft.summary}
           </AppText>
         </View>
       ) : null}
 
+      {draft.photo ? (
+        <View style={styles.summaryBlock}>
+          <AppText variant="label" style={{ color: colors.textMuted }}>
+            {STRINGS.report.photo.confirmTitle}
+          </AppText>
+          {/* Labelled with the caption alone: that is exactly what a screen
+              reader user will hear on the place screen once this is saved. */}
+          <Image
+            source={{ uri: draft.photo.uri }}
+            style={[styles.thumbnail, { borderColor: colors.border }]}
+            contentFit="cover"
+            accessible
+            accessibilityRole="image"
+            accessibilityLabel={draft.photo.caption.trim()}
+          />
+          <AppText style={{ color: colors.text }}>
+            {draft.photo.caption.trim()}
+          </AppText>
+        </View>
+      ) : null}
+
       <TouchTarget
         accessibilityRole="button"
-        accessibilityLabel="Submit report"
-        accessibilityHint="Saves your accessibility report for this place."
+        accessibilityLabel={STRINGS.report.confirm.submit}
+        accessibilityHint={STRINGS.report.confirm.submitHint}
         accessibilityState={{ disabled: isSubmitting, busy: isSubmitting }}
         disabled={isSubmitting}
         onPress={onSubmit}
@@ -79,7 +111,11 @@ export function ConfirmStep({ draft, isSubmitting, onSubmit }: Props) {
         ]}
       >
         <AppText variant="bodyStrong" style={{ color: colors.onPrimary }}>
-          {isSubmitting ? "Submitting…" : "Submit report"}
+          {isUploadingPhoto
+            ? STRINGS.report.confirm.uploadingPhoto
+            : isSubmitting
+              ? STRINGS.report.confirm.submitting
+              : STRINGS.report.confirm.submit}
         </AppText>
       </TouchTarget>
     </View>
@@ -98,6 +134,12 @@ const styles = StyleSheet.create({
   },
   summaryBlock: {
     gap: spacing.xs,
+  },
+  thumbnail: {
+    width: 160,
+    aspectRatio: 4 / 3,
+    borderRadius: radii.md,
+    borderWidth: 1,
   },
   submit: {
     minHeight: 52,

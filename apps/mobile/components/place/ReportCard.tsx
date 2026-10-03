@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
@@ -5,6 +6,7 @@ import {
   ATTRIBUTE_METADATA,
   VALUE_LABELS,
 } from "@/constants/accessibility-metadata";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { formatRelativeTime } from "@/utils/format-relative-time";
@@ -39,6 +41,8 @@ export type PlaceReport = {
   confirmCount: number;
   disputeCount: number;
   myVerdict: Verdict | null;
+  /** US-09. Already resolved to URLs by the query; empty when there is none. */
+  photos: { url: string; caption: string }[];
 };
 
 type Props = {
@@ -93,7 +97,7 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
           <AppText
             variant="label"
             style={{ color: colors.textMuted }}
-            accessibilityLabel={`Reported ${observed}`}
+            accessibilityLabel={STRINGS.place.reportedOn(observed)}
           >
             {observed}
           </AppText>
@@ -103,6 +107,33 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
 
       {report.summary ? (
         <AppText style={{ color: colors.text }}>{report.summary}</AppText>
+      ) : null}
+
+      {/* Labelled with the caption alone, which is what the author wrote to
+          describe it; the image role already tells a screen reader it is a
+          photo. The query never returns a photo without a caption, so there is
+          no unlabelled case to handle here. */}
+      {report.photos.length > 0 ? (
+        <View style={styles.photos}>
+          {report.photos.map((photo) => (
+            <Image
+              key={photo.url}
+              source={{ uri: photo.url }}
+              style={[
+                styles.thumbnail,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.surfaceElevated,
+                },
+              ]}
+              contentFit="cover"
+              transition={150}
+              accessible
+              accessibilityRole="image"
+              accessibilityLabel={photo.caption}
+            />
+          ))}
+        </View>
       ) : null}
 
       {report.attributes.length > 0 ? (
@@ -134,7 +165,7 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
             // about why, and `getPlace` already preserves notes down to this
             // component, so the same report reads differently here than on the
             // place detail screen would be a regression.
-            const note = attribute.note ? `. Note: ${attribute.note}` : "";
+            const note = attribute.note ?? null;
             // `submitReport` rejects duplicate keys, so the key is unique
             // within one report and safe as a list key.
             return (
@@ -149,7 +180,11 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
                 style={styles.chipColumn}
                 accessible
                 accessibilityRole="text"
-                accessibilityLabel={`${label}: ${valueLabel}${note}`}
+                accessibilityLabel={STRINGS.place.attributeLabel(
+                  label,
+                  valueLabel,
+                  note,
+                )}
               >
                 <View
                   style={[
@@ -161,13 +196,11 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
                     {label}: {valueLabel}
                   </AppText>
                 </View>
+                {/* No `numberOfLines`: a cap hides more of the note the larger
+                    the user's text is, which is when they need it most
+                    (WCAG 1.4.4). Notes are capped at 280 characters. */}
                 {note ? (
-                  <AppText
-                    style={{ color: colors.textMuted }}
-                    numberOfLines={2}
-                  >
-                    {note}
-                  </AppText>
+                  <AppText style={{ color: colors.textMuted }}>{note}</AppText>
                 ) : null}
               </View>
             );
@@ -182,7 +215,7 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
         // The tally is folded into the reason because `VerifyControl` shows
         // this string *instead of* the tally. Without it, a screen-reader user
         // on their own report would hear the reason and no counts at all.
-        disabledReason={`You can't verify your own report · ${tallySummary(tally)}`}
+        disabledReason={STRINGS.place.ownReportNote(tallySummary(tally))}
         onVote={onVote}
       />
     </View>
@@ -206,6 +239,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
+  },
+  photos: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
+  },
+  thumbnail: {
+    width: 120,
+    height: 90,
+    borderRadius: radii.sm,
+    borderWidth: 1,
   },
   chips: {
     flexDirection: "row",

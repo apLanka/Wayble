@@ -14,6 +14,7 @@ import { MAX_NOTE_LENGTH } from "@packages/backend/convex/reportLimits";
  * `report-errors.ts`.
  */
 
+import { STRINGS } from "@/constants/strings";
 export type VerificationErrorKind =
   | "unauthenticated"
   | "selfVerification"
@@ -46,14 +47,14 @@ export function classifyVerificationError(
 export function verificationErrorMessage(kind: VerificationErrorKind): string {
   switch (kind) {
     case "unauthenticated":
-      return "Sign in to confirm or dispute a report.";
+      return STRINGS.errors.verification.unauthenticated;
     case "selfVerification":
-      return "You can't verify your own report.";
+      return STRINGS.errors.verification.selfVerification;
     case "unknownReport":
-      return "This report no longer exists.";
+      return STRINGS.errors.verification.unknownReport;
     case "noteTooLong":
-      return `Keep your note to ${MAX_NOTE_LENGTH} characters or fewer.`;
+      return STRINGS.errors.verification.noteTooLong(MAX_NOTE_LENGTH);
     case "generic":
-      return "We couldn't save your vote. Please try again.";
+      return STRINGS.errors.verification.generic;
   }
 }

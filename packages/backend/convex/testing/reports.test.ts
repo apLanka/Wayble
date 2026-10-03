@@ -3,6 +3,12 @@ import { describe, expect, test } from "vitest";
 import { api } from "../_generated/api";
 import schema from "../schema";
 import type { Id } from "../_generated/dataModel";
+import {
+  ALLOWED_PHOTO_MIME_TYPES,
+  MAX_CAPTION_LENGTH,
+  MAX_EVIDENCE_PHOTOS,
+  MAX_PHOTO_BYTES,
+} from "../reportLimits";
 
 const modules = import.meta.glob("../**/*.*s");
 
@@ -424,6 +430,288 @@ describe("US-08 report submission", () => {
   });
 });
 
+describe("US-09 photo evidence", () => {
+  /**
+   * Stores a blob the way an upload would leave it.
+   *
+   * convex-test's `storage.store` records `size` but not `contentType`, which
+   * the real backend takes from the upload's Content-Type header. The patch
+   * fills that in so the type guard sees what production would. `contentType:
+   * null` leaves it unset, which is the "client sent no header" case.
+   */
+  async function storePhoto(
+    t: ReturnType<typeof convexTest>,
+    opts: { bytes?: number; contentType?: string | null } = {},
+  ) {
+    return await t.run(async (ctx) => {
+      const storageId = await ctx.storage.store(
+        new Blob([new Uint8Array(opts.bytes ?? 1024)]),
+      );
+      if (opts.contentType !== null) {
+        // `_storage` is a system table, so the generated types do not allow
+        // writing it; convex-test does, and this is test-only.
+        await (
+          ctx.db as unknown as {
+            patch: (id: Id<"_storage">, v: object) => Promise<void>;
+          }
+        ).patch(storageId, { contentType: opts.contentType ?? "image/jpeg" });
+      }
+      return storageId;
+    });
+  }
+
+  test("generateUploadUrl rejects unauthenticated callers", async () => {
+    const t = convexTest(schema, modules);
+
+    await expect(t.mutation(api.reports.generateUploadUrl, {})).rejects.toThrow(
+      "Unauthenticated: must be logged in to upload a photo",
+    );
+  });
+
+  test("generateUploadUrl returns a URL for a signed-in user", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    const url = await asUser.mutation(api.reports.generateUploadUrl, {});
+    expect(typeof url).toBe("string");
+    expect(url.length).toBeGreaterThan(0);
+  });
+
+  test("stores the photo's storageId and trimmed caption on the report", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const storageId = await storePhoto(t);
+
+    const created = await asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [validAttribute],
+      observedAt: Date.now(),
+      evidence: [{ storageId, caption: "  Ramp at the side entrance  " }],
+    });
+
+    expect(created?.evidence).toEqual([
+      { storageId, caption: "Ramp at the side entrance" },
+    ]);
+  });
+
+  test("an empty evidence array is the same as no photo", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+
+    const created = await asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [validAttribute],
+      observedAt: Date.now(),
+      evidence: [],
+    });
+
+    expect(created?.evidence).toEqual([]);
+  });
+
+  test("accepts each allowed photo type", async () => {
+    for (const contentType of ALLOWED_PHOTO_MIME_TYPES) {
+      const t = convexTest(schema, modules);
+      const { authorId: userId, placeId } = await seedAuthor(t);
+      const asUser = t.withIdentity({ subject: userId });
+      const storageId = await storePhoto(t, { contentType });
+
+      const created = await asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Date.now(),
+        evidence: [{ storageId, caption: "Entrance" }],
+      });
+      expect(created?.evidence).toHaveLength(1);
+    }
+  });
+
+  test("accepts a photo exactly at the size cap", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const storageId = await storePhoto(t, { bytes: MAX_PHOTO_BYTES });
+
+    const created = await asUser.mutation(api.reports.submitReport, {
+      placeId,
+      attributes: [validAttribute],
+      observedAt: Date.now(),
+      evidence: [{ storageId, caption: "Entrance" }],
+    });
+    expect(created?.evidence).toHaveLength(1);
+  });
+
+  test("rejects a photo one byte over the size cap", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const storageId = await storePhoto(t, { bytes: MAX_PHOTO_BYTES + 1 });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Date.now(),
+        evidence: [{ storageId, caption: "Entrance" }],
+      }),
+    ).rejects.toThrow(
+      `Photo too large: ${MAX_PHOTO_BYTES + 1} bytes, maximum ${MAX_PHOTO_BYTES}`,
+    );
+    expect(
+      await t.run(async (ctx) => ctx.db.query("reports").collect()),
+    ).toHaveLength(0);
+  });
+
+  test("rejects a file that is not an allowed image type", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const storageId = await storePhoto(t, { contentType: "image/heic" });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Date.now(),
+        evidence: [{ storageId, caption: "Entrance" }],
+      }),
+    ).rejects.toThrow("Unsupported photo type: image/heic");
+  });
+
+  test("rejects an upload that carried no content type", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const storageId = await storePhoto(t, { contentType: null });
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Date.now(),
+        evidence: [{ storageId, caption: "Entrance" }],
+      }),
+    ).rejects.toThrow("Unsupported photo type: unknown");
+  });
+
+  test("rejects more photos than the cap", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const first = await storePhoto(t);
+    const second = await storePhoto(t);
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Date.now(),
+        evidence: [
+          { storageId: first, caption: "Entrance" },
+          { storageId: second, caption: "Lift" },
+        ],
+      }),
+    ).rejects.toThrow(`Too many photos: maximum ${MAX_EVIDENCE_PHOTOS}`);
+  });
+
+  test("rejects a blank caption", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const storageId = await storePhoto(t);
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Date.now(),
+        evidence: [{ storageId, caption: "   " }],
+      }),
+    ).rejects.toThrow("Photo description is required");
+  });
+
+  test("rejects a caption over the cap", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const storageId = await storePhoto(t);
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Date.now(),
+        evidence: [{ storageId, caption: "x".repeat(MAX_CAPTION_LENGTH + 1) }],
+      }),
+    ).rejects.toThrow(
+      `Photo description too long: ${MAX_CAPTION_LENGTH + 1} characters, maximum ${MAX_CAPTION_LENGTH}`,
+    );
+  });
+
+  test("rejects a storageId whose file no longer exists", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const asUser = t.withIdentity({ subject: userId });
+    const storageId = await storePhoto(t);
+    await t.run(async (ctx) => ctx.storage.delete(storageId));
+
+    await expect(
+      asUser.mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Date.now(),
+        evidence: [{ storageId, caption: "Entrance" }],
+      }),
+    ).rejects.toThrow("Unknown photo upload");
+  });
+
+  test("rejects a photo already attached to another report", async () => {
+    const t = convexTest(schema, modules);
+    const { authorId: userId, placeId } = await seedAuthor(t);
+    const storageId = await storePhoto(t);
+    // A second place and author, so neither the duplicate-report guard nor
+    // any per-place scoping could be what rejects the reuse.
+    const { otherAuthorId, otherPlaceId } = await t.run(async (ctx) => {
+      const otherAuthorId = await ctx.db.insert("users", {
+        email: "other@example.com",
+        role: "member",
+        updatedAt: 1,
+      });
+      const otherPlaceId = await ctx.db.insert("places", {
+        name: "Bus Station",
+        category: "transport",
+        address: "2 Main Street",
+        location: { latitude: 6.93, longitude: 79.86 },
+        createdBy: otherAuthorId,
+        updatedAt: 1,
+      });
+      return { otherAuthorId, otherPlaceId };
+    });
+
+    await t
+      .withIdentity({ subject: userId })
+      .mutation(api.reports.submitReport, {
+        placeId,
+        attributes: [validAttribute],
+        observedAt: Date.now(),
+        evidence: [{ storageId, caption: "Entrance" }],
+      });
+
+    await expect(
+      t
+        .withIdentity({ subject: otherAuthorId })
+        .mutation(api.reports.submitReport, {
+          placeId: otherPlaceId,
+          attributes: [validAttribute],
+          observedAt: Date.now(),
+          evidence: [{ storageId, caption: "Not my photo" }],
+        }),
+    ).rejects.toThrow("Photo already attached to another report");
+  });
+});
+
 describe("reports.listForPlace", () => {
   /**
    * One place, `count` reports by a single author, and optionally one
@@ -537,6 +825,65 @@ describe("reports.listForPlace", () => {
     const reports = await t.query(api.reports.listForPlace, { placeId });
 
     expect(reports[0]?.authorDisplayName).toBe("A Wayble user");
+  });
+
+  test("returns no photos for a report without evidence", async () => {
+    const t = convexTest(schema, modules);
+    const { placeId } = await seedReports(t, { count: 1 });
+
+    const reports = await t.query(api.reports.listForPlace, { placeId });
+
+    expect(reports[0]?.photos).toEqual([]);
+  });
+
+  test("resolves a photo to a URL and caption, never the storageId", async () => {
+    const t = convexTest(schema, modules);
+    const { placeId, reportIds } = await seedReports(t, { count: 1 });
+    const storageId = await t.run(async (ctx) => {
+      const storageId = await ctx.storage.store(new Blob(["jpeg bytes"]));
+      await ctx.db.patch(reportIds[0]!, {
+        evidence: [{ storageId, caption: "Ramp at the side entrance" }],
+      });
+      return storageId;
+    });
+
+    const reports = await t.query(api.reports.listForPlace, { placeId });
+
+    expect(reports[0]?.photos).toHaveLength(1);
+    expect(reports[0]?.photos[0]?.caption).toBe("Ramp at the side entrance");
+    expect(reports[0]?.photos[0]?.url).toMatch(/^https:\/\//);
+    expect(JSON.stringify(reports)).not.toContain(storageId);
+  });
+
+  test("drops a photo whose file has been deleted", async () => {
+    const t = convexTest(schema, modules);
+    const { placeId, reportIds } = await seedReports(t, { count: 1 });
+    await t.run(async (ctx) => {
+      const storageId = await ctx.storage.store(new Blob(["jpeg bytes"]));
+      await ctx.db.patch(reportIds[0]!, {
+        evidence: [{ storageId, caption: "Gone" }],
+      });
+      await ctx.storage.delete(storageId);
+    });
+
+    const reports = await t.query(api.reports.listForPlace, { placeId });
+
+    expect(reports[0]?.photos).toEqual([]);
+  });
+
+  test("labels a captionless legacy photo instead of leaving it without alt text", async () => {
+    const t = convexTest(schema, modules);
+    const { placeId, reportIds } = await seedReports(t, { count: 1 });
+    await t.run(async (ctx) => {
+      const storageId = await ctx.storage.store(new Blob(["jpeg bytes"]));
+      await ctx.db.patch(reportIds[0]!, { evidence: [{ storageId }] });
+    });
+
+    const reports = await t.query(api.reports.listForPlace, { placeId });
+
+    expect(reports[0]?.photos[0]?.caption).toBe(
+      "Photo attached to this report",
+    );
   });
 
   test("carries per-report tallies and the caller's own verdict", async () => {

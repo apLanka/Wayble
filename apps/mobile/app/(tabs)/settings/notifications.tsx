@@ -6,15 +6,16 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { AppText } from "@/components/ui/app-text";
 import { CheckboxRow } from "@/components/ui/checkbox-row";
 import { Screen } from "@/components/ui/screen";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { useLocationReporter } from "@/hooks/use-location-reporter";
 import { usePushRegistration } from "@/hooks/use-push-registration";
 
 const RADIUS_CHOICES = [
-  { meters: 500, label: "Within 500 m" },
-  { meters: 2000, label: "Within 2 km" },
-  { meters: 5000, label: "Within 5 km" },
+  { meters: 500, label: STRINGS.settings.notifications.radius.m500 },
+  { meters: 2000, label: STRINGS.settings.notifications.radius.km2 },
+  { meters: 5000, label: STRINGS.settings.notifications.radius.km5 },
 ];
 
 /**
@@ -53,7 +54,7 @@ export default function NotificationSettingsScreen() {
       <Screen>
         <View style={styles.centered}>
           <AppText variant="bodyStrong" accessibilityRole="header">
-            Sign in to manage notifications
+            {STRINGS.settings.notifications.signInTitle}
           </AppText>
         </View>
       </Screen>
@@ -73,13 +74,13 @@ export default function NotificationSettingsScreen() {
         setError(
           permission === "denied"
             ? "Notifications are blocked for Wayble. Enable them in your device settings, then try again."
-            : "Couldn't set up notifications on this device. Push notifications need a real device, not a simulator.",
+            : STRINGS.settings.notificationsUnavailable,
         );
         return;
       }
       await updatePrefs({ verifyNearbyEnabled: true });
     } catch {
-      setError("Couldn't save that change. Check your connection.");
+      setError(STRINGS.errors.saveFailed);
     }
   };
 
@@ -88,7 +89,7 @@ export default function NotificationSettingsScreen() {
     try {
       await updatePrefs({ verifyNearbyRadiusMeters: meters });
     } catch {
-      setError("Couldn't save that change. Check your connection.");
+      setError(STRINGS.errors.saveFailed);
     }
   };
 
@@ -99,9 +100,7 @@ export default function NotificationSettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <AppText style={{ color: colors.textMuted }}>
-          Get a notification when you&apos;re near a place whose accessibility
-          information is missing or out of date, so you can check it while
-          you&apos;re there.
+          {STRINGS.settings.notifications.body}
         </AppText>
 
         {error ? (
@@ -126,11 +125,11 @@ export default function NotificationSettingsScreen() {
           ]}
         >
           <CheckboxRow
-            label="Notify me about nearby places"
+            label={STRINGS.settings.notifications.toggleLabel}
             icon="🔔"
             checked={enabled}
             onToggle={() => void handleToggle()}
-            accessibilityHint="Asks for notification permission the first time you turn this on"
+            accessibilityHint={STRINGS.settings.notifications.permissionHint}
           />
         </View>
 
@@ -141,7 +140,7 @@ export default function NotificationSettingsScreen() {
               accessibilityRole="header"
               style={[styles.header, { color: colors.textMuted }]}
             >
-              How close
+              {STRINGS.settings.notifications.howClose}
             </AppText>
             <View
               style={[
@@ -167,11 +166,11 @@ export default function NotificationSettingsScreen() {
             { backgroundColor: colors.surface, borderColor: colors.border },
           ]}
         >
-          <AppText variant="label">What we store</AppText>
+          <AppText variant="label">
+            {STRINGS.settings.notifications.whatWeStore}
+          </AppText>
           <AppText style={{ color: colors.textMuted }}>
-            While this is on, Wayble records your approximate location when you
-            open the app rounded to about 110 metres, never your exact position,
-            and never in the background. Turn this off and we stop.
+            {STRINGS.settings.notifications.privacy}
           </AppText>
         </View>
       </ScrollView>

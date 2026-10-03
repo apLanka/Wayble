@@ -2,7 +2,6 @@ import { ScrollView, StyleSheet, View } from "react-native";
 
 import {
   CATEGORY_COLORS,
-  CATEGORY_LABELS,
   type Category,
 } from "@/components/map/CategoryFilter";
 import {
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/app-symbol";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { spacing } from "@/constants/theme";
 
 const HOME_CATEGORIES = [
@@ -58,8 +58,8 @@ export function CategoryShortcuts({
             ]}
             onPress={() => onSelectCategory(category)}
             accessibilityRole="button"
-            accessibilityLabel={CATEGORY_LABELS[category]}
-            accessibilityHint="Opens map filtered by this category"
+            accessibilityLabel={STRINGS.map.categoryLabels[category]}
+            accessibilityHint={STRINGS.home.a11y.categoryShortcutHint}
           >
             <View style={styles.pillContent}>
               <AppSymbol
@@ -68,7 +68,7 @@ export function CategoryShortcuts({
                 tintColor={color}
               />
               <AppText style={[styles.pillText, { color }]}>
-                {CATEGORY_LABELS[category]}
+                {STRINGS.map.categoryLabels[category]}
               </AppText>
             </View>
           </TouchTarget>

@@ -12,6 +12,7 @@ import {
 
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -63,7 +64,7 @@ export function EditDisplayNameModal({
         <Pressable
           style={styles.backdrop}
           accessibilityRole="button"
-          accessibilityLabel="Close edit name dialog"
+          accessibilityLabel={STRINGS.profile.editName.closeLabel}
           onPress={onClose}
         />
 
@@ -77,23 +78,23 @@ export function EditDisplayNameModal({
           ]}
         >
           <AppText variant="title" accessibilityRole="header">
-            Edit name
+            {STRINGS.profile.editName.title}
           </AppText>
           <AppText style={{ color: appTheme.colors.textMuted }}>
-            This is how you appear in Wayble.
+            {STRINGS.profile.editName.body}
           </AppText>
 
           <TextInput
             value={name}
             onChangeText={setName}
-            placeholder="Your name"
+            placeholder={STRINGS.profile.editName.placeholder}
             placeholderTextColor={appTheme.colors.textMuted}
             autoFocus
             editable={!isSaving}
             maxLength={80}
             returnKeyType="done"
             onSubmitEditing={handleSave}
-            accessibilityLabel="Display name"
+            accessibilityLabel={STRINGS.profile.editName.label}
             style={[
               styles.input,
               {
@@ -116,7 +117,7 @@ export function EditDisplayNameModal({
           <View style={styles.actions}>
             <TouchTarget
               accessibilityRole="button"
-              accessibilityLabel="Cancel editing name"
+              accessibilityLabel={STRINGS.profile.editName.cancelLabel}
               disabled={isSaving}
               onPress={onClose}
               style={[
@@ -128,12 +129,14 @@ export function EditDisplayNameModal({
                 },
               ]}
             >
-              <AppText variant="bodyStrong">Cancel</AppText>
+              <AppText variant="bodyStrong">
+                {STRINGS.profile.editName.cancel}
+              </AppText>
             </TouchTarget>
 
             <TouchTarget
               accessibilityRole="button"
-              accessibilityLabel="Save display name"
+              accessibilityLabel={STRINGS.profile.editName.saveLabel}
               accessibilityState={{ disabled: !canSave }}
               disabled={!canSave}
               focusColor={appTheme.colors.onPrimary}
@@ -153,7 +156,7 @@ export function EditDisplayNameModal({
                   variant="bodyStrong"
                   style={{ color: appTheme.colors.onPrimary }}
                 >
-                  Save
+                  {STRINGS.profile.editName.save}
                 </AppText>
               )}
             </TouchTarget>

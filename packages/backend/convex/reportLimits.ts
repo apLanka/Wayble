@@ -21,3 +21,23 @@ export const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
 /** How far back a report may claim to have been observed. */
 export const MAX_OBSERVATION_AGE_MS = 365 * 24 * 60 * 60 * 1000;
+
+/** Maximum size of one evidence photo, checked against the stored file. */
+export const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Photo types a report may carry. The app re-encodes HEIC to JPEG before
+ * upload, so HEIC is deliberately absent: a HEIC that reaches the server came
+ * from a client that skipped that step, and most browsers cannot render it.
+ */
+export const ALLOWED_PHOTO_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+
+/** Photos per report. The schema allows an array; the product allows one. */
+export const MAX_EVIDENCE_PHOTOS = 1;
+
+/** Maximum characters in a photo's caption, which doubles as its alt text. */
+export const MAX_CAPTION_LENGTH = 280;

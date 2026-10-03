@@ -3,6 +3,7 @@ import { StyleSheet } from "react-native";
 import { AppSymbol, HOME_SYMBOLS } from "@/components/ui/app-symbol";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -13,7 +14,7 @@ interface SearchEntryProps {
 
 export function SearchEntry({
   onPress,
-  placeholder = "Search accessible places…",
+  placeholder = STRINGS.home.searchPlaceholder,
 }: SearchEntryProps) {
   const { appTheme } = useAppTheme();
 
@@ -21,8 +22,8 @@ export function SearchEntry({
     <TouchTarget
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel="Search accessible places"
-      accessibilityHint="Opens map search"
+      accessibilityLabel={STRINGS.home.a11y.searchLabel}
+      accessibilityHint={STRINGS.home.a11y.searchHint}
       style={[
         styles.container,
         {

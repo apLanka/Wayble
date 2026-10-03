@@ -6,6 +6,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import Mapbox from "@rnmapbox/maps";
 import { LocationPermissionBanner } from "@/components/map/LocationPermissionBanner";
 import { LocateButton } from "@/components/map/LocateButton";
+import { AddPlaceButton } from "@/components/map/AddPlaceButton";
 import { DetailSheet } from "@/components/map/DetailSheet";
 import { CategoryFilter } from "@/components/map/CategoryFilter";
 import type { Category } from "@/components/map/CategoryFilter";
@@ -13,10 +14,13 @@ import { PlaceListItem } from "@/components/map/PlaceListItem";
 import { ViewModeToggle } from "@/components/map/ViewModeToggle";
 import { SearchBar } from "@/components/map/SearchBar";
 import { AppText } from "@/components/ui/app-text";
+import { matchExplanation } from "@/utils/rank-places";
 
 import { useNearbyPlaces, NearbyPlace } from "@/hooks/use-nearby-places";
 import { useScreenReader } from "@/hooks/use-screen-reader";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { DEFAULT_MAP_CENTER } from "@/constants/default-location";
+import { STRINGS } from "@/constants/strings";
 import { spacing } from "@/constants/theme";
 
 // Connect to Mapbox using env var
@@ -46,6 +50,7 @@ export default function MapboxTab() {
     refreshLocation,
     locations,
     filtered,
+    ranked,
     highlightedIds,
     activeCategories,
     setActiveCategories,
@@ -241,7 +246,7 @@ export default function MapboxTab() {
       <SearchBar
         value={searchQuery}
         onChangeText={setSearchQuery}
-        placeholder="Search accessible places…"
+        placeholder={STRINGS.map.searchPlaceholder}
         focusOnMount={focusSearchOnMount}
         results={
           searchQuery.trim().length > 0
@@ -310,23 +315,30 @@ export default function MapboxTab() {
                 accessibilityRole="text"
                 style={[styles.emptyText, { color: appTheme.colors.textMuted }]}
               >
-                No places found nearby.
+                {STRINGS.map.emptyNearby}
               </AppText>
             </View>
           ) : (
+            // `ranked`, not `filtered`: the same places, ordered by how well
+            // they meet the user's needs (US-16). The map keeps `filtered`.
             <FlatList
-              data={filtered}
+              data={ranked}
               keyExtractor={(item) => item._id}
               renderItem={({ item }) => (
                 <PlaceListItem
                   name={item.name}
                   category={item.category}
                   distance={item.distance}
+                  matchExplanation={matchExplanation(item.match)}
                   onPress={() => handlePlacePress(item)}
                 />
               )}
             />
           )}
+          <AddPlaceButton
+            onPress={() => router.push("/add-place")}
+            bottomOffset={100}
+          />
         </View>
       ) : (
         <View style={styles.mapContainer}>
@@ -345,7 +357,7 @@ export default function MapboxTab() {
               centerCoordinate={
                 location
                   ? [location.coords.longitude, location.coords.latitude]
-                  : undefined
+                  : DEFAULT_MAP_CENTER
               }
               animationMode="flyTo"
               animationDuration={1000}
@@ -377,7 +389,9 @@ export default function MapboxTab() {
               >
                 <View
                   accessible
-                  accessibilityLabel="Your current location"
+                  accessibilityLabel={
+                    STRINGS.map.placeDetail.yourCurrentLocation
+                  }
                   style={{
                     width: 60,
                     height: 60,
@@ -493,6 +507,10 @@ export default function MapboxTab() {
             )}
           </Mapbox.MapView>
 
+          <AddPlaceButton
+            onPress={() => router.push("/add-place")}
+            bottomOffset={170}
+          />
           <LocateButton onPress={handleLocateMe} bottomOffset={100} />
         </View>
       )}

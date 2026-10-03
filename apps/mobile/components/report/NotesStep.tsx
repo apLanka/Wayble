@@ -2,23 +2,28 @@ import { StyleSheet, TextInput, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { radii, spacing } from "@/constants/theme";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { MAX_SUMMARY_LENGTH } from "@packages/backend/convex/reportLimits";
+import { PhotoEvidencePicker } from "./PhotoEvidencePicker";
 import type { DraftAction, ReportDraft } from "./report-draft";
 
 type Props = {
   draft: ReportDraft;
   dispatch: (action: DraftAction) => void;
+  /** Seeds a new photo's default caption. */
+  placeName: string | undefined;
 };
 
 /**
- * Step 3 of the report wizard: one optional sentence about the whole visit.
+ * Step 3 of the report wizard: one optional sentence about the whole visit,
+ * and an optional photo (US-09).
  *
- * The per-attribute notes were captured in step 2. This is the only free-text
- * moment in the wizard, which keeps typing to a single place for screen
- * reader and switch-control users.
+ * The per-attribute notes were captured in step 2. Apart from the photo's
+ * caption, this is the only free-text moment in the wizard, which keeps typing
+ * to a single place for screen reader and switch-control users.
  */
-export function NotesStep({ draft, dispatch }: Props) {
+export function NotesStep({ draft, dispatch, placeName }: Props) {
   const { appTheme } = useAppTheme();
   const { colors } = appTheme;
   // `onChangeText` is the writer; `maxLength` below is the clamp. Nothing
@@ -31,10 +36,10 @@ export function NotesStep({ draft, dispatch }: Props) {
   return (
     <View style={styles.container}>
       <AppText variant="title" accessibilityRole="header">
-        Anything to add?
+        {STRINGS.report.notes.title}
       </AppText>
       <AppText style={{ color: colors.textMuted }}>
-        One optional sentence about the whole visit. You can skip this.
+        {STRINGS.report.notes.body}
       </AppText>
 
       <View style={styles.fieldBlock}>
@@ -43,20 +48,22 @@ export function NotesStep({ draft, dispatch }: Props) {
           nativeID="summary-label"
           style={{ color: colors.textMuted }}
         >
-          Your summary (optional)
+          {STRINGS.report.notes.titleLabel}
         </AppText>
         <TextInput
           value={draft.summary}
           onChangeText={(text) =>
             dispatch({ type: "setSummary", summary: text })
           }
-          placeholder="For example: the side entrance is the only step-free way in."
+          placeholder={STRINGS.report.notes.placeholder}
           placeholderTextColor={colors.textMuted}
           maxLength={MAX_SUMMARY_LENGTH}
           multiline
-          accessibilityLabel="Your summary"
+          accessibilityLabel={STRINGS.report.notes.summaryLabel}
           accessibilityLabelledBy="summary-label"
-          accessibilityHint={`Optional. Up to ${MAX_SUMMARY_LENGTH} characters.`}
+          accessibilityHint={STRINGS.report.notes.summaryHint(
+            MAX_SUMMARY_LENGTH,
+          )}
           style={[
             styles.input,
             {
@@ -77,9 +84,15 @@ export function NotesStep({ draft, dispatch }: Props) {
           variant="label"
           style={[styles.counter, { color: colors.textMuted }]}
         >
-          {remaining} of {MAX_SUMMARY_LENGTH} characters left
+          {STRINGS.report.notes.charactersLeft(remaining, MAX_SUMMARY_LENGTH)}
         </AppText>
       </View>
+
+      <PhotoEvidencePicker
+        photo={draft.photo}
+        placeName={placeName}
+        dispatch={dispatch}
+      />
     </View>
   );
 }

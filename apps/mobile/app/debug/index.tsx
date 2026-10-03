@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 
-import { AddPlaceForm } from "@/components/debug/AddPlaceForm";
+import { AddPlaceForm } from "@/components/place/AddPlaceForm";
 import { LoadAllPlacesButton } from "@/components/debug/LoadAllPlacesButton";
 import { VerifyPlaceForm } from "@/components/debug/VerifyPlaceForm";
 import { AppText } from "@/components/ui/app-text";

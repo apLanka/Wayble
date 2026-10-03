@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, Switch } from "react-native";
 import { AppText } from "@/components/ui/app-text";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { STRINGS } from "@/constants/strings";
 import { spacing } from "@/constants/theme";
 
 interface ViewModeToggleProps {
@@ -23,7 +24,7 @@ export function ViewModeToggle({ isListMode, onToggle }: ViewModeToggleProps) {
       ]}
     >
       <AppText style={[styles.label, { color: appTheme.colors.text }]}>
-        List View
+        {STRINGS.map.viewMode.label}
       </AppText>
       <Switch
         value={isListMode}
@@ -34,8 +35,8 @@ export function ViewModeToggle({ isListMode, onToggle }: ViewModeToggleProps) {
         }}
         accessibilityRole="switch"
         accessibilityState={{ checked: isListMode }}
-        accessibilityLabel="List View"
-        accessibilityHint="Toggles between map and accessible list views"
+        accessibilityLabel={STRINGS.map.viewMode.label}
+        accessibilityHint={STRINGS.map.viewMode.hint}
       />
     </View>
   );

@@ -4,6 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { ConfidenceBadge } from "@/components/place/ConfidenceBadge";
 import { AppText } from "@/components/ui/app-text";
 import { CONFIDENCE_LABELS } from "@/constants/confidence-metadata";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { formatRelativeTime } from "@/utils/format-relative-time";
@@ -29,21 +30,30 @@ export function FeedItemRow({ item, currentUserId }: Props) {
   const { colors } = appTheme;
 
   const mine = item.verifierId === currentUserId;
-  const who = mine ? "You" : item.verifierName;
+  const who = mine ? STRINGS.feed.you : item.verifierName;
   const confirmed = item.verdict === "confirm";
-  const verb = confirmed ? "confirmed" : "disputed";
+  const verb = confirmed ? STRINGS.feed.confirmed : STRINGS.feed.disputed;
   const attribute = attributeSummary(item.attributes);
   // Computed once so the visible and spoken text cannot differ across a tick.
   const when = formatRelativeTime(item.updatedAt);
-  const confidenceText = `Confidence: ${CONFIDENCE_LABELS[item.confidence.tier]}${
-    item.confidence.isStale ? ", needs re-check" : ""
-  }`;
+  const confidenceText = STRINGS.place.confidenceLabel(
+    `${CONFIDENCE_LABELS[item.confidence.tier]}${
+      item.confidence.isStale ? STRINGS.feed.needsRecheck : ""
+    }`,
+  );
 
   return (
     <View
       accessible
       accessibilityRole="text"
-      accessibilityLabel={`${who} ${verb} ${attribute} at ${item.placeName}. ${when}. ${confidenceText}.`}
+      accessibilityLabel={STRINGS.feed.rowLabel(
+        who,
+        verb,
+        attribute,
+        item.placeName,
+        when,
+        confidenceText,
+      )}
       style={[
         styles.card,
         { backgroundColor: colors.surface, borderColor: colors.border },
@@ -66,7 +76,7 @@ export function FeedItemRow({ item, currentUserId }: Props) {
           variant="bodyStrong"
           style={{ color: confirmed ? colors.success : colors.danger }}
         >
-          {confirmed ? "Confirmed" : "Disputed"}
+          {confirmed ? STRINGS.feed.confirmedTitle : STRINGS.feed.disputedTitle}
         </AppText>{" "}
         {attribute}
       </AppText>

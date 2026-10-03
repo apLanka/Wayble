@@ -4,6 +4,7 @@ import { components } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { mutation, type MutationCtx } from "./_generated/server";
 import { SEED_PLACES } from "./seed/placesSeedData";
+import { seedReportsFor } from "./seed/reportsSeedData";
 import { ACCESSIBILITY_TAXONOMY_VERSION } from "./accessibility";
 
 export const geo = new GeospatialIndex<
@@ -14,10 +15,16 @@ export const geo = new GeospatialIndex<
 /**
  * Seeds the database with real public spaces in Greater Colombo & Malabe.
  * Idempotent: checks for existing places by name to avoid duplicate insertions.
+ *
+ * `reseedReports: true` replaces the seed bot's own reports with a fresh
+ * generation (see `seed/reportsSeedData.ts`) without touching places or any
+ * report a real user wrote. Use it to move an existing dev database onto new
+ * sample data: `convex run seed:seedPlaces '{"reseedReports": true}'`.
  */
 export const seedPlaces = mutation({
   args: {
     clearExisting: v.optional(v.boolean()),
+    reseedReports: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     // 1. Ensure a system seed user exists
@@ -109,14 +116,20 @@ export const seedPlaces = mutation({
       insertedCount++;
     }
 
-    // 4. Seed initial accessibility reports for well-known demo hubs if they have none
-    await seedDemoReports(ctx, seedUser._id, now);
+    // 4. Sample reports for every place that has none yet.
+    const removedReports = args.reseedReports
+      ? await removeSeedReports(ctx, seedUser._id)
+      : 0;
+    const reports = await seedSampleReports(ctx, seedUser._id, now);
 
     return {
       totalInDataset: SEED_PLACES.length,
       inserted: insertedCount,
       skipped: skippedCount,
       currentTotalInDb: (await ctx.db.query("places").collect()).length,
+      reportsRemoved: removedReports,
+      reportsInserted: reports.inserted,
+      placesWithSampleReports: reports.places,
     };
   },
 });
@@ -151,66 +164,69 @@ export const backfillGeoIndex = mutation({
 });
 
 /**
- * Helper to seed sample accessibility reports for iconic demo venues.
+ * Inserts generated sample reports for every place with no reports.
+ *
+ * A place that already has any report — a real user's, or the seed bot's
+ * from an earlier run — is left alone, so seeded data never mixes into a
+ * place someone actually assessed, and a re-run inserts nothing twice.
+ *
+ * Reads `reports` once rather than `by_place` per place: this runs over every
+ * place in one mutation, and one scan is cheaper than 155 index reads.
  */
-async function seedDemoReports(
+async function seedSampleReports(
   ctx: MutationCtx,
   authorId: Id<"users">,
-  timestamp: number,
+  now: number,
 ) {
-  const demoVenues = [
-    {
-      namePattern: /SLIIT|Hospital|Mall|Park|Station|Cargills/i,
-      attributes: [
-        {
-          key: "mobility.step_free_entrance" as const,
-          value: "yes" as const,
-          note: "Level entrance with ramp",
-        },
-        { key: "mobility.wide_entrance" as const, value: "yes" as const },
-        {
-          key: "mobility.accessible_parking" as const,
-          value: "yes" as const,
-          note: "Designated spots near main lobby",
-        },
-        { key: "mobility.accessible_restroom" as const, value: "yes" as const },
-        { key: "mobility.elevator" as const, value: "yes" as const },
-        {
-          key: "vision.braille_signage" as const,
-          value: "partial" as const,
-          note: "Braille in elevators only",
-        },
-        { key: "vision.tactile_guidance" as const, value: "yes" as const },
-        { key: "assistance.service_animals" as const, value: "yes" as const },
-      ],
-    },
-  ];
-
+  const reported = new Set(
+    (await ctx.db.query("reports").collect()).map((r) => r.placeId),
+  );
   const places = await ctx.db.query("places").collect();
 
+  let inserted = 0;
+  let placesSeeded = 0;
   for (const place of places) {
-    for (const demo of demoVenues) {
-      if (demo.namePattern.test(place.name)) {
-        // Check if report already exists
-        const existingReport = await ctx.db
-          .query("reports")
-          .withIndex("by_place", (q) => q.eq("placeId", place._id))
-          .first();
-
-        if (!existingReport) {
-          await ctx.db.insert("reports", {
-            placeId: place._id,
-            authorId,
-            taxonomyVersion: ACCESSIBILITY_TAXONOMY_VERSION,
-            attributes: demo.attributes,
-            summary: "Initial verified accessibility assessment.",
-            evidence: [],
-            observedAt: timestamp,
-            status: "active",
-            updatedAt: timestamp,
-          });
-        }
-      }
+    if (reported.has(place._id)) continue;
+    const generated = seedReportsFor(place, now);
+    if (generated.length === 0) continue;
+    for (const report of generated) {
+      await ctx.db.insert("reports", {
+        placeId: place._id,
+        authorId,
+        taxonomyVersion: ACCESSIBILITY_TAXONOMY_VERSION,
+        attributes: report.attributes,
+        summary: report.summary,
+        evidence: [],
+        observedAt: report.observedAt,
+        status: "active",
+        updatedAt: now,
+      });
+      inserted++;
     }
+    placesSeeded++;
   }
+  return { inserted, places: placesSeeded };
+}
+
+/**
+ * Deletes every report the seed bot wrote, with the verifications and flags
+ * that point at them, so nothing is left referencing a deleted report.
+ * Reports by any other author are untouched.
+ */
+async function removeSeedReports(ctx: MutationCtx, authorId: Id<"users">) {
+  const own = await ctx.db
+    .query("reports")
+    .withIndex("by_author", (q) => q.eq("authorId", authorId))
+    .collect();
+  for (const report of own) {
+    for (const table of ["verifications", "flags"] as const) {
+      const linked = await ctx.db
+        .query(table)
+        .withIndex("by_report", (q) => q.eq("reportId", report._id))
+        .collect();
+      for (const row of linked) await ctx.db.delete(row._id);
+    }
+    await ctx.db.delete(report._id);
+  }
+  return own.length;
 }

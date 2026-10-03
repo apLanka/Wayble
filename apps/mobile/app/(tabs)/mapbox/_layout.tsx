@@ -1,5 +1,7 @@
 import { Stack } from "expo-router";
 
+import { STRINGS } from "@/constants/strings";
+
 export default function MapboxStackLayout() {
   return (
     <Stack>
@@ -7,8 +9,8 @@ export default function MapboxStackLayout() {
       <Stack.Screen
         name="place/[id]"
         options={{
-          title: "Place Details",
-          headerBackTitle: "Back",
+          title: STRINGS.navigation.titles.placeDetails,
+          headerBackTitle: STRINGS.navigation.back,
         }}
       />
     </Stack>

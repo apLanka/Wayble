@@ -3,7 +3,8 @@ import { StyleSheet } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
-import { CATEGORY_COLORS, CATEGORY_LABELS } from "./CategoryFilter";
+import { CATEGORY_COLORS } from "./CategoryFilter";
+import { STRINGS } from "@/constants/strings";
 
 type Props = {
   category: "all" | "wheelchair" | "elevator" | "bathroom" | "multi";
@@ -21,9 +22,8 @@ const PIN_EMOJI: Record<Props["category"], string> = {
 export default function AccessibilityPin({ category, onPress }: Props) {
   const emoji = PIN_EMOJI[category];
   const color = CATEGORY_COLORS[category];
-  const categoryLabel = CATEGORY_LABELS[category] || category;
-  const a11yLabel =
-    category === "all" ? "Place marker" : `${categoryLabel} place`;
+  const categoryLabel = STRINGS.map.categoryLabels[category] ?? category;
+  const a11yLabel = STRINGS.map.placeMarker(category, categoryLabel);
 
   return (
     <TouchTarget

@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -14,8 +15,8 @@ export function GuestProfilePrompt() {
     <View style={styles.container}>
       <TouchTarget
         accessibilityRole="button"
-        accessibilityLabel="Sign in"
-        accessibilityHint="Opens the sign in screen"
+        accessibilityLabel={STRINGS.profile.guest.signInLabel}
+        accessibilityHint={STRINGS.profile.guest.signInHint}
         focusColor={appTheme.colors.onPrimary}
         onPress={() => router.push("/sign-in")}
         style={[
@@ -27,14 +28,14 @@ export function GuestProfilePrompt() {
           variant="bodyStrong"
           style={{ color: appTheme.colors.onPrimary }}
         >
-          Sign In
+          {STRINGS.profile.guest.signIn}
         </AppText>
       </TouchTarget>
 
       <TouchTarget
         accessibilityRole="button"
-        accessibilityLabel="Create account"
-        accessibilityHint="Opens the sign up screen"
+        accessibilityLabel={STRINGS.profile.guest.createAccountLabel}
+        accessibilityHint={STRINGS.profile.guest.signUpHint}
         onPress={() => router.push("/sign-up")}
         style={[
           styles.secondaryButton,
@@ -44,7 +45,9 @@ export function GuestProfilePrompt() {
           },
         ]}
       >
-        <AppText variant="bodyStrong">Create Account</AppText>
+        <AppText variant="bodyStrong">
+          {STRINGS.profile.guest.createAccount}
+        </AppText>
       </TouchTarget>
     </View>
   );
