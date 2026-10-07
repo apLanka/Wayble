@@ -136,8 +136,13 @@ export default function PlaceReportsScreen() {
   if (currentUser === null) {
     return (
       <>
-        <Stack.Screen options={{ title: STRINGS.place.reports.title }} />
-        <Screen>
+        <Stack.Screen
+          options={{
+            title: STRINGS.place.reports.title,
+            headerBackTitle: STRINGS.navigation.back,
+          }}
+        />
+        <Screen edges={["left", "right", "bottom"]}>
           <View style={styles.centered}>
             <AppText variant="title" accessibilityRole="header">
               {STRINGS.place.reports.signedOutTitle}
@@ -176,8 +181,13 @@ export default function PlaceReportsScreen() {
   if (currentUser === undefined || reports === undefined) {
     return (
       <>
-        <Stack.Screen options={{ title: STRINGS.place.reports.title }} />
-        <Screen>
+        <Stack.Screen
+          options={{
+            title: STRINGS.place.reports.title,
+            headerBackTitle: STRINGS.navigation.back,
+          }}
+        />
+        <Screen edges={["left", "right", "bottom"]}>
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={colors.primary} />
             <AppText style={[styles.centeredText, { color: colors.textMuted }]}>
@@ -191,8 +201,13 @@ export default function PlaceReportsScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: STRINGS.place.reports.title }} />
-      <Screen>
+      <Stack.Screen
+        options={{
+          title: STRINGS.place.reports.title,
+          headerBackTitle: STRINGS.navigation.back,
+        }}
+      />
+      <Screen edges={["left", "right", "bottom"]}>
         {/* The banner is a sibling of the list, not part of its header. A vote
             can fail on a card below the fold, and inside `ListHeaderComponent`
             the message scrolls away with the list, so a sighted user gets no
@@ -248,7 +263,8 @@ const styles = StyleSheet.create({
   },
   listContent: {
     gap: spacing.md,
-    paddingVertical: spacing.lg,
+    paddingBottom: spacing.lg,
+    paddingTop: spacing.md,
   },
   centered: {
     alignItems: "center",

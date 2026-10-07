@@ -627,6 +627,11 @@ export const STRINGS = {
 
     addressLabel: (address: string): string => `Address: ${address}`,
 
+    addFirstReport: {
+      label: "Add the first report",
+      button: "Be the first to report",
+    },
+
     notFound: {
       loading: "Loading place details…",
       title: "Place not found",

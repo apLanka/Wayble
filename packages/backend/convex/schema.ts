@@ -47,7 +47,7 @@ export const verificationVerdictValidator = v.union(
   v.literal("dispute"),
 );
 
-const flagReasonValidator = v.union(
+export const flagReasonValidator = v.union(
   v.literal("inaccurate"),
   v.literal("spam"),
   v.literal("abusive"),
@@ -56,7 +56,7 @@ const flagReasonValidator = v.union(
   v.literal("other"),
 );
 
-const flagStatusValidator = v.union(
+export const flagStatusValidator = v.union(
   v.literal("open"),
   v.literal("resolved"),
   v.literal("dismissed"),
@@ -180,10 +180,13 @@ export default defineSchema({
     status: flagStatusValidator,
     resolvedBy: v.optional(v.id("users")),
     resolvedAt: v.optional(v.number()),
+    // S4-7b: the moderator's optional reason for the decision.
+    resolutionNote: v.optional(v.string()),
     updatedAt: v.number(),
   })
     .index("by_report", ["reportId"])
-    .index("by_author", ["authorId"]),
+    .index("by_author", ["authorId"])
+    .index("by_report_and_author", ["reportId", "authorId"]),
 
   // One row per device. Tokens rotate and a user may have several devices,
   // so this cannot live on the user document. `disabledAt` is set when Expo

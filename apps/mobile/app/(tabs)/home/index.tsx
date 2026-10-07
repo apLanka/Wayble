@@ -1,6 +1,6 @@
 import { api } from "@packages/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   Dimensions,
@@ -48,6 +48,12 @@ export default function HomeScreen() {
 
   const openMap = useCallback(() => {
     router.push("/mapbox");
+  }, [router]);
+
+  const openActivityFeed = useCallback(() => {
+    // Cast: Expo regenerates the typed-route list while Metro runs and can
+    // transiently omit a newly added route, which would fail check-types.
+    router.push("/feed" as Href);
   }, [router]);
 
   const openMapWithSearch = useCallback(() => {
@@ -126,6 +132,13 @@ export default function HomeScreen() {
               accessibilityLabel={STRINGS.home.a11y.nearMeLabel}
               accessibilityHint={STRINGS.home.a11y.nearMeHint}
               onPress={openMapNearMe}
+            />
+            <QuickActionCard
+              label="Activity"
+              symbol={{ ios: "person.2.fill", android: "group" }}
+              accessibilityLabel="Nearby verification activity"
+              accessibilityHint="Opens a live feed of verifications near you"
+              onPress={openActivityFeed}
             />
           </View>
         </View>

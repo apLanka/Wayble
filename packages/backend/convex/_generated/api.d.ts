@@ -10,9 +10,12 @@
 
 import type * as accessibility from "../accessibility.js";
 import type * as auth from "../auth.js";
+import type * as confidence from "../confidence.js";
 import type * as crons from "../crons.js";
+import type * as flags from "../flags.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
+import type * as moderation from "../moderation.js";
 import type * as notificationCopy from "../notificationCopy.js";
 import type * as notificationPolicy from "../notificationPolicy.js";
 import type * as notifications from "../notifications.js";
@@ -23,6 +26,7 @@ import type * as reports from "../reports.js";
 import type * as seed from "../seed.js";
 import type * as seed_placesSeedData from "../seed/placesSeedData.js";
 import type * as users from "../users.js";
+import type * as verificationFeed from "../verificationFeed.js";
 import type * as verificationNeed from "../verificationNeed.js";
 import type * as verifications from "../verifications.js";
 
@@ -35,9 +39,12 @@ import type {
 declare const fullApi: ApiFromModules<{
   accessibility: typeof accessibility;
   auth: typeof auth;
+  confidence: typeof confidence;
   crons: typeof crons;
+  flags: typeof flags;
   health: typeof health;
   http: typeof http;
+  moderation: typeof moderation;
   notificationCopy: typeof notificationCopy;
   notificationPolicy: typeof notificationPolicy;
   notifications: typeof notifications;
@@ -48,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   seed: typeof seed;
   "seed/placesSeedData": typeof seed_placesSeedData;
   users: typeof users;
+  verificationFeed: typeof verificationFeed;
   verificationNeed: typeof verificationNeed;
   verifications: typeof verifications;
 }>;
