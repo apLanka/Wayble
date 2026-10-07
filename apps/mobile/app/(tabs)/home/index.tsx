@@ -19,6 +19,7 @@ import { SectionHeader } from "@/components/home/SectionHeader";
 import { HOME_SYMBOLS } from "@/components/ui/app-symbol";
 import type { Category } from "@/components/map/CategoryFilter";
 import { Screen } from "@/components/ui/screen";
+import { STRINGS } from "@/constants/strings";
 import { spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { useNearbyPlaces } from "@/hooks/use-nearby-places";
@@ -102,7 +103,7 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        accessibilityLabel="Wayble home"
+        accessibilityLabel={STRINGS.home.a11y.screen}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -116,41 +117,41 @@ export default function HomeScreen() {
         <SearchEntry onPress={openMapWithSearch} />
 
         <View style={styles.section}>
-          <SectionHeader title="Quick actions" />
+          <SectionHeader title={STRINGS.home.quickActionsTitle} />
           <View style={styles.quickActions}>
             <QuickActionCard
-              label="Open Map"
+              label={STRINGS.home.openMap}
               symbol={HOME_SYMBOLS.openMap}
-              accessibilityLabel="Open map"
-              accessibilityHint="Opens the full map view"
+              accessibilityLabel={STRINGS.home.a11y.openMapLabel}
+              accessibilityHint={STRINGS.home.a11y.openMapHint}
               onPress={openMap}
             />
             <QuickActionCard
-              label="Near Me"
+              label={STRINGS.home.nearMe}
               symbol={HOME_SYMBOLS.nearMe}
-              accessibilityLabel="Show places near me"
-              accessibilityHint="Opens the map centered on your location"
+              accessibilityLabel={STRINGS.home.a11y.nearMeLabel}
+              accessibilityHint={STRINGS.home.a11y.nearMeHint}
               onPress={openMapNearMe}
             />
             <QuickActionCard
-              label="Activity"
+              label={STRINGS.home.activity}
               symbol={{ ios: "person.2.fill", android: "group" }}
-              accessibilityLabel="Nearby verification activity"
-              accessibilityHint="Opens a live feed of verifications near you"
+              accessibilityLabel={STRINGS.home.activityLabel}
+              accessibilityHint={STRINGS.home.activityHint}
               onPress={openActivityFeed}
             />
           </View>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Browse by need" />
+          <SectionHeader title={STRINGS.home.browseByNeedTitle} />
           <CategoryShortcuts onSelectCategory={openMapWithCategory} />
         </View>
 
         <View style={styles.section}>
           <SectionHeader
-            title="Nearby accessible places"
-            actionLabel="See all"
+            title={STRINGS.home.nearbyTitle}
+            actionLabel={STRINGS.home.seeAll}
             onActionPress={openMap}
           />
           <HomeNearbySection

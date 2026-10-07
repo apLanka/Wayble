@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import waybleAppIcon from "@/assets/images/app-icon/wayble-app-icon.png";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -59,9 +60,7 @@ export default function OnboardingScreen() {
       }),
     ]).start();
 
-    AccessibilityInfo.announceForAccessibility?.(
-      "Welcome to Wayble. Find a better way to get there.",
-    );
+    AccessibilityInfo.announceForAccessibility?.(STRINGS.announcements.welcome);
   }, [fadeAnim, logoScaleAnim, contentSlideAnim, actionsSlideAnim]);
 
   const markOnboardingComplete = async () => {
@@ -147,7 +146,7 @@ export default function OnboardingScreen() {
               style={styles.logoImage}
               resizeMode="cover"
               accessibilityRole="image"
-              accessibilityLabel="Wayble application logo"
+              accessibilityLabel={STRINGS.onboarding.a11y.logo}
             />
           </View>
 
@@ -162,7 +161,7 @@ export default function OnboardingScreen() {
             ]}
             accessibilityRole="header"
           >
-            Wayble
+            {STRINGS.common.appName}
           </AppText>
 
           {/* Slogan */}
@@ -176,7 +175,7 @@ export default function OnboardingScreen() {
                 },
               ]}
             >
-              “Find a better way to get there.”
+              {STRINGS.onboarding.slogan}
             </AppText>
           </View>
 
@@ -197,7 +196,7 @@ export default function OnboardingScreen() {
                 variant="body"
                 style={[styles.featureText, { color: colors.textMuted }]}
               >
-                🗺️ Accessible route navigation & place guides
+                {STRINGS.onboarding.benefitRoutes}
               </AppText>
             </View>
             <View
@@ -215,7 +214,7 @@ export default function OnboardingScreen() {
                 variant="body"
                 style={[styles.featureText, { color: colors.textMuted }]}
               >
-                ♿ Verified ramp, entrance & mobility info
+                {STRINGS.onboarding.benefitMobility}
               </AppText>
             </View>
           </View>
@@ -233,8 +232,8 @@ export default function OnboardingScreen() {
         >
           {/* Primary CTA: Get Started */}
           <TouchTarget
-            accessibilityHint="Creates a new account to join Wayble"
-            accessibilityLabel="Get Started"
+            accessibilityHint={STRINGS.onboarding.a11y.getStartedHint}
+            accessibilityLabel={STRINGS.onboarding.a11y.getStartedLabel}
             accessibilityRole="button"
             style={[
               styles.primaryButton,
@@ -248,14 +247,14 @@ export default function OnboardingScreen() {
               variant="bodyStrong"
               style={[styles.primaryButtonText, { color: colors.onPrimary }]}
             >
-              Get Started
+              {STRINGS.onboarding.getStarted}
             </AppText>
           </TouchTarget>
 
           {/* Secondary CTA: Sign In */}
           <TouchTarget
-            accessibilityHint="Navigates to the sign in page"
-            accessibilityLabel="I already have an account. Sign in"
+            accessibilityHint={STRINGS.onboarding.a11y.haveAccountHint}
+            accessibilityLabel={STRINGS.onboarding.a11y.haveAccountLabel}
             accessibilityRole="button"
             style={[
               styles.secondaryButton,
@@ -270,14 +269,14 @@ export default function OnboardingScreen() {
               variant="bodyStrong"
               style={[styles.secondaryButtonText, { color: colors.text }]}
             >
-              I already have an account
+              {STRINGS.onboarding.haveAccount}
             </AppText>
           </TouchTarget>
 
           {/* Guest Exploration Option */}
           <TouchTarget
-            accessibilityHint="Explores accessible map without signing in"
-            accessibilityLabel="Explore map as guest"
+            accessibilityHint={STRINGS.onboarding.a11y.exploreAsGuestHint}
+            accessibilityLabel={STRINGS.onboarding.a11y.exploreAsGuestLabel}
             accessibilityRole="button"
             style={styles.guestButton}
             onPress={handleExploreGuest}
@@ -286,7 +285,7 @@ export default function OnboardingScreen() {
               variant="label"
               style={[styles.guestButtonText, { color: colors.textMuted }]}
             >
-              Explore map as guest →
+              {STRINGS.onboarding.exploreAsGuest}
             </AppText>
           </TouchTarget>
         </Animated.View>

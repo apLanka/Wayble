@@ -9,6 +9,7 @@ import {
   VALUE_SEMANTIC_COLORS,
 } from "@/constants/accessibility-metadata";
 import { spacing } from "@/constants/theme";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import type { AccessibilityAttributeKey } from "@packages/backend/convex/accessibility";
 
@@ -36,7 +37,11 @@ export function AttributeRow({ attributeKey, value, note }: Props) {
       style={styles.container}
       accessible
       accessibilityRole="text"
-      accessibilityLabel={`${meta.label}: ${valueLabel}${note ? `. Note: ${note}` : ""}`}
+      accessibilityLabel={STRINGS.place.attributeLabel(
+        meta.label,
+        valueLabel,
+        note || null,
+      )}
     >
       <View style={styles.row}>
         {/* Emoji icon — always paired with the text label below */}

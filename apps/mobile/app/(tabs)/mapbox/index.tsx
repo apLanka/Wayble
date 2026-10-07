@@ -17,6 +17,7 @@ import { AppText } from "@/components/ui/app-text";
 import { useNearbyPlaces, NearbyPlace } from "@/hooks/use-nearby-places";
 import { useScreenReader } from "@/hooks/use-screen-reader";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { STRINGS } from "@/constants/strings";
 import { spacing } from "@/constants/theme";
 
 // Connect to Mapbox using env var
@@ -241,7 +242,7 @@ export default function MapboxTab() {
       <SearchBar
         value={searchQuery}
         onChangeText={setSearchQuery}
-        placeholder="Search accessible places…"
+        placeholder={STRINGS.map.searchPlaceholder}
         focusOnMount={focusSearchOnMount}
         results={
           searchQuery.trim().length > 0
@@ -310,7 +311,7 @@ export default function MapboxTab() {
                 accessibilityRole="text"
                 style={[styles.emptyText, { color: appTheme.colors.textMuted }]}
               >
-                No places found nearby.
+                {STRINGS.map.emptyNearby}
               </AppText>
             </View>
           ) : (
@@ -377,7 +378,9 @@ export default function MapboxTab() {
               >
                 <View
                   accessible
-                  accessibilityLabel="Your current location"
+                  accessibilityLabel={
+                    STRINGS.map.placeDetail.yourCurrentLocation
+                  }
                   style={{
                     width: 60,
                     height: 60,

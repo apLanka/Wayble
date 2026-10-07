@@ -4,6 +4,7 @@ import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { useVerificationFeed } from "@/hooks/use-verification-feed";
@@ -27,7 +28,7 @@ export function FeedScreen() {
     currentUserId,
   } = useVerificationFeed();
 
-  const title = <Stack.Screen options={{ title: "Nearby activity" }} />;
+  const title = <Stack.Screen options={{ title: STRINGS.feed.title }} />;
 
   if (!hasLocation) {
     const denied = !isLocating && status !== "granted";
@@ -39,16 +40,16 @@ export function FeedScreen() {
             {denied ? (
               <>
                 <AppText variant="title" accessibilityRole="header">
-                  Location needed
+                  {STRINGS.feed.locationNeededTitle}
                 </AppText>
                 <AppText
                   style={[styles.centeredText, { color: colors.textMuted }]}
                 >
-                  Allow location to see verifications happening near you.
+                  {STRINGS.feed.locationNeededBody}
                 </AppText>
                 <TouchTarget
                   accessibilityRole="button"
-                  accessibilityLabel="Allow location access"
+                  accessibilityLabel={STRINGS.feed.allowLocationLabel}
                   onPress={() => void requestPermission()}
                   style={[
                     styles.primaryButton,
@@ -59,7 +60,7 @@ export function FeedScreen() {
                     variant="bodyStrong"
                     style={{ color: colors.onPrimary }}
                   >
-                    Allow location
+                    {STRINGS.feed.allowLocationButton}
                   </AppText>
                 </TouchTarget>
               </>
@@ -69,7 +70,7 @@ export function FeedScreen() {
                 <AppText
                   style={[styles.centeredText, { color: colors.textMuted }]}
                 >
-                  Finding your location…
+                  {STRINGS.feed.finding}
                 </AppText>
               </>
             )}
@@ -87,7 +88,7 @@ export function FeedScreen() {
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={colors.primary} />
             <AppText style={[styles.centeredText, { color: colors.textMuted }]}>
-              Loading nearby activity…
+              {STRINGS.feed.loading}
             </AppText>
           </View>
         </Screen>
@@ -106,13 +107,12 @@ export function FeedScreen() {
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={
             <AppText variant="title" accessibilityRole="header">
-              Nearby verifications
+              {STRINGS.feed.header}
             </AppText>
           }
           ListEmptyComponent={
             <AppText style={{ color: colors.textMuted }}>
-              No verifications near you yet. When someone confirms or disputes a
-              report nearby, it will show up here.
+              {STRINGS.feed.empty}
             </AppText>
           }
           renderItem={({ item }) => (

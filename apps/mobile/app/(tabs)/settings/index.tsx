@@ -8,6 +8,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { useLocationPermission } from "@/hooks/use-location-permission";
@@ -20,12 +21,10 @@ export default function SettingsScreen() {
   const { status } = useLocationPermission();
 
   const needsCount = currentUser?.accessibilityNeeds?.length ?? 0;
-  const needsSummary =
-    currentUser == null
-      ? "Sign in to set your needs"
-      : needsCount === 0
-        ? "Not set yet"
-        : `${needsCount} need${needsCount === 1 ? "" : "s"} selected`;
+  const needsSummary = STRINGS.profile.needsSummary(
+    currentUser != null,
+    needsCount,
+  );
 
   const handleSignOut = async () => {
     await signOut();
@@ -40,17 +39,17 @@ export default function SettingsScreen() {
       >
         <View style={styles.section}>
           <AppText variant="title" accessibilityRole="header">
-            Settings
+            {STRINGS.settings.title}
           </AppText>
           <AppText style={{ color: appTheme.colors.textMuted }}>
-            Manage your account and app preferences.
+            {STRINGS.settings.body}
           </AppText>
         </View>
 
         {/* Account Card */}
         <View
           accessible
-          accessibilityLabel="Account information"
+          accessibilityLabel={STRINGS.settings.account.a11yLabel}
           style={[
             styles.statusCard,
             {
@@ -59,7 +58,7 @@ export default function SettingsScreen() {
             },
           ]}
         >
-          <AppText variant="label">Account</AppText>
+          <AppText variant="label">{STRINGS.settings.account.section}</AppText>
           {currentUser === undefined ? (
             <ActivityIndicator size="small" color={appTheme.colors.primary} />
           ) : currentUser ? (
@@ -78,12 +77,12 @@ export default function SettingsScreen() {
             </View>
           ) : (
             <AppText style={{ color: appTheme.colors.textMuted }}>
-              Not signed in
+              {STRINGS.settings.account.signedOut}
             </AppText>
           )}
 
           <TouchTarget
-            accessibilityLabel="Sign out of your account"
+            accessibilityLabel={STRINGS.profile.signOut.label}
             accessibilityRole="button"
             onPress={handleSignOut}
             style={[
@@ -98,7 +97,7 @@ export default function SettingsScreen() {
               variant="bodyStrong"
               style={{ color: appTheme.colors.danger }}
             >
-              Sign Out
+              {STRINGS.profile.signOut.button}
             </AppText>
           </TouchTarget>
         </View>
@@ -106,8 +105,11 @@ export default function SettingsScreen() {
         {/* Accessibility Needs Card */}
         <TouchTarget
           accessibilityRole="button"
-          accessibilityLabel={`Accessibility needs. ${needsSummary}`}
-          accessibilityHint="Opens the screen where you choose the accessibility features you need"
+          accessibilityLabel={STRINGS.profile.navRowLabel(
+            STRINGS.profile.accessibilityNeedsTitle,
+            needsSummary,
+          )}
+          accessibilityHint={STRINGS.profile.needsLinkHint}
           onPress={() => router.push("/(tabs)/profile/accessibility-needs")}
           style={[
             styles.statusCard,
@@ -119,7 +121,9 @@ export default function SettingsScreen() {
           ]}
         >
           <View style={styles.navCardText}>
-            <AppText variant="label">Accessibility needs</AppText>
+            <AppText variant="label">
+              {STRINGS.profile.accessibilityNeedsTitle}
+            </AppText>
             <AppText style={{ color: appTheme.colors.textMuted }}>
               {needsSummary}
             </AppText>
@@ -128,14 +132,14 @@ export default function SettingsScreen() {
             variant="bodyStrong"
             style={{ color: appTheme.colors.textMuted }}
           >
-            ›
+            {STRINGS.common.chevron}
           </AppText>
         </TouchTarget>
 
         {/* Theme Card */}
         <View
           accessible
-          accessibilityLabel={`Theme: ${appTheme.mode}`}
+          accessibilityLabel={STRINGS.settings.theme.label(appTheme.mode)}
           style={[
             styles.statusCard,
             {
@@ -144,17 +148,21 @@ export default function SettingsScreen() {
             },
           ]}
         >
-          <AppText variant="label">Current theme</AppText>
-          <AppText>{appTheme.mode === "dark" ? "Dark" : "Light"}</AppText>
+          <AppText variant="label">{STRINGS.settings.theme.title}</AppText>
+          <AppText>
+            {appTheme.mode === "dark"
+              ? STRINGS.settings.theme.dark
+              : STRINGS.settings.theme.light}
+          </AppText>
           <AppText style={{ color: appTheme.colors.textMuted }}>
-            Follows your device appearance setting.
+            {STRINGS.settings.theme.body}
           </AppText>
         </View>
 
         {/* Location Card */}
         <View
           accessible
-          accessibilityLabel="Location permissions"
+          accessibilityLabel={STRINGS.settings.location.a11yLabel}
           style={[
             styles.statusCard,
             {
@@ -163,17 +171,13 @@ export default function SettingsScreen() {
             },
           ]}
         >
-          <AppText variant="label">Location</AppText>
+          <AppText variant="label">{STRINGS.settings.location.section}</AppText>
           <AppText>
-            Status:{" "}
-            {status === "granted"
-              ? "Granted"
-              : status === "denied"
-                ? "Denied"
-                : "Undetermined"}
+            {STRINGS.settings.location.statusPrefix}
+            {STRINGS.settings.location.status(status ?? "undetermined")}
           </AppText>
           <TouchTarget
-            accessibilityLabel="Open OS settings for location"
+            accessibilityLabel={STRINGS.settings.location.openOsSettings}
             accessibilityRole="button"
             onPress={() => Linking.openSettings()}
             style={[
@@ -184,14 +188,16 @@ export default function SettingsScreen() {
               },
             ]}
           >
-            <AppText variant="bodyStrong">Open Settings</AppText>
+            <AppText variant="bodyStrong">
+              {STRINGS.permissions.location.openSettings}
+            </AppText>
           </TouchTarget>
         </View>
 
         {/* Developer */}
         <View
           accessible
-          accessibilityLabel="Developer tools"
+          accessibilityLabel={STRINGS.settings.developer.a11yLabel}
           style={[
             styles.statusCard,
             {
@@ -200,14 +206,16 @@ export default function SettingsScreen() {
             },
           ]}
         >
-          <AppText variant="label">Developer</AppText>
+          <AppText variant="label">
+            {STRINGS.settings.developer.section}
+          </AppText>
           <AppText style={{ color: appTheme.colors.textMuted }}>
-            Convex connection health check and debug utilities.
+            {STRINGS.settings.developer.body}
           </AppText>
           <TouchTarget
             accessibilityRole="button"
-            accessibilityLabel="Open debug screen"
-            accessibilityHint="Opens the Convex connection health check"
+            accessibilityLabel={STRINGS.settings.developer.openLabel}
+            accessibilityHint={STRINGS.settings.developer.openHint}
             focusColor={appTheme.colors.onPrimary}
             onPress={() => router.push("/debug")}
             style={[
@@ -219,7 +227,7 @@ export default function SettingsScreen() {
               variant="bodyStrong"
               style={{ color: appTheme.colors.onPrimary }}
             >
-              Open debug screen
+              {STRINGS.settings.developer.openButton}
             </AppText>
           </TouchTarget>
         </View>

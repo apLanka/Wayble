@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -10,12 +11,12 @@ export type FlagReasonKey =
 
 /** Same wording as the reporter's picker in `ReportCardMenu`. */
 export const FLAG_REASON_LABELS: Record<FlagReasonKey, string> = {
-  inaccurate: "Inaccurate",
-  spam: "Spam",
-  abusive: "Abusive",
-  privacy: "Privacy concern",
-  duplicate: "Duplicate",
-  other: "Other",
+  inaccurate: STRINGS.place.reportMenu.reasons.inaccurate,
+  spam: STRINGS.place.reportMenu.reasons.spam,
+  abusive: STRINGS.place.reportMenu.reasons.abusive,
+  privacy: STRINGS.place.reportMenu.reasons.privacy,
+  duplicate: STRINGS.place.reportMenu.reasons.duplicate,
+  other: STRINGS.place.reportMenu.reasons.other,
 };
 
 /** One entry from `moderation.getFlaggedReports`, as this row reads it. */
@@ -45,8 +46,8 @@ export function FlaggedReportRow({ item, onDismiss, onRemove }: Props) {
   const reasons = item.reasons
     .map((reason) => FLAG_REASON_LABELS[reason])
     .join(", ");
-  const count = `${item.flagCount} ${item.flagCount === 1 ? "flag" : "flags"}`;
-  const summary = item.summary ?? "No summary provided";
+  const count = STRINGS.moderator.row.flagCount(item.flagCount);
+  const summary = item.summary ?? STRINGS.moderator.row.noSummary;
 
   return (
     <View
@@ -57,7 +58,12 @@ export function FlaggedReportRow({ item, onDismiss, onRemove }: Props) {
     >
       <View
         accessible
-        accessibilityLabel={`${item.placeName}. ${summary}. Reason: ${reasons}. ${count}.`}
+        accessibilityLabel={STRINGS.moderator.row.summaryLabel(
+          item.placeName,
+          summary,
+          reasons,
+          count,
+        )}
         style={styles.info}
       >
         <View style={styles.header}>
@@ -77,29 +83,31 @@ export function FlaggedReportRow({ item, onDismiss, onRemove }: Props) {
           {summary}
         </AppText>
         <AppText variant="label" style={{ color: colors.textMuted }}>
-          Reason: {reasons}
+          {STRINGS.moderator.row.reason(reasons)}
         </AppText>
       </View>
 
       <View style={styles.actions}>
         <TouchTarget
           accessibilityRole="button"
-          accessibilityLabel={`Dismiss flags on ${item.placeName}`}
+          accessibilityLabel={STRINGS.moderator.row.dismissLabel(
+            item.placeName,
+          )}
           onPress={() => onDismiss(item)}
           style={[styles.button, { borderColor: colors.primary }]}
         >
           <AppText variant="bodyStrong" style={{ color: colors.primary }}>
-            Dismiss
+            {STRINGS.moderator.row.dismiss}
           </AppText>
         </TouchTarget>
         <TouchTarget
           accessibilityRole="button"
-          accessibilityLabel={`Remove report at ${item.placeName}`}
+          accessibilityLabel={STRINGS.moderator.row.removeLabel(item.placeName)}
           onPress={() => onRemove(item)}
           style={[styles.button, { borderColor: colors.danger }]}
         >
           <AppText variant="bodyStrong" style={{ color: colors.danger }}>
-            Remove
+            {STRINGS.moderator.row.remove}
           </AppText>
         </TouchTarget>
       </View>
