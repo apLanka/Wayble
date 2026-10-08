@@ -1,5 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { MAX_SUMMARY_LENGTH } from "@packages/backend/convex/reportLimits";
+import {
+  MAX_CAPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+} from "@packages/backend/convex/reportLimits";
 import {
   classifyReportError,
   reportErrorMessage,
@@ -20,6 +23,14 @@ const SERVER_PREFIXES = [
   "Note too long:",
   "Observation time is outside the allowed range",
   "Duplicate report:",
+  "Too many photos:",
+  "Photo description is required",
+  "Photo description too long:",
+  "Unknown photo upload",
+  "Photo too large:",
+  "Unsupported photo type:",
+  "Photo already attached to another report",
+  "Photo upload failed:",
 ];
 
 const KINDS = [
@@ -27,6 +38,9 @@ const KINDS = [
   "unauthenticated",
   "summaryTooLong",
   "observationTime",
+  "photoCaption",
+  "photoRejected",
+  "uploadFailed",
   "generic",
 ] as const satisfies readonly ReportErrorKind[];
 
@@ -75,6 +89,43 @@ describe("classifyReportError", () => {
         new Error("Observation time is outside the allowed range"),
       ),
     ).toBe("observationTime");
+  });
+
+  test("maps both caption rejections to photoCaption", () => {
+    expect(
+      classifyReportError(new Error("Photo description is required")),
+    ).toBe("photoCaption");
+    expect(
+      classifyReportError(
+        new Error("Photo description too long: 281 characters, maximum 280"),
+      ),
+    ).toBe("photoCaption");
+  });
+
+  test("maps every stored-file rejection to photoRejected", () => {
+    for (const message of [
+      "Photo too large: 5242881 bytes, maximum 5242880",
+      "Unsupported photo type: image/heic",
+      "Unknown photo upload",
+      "Photo already attached to another report",
+      "Too many photos: maximum 1",
+    ]) {
+      expect(classifyReportError(new Error(message))).toBe("photoRejected");
+    }
+  });
+
+  test("maps a failed transfer to uploadFailed", () => {
+    expect(
+      classifyReportError(new Error("Photo upload failed: HTTP 413")),
+    ).toBe("uploadFailed");
+  });
+
+  test("maps a signed-out upload URL request to unauthenticated", () => {
+    expect(
+      classifyReportError(
+        new Error("Unauthenticated: must be logged in to upload a photo"),
+      ),
+    ).toBe("unauthenticated");
   });
 
   test("falls back to generic for an unrecognised message", () => {
@@ -147,6 +198,16 @@ describe("reportErrorMessage", () => {
     // telling the user to check their connection sends them down a dead end
     // when the real cause is something else entirely.
     expect(reportErrorMessage("generic")).not.toMatch(/connection/i);
+  });
+
+  test("interpolates the real caption cap", () => {
+    expect(reportErrorMessage("photoCaption")).toContain(
+      String(MAX_CAPTION_LENGTH),
+    );
+  });
+
+  test("the upload message names the connection", () => {
+    expect(reportErrorMessage("uploadFailed")).toMatch(/connection/i);
   });
 
   test("gives the duplicate case a next action", () => {

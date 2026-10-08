@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
@@ -40,6 +41,8 @@ export type PlaceReport = {
   confirmCount: number;
   disputeCount: number;
   myVerdict: Verdict | null;
+  /** US-09. Already resolved to URLs by the query; empty when there is none. */
+  photos: { url: string; caption: string }[];
 };
 
 type Props = {
@@ -104,6 +107,33 @@ export function ReportCard({ report, currentUserId, onVote }: Props) {
 
       {report.summary ? (
         <AppText style={{ color: colors.text }}>{report.summary}</AppText>
+      ) : null}
+
+      {/* Labelled with the caption alone, which is what the author wrote to
+          describe it; the image role already tells a screen reader it is a
+          photo. The query never returns a photo without a caption, so there is
+          no unlabelled case to handle here. */}
+      {report.photos.length > 0 ? (
+        <View style={styles.photos}>
+          {report.photos.map((photo) => (
+            <Image
+              key={photo.url}
+              source={{ uri: photo.url }}
+              style={[
+                styles.thumbnail,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.surfaceElevated,
+                },
+              ]}
+              contentFit="cover"
+              transition={150}
+              accessible
+              accessibilityRole="image"
+              accessibilityLabel={photo.caption}
+            />
+          ))}
+        </View>
       ) : null}
 
       {report.attributes.length > 0 ? (
@@ -211,6 +241,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
+  },
+  photos: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
+  },
+  thumbnail: {
+    width: 120,
+    height: 90,
+    borderRadius: radii.sm,
+    borderWidth: 1,
   },
   chips: {
     flexDirection: "row",

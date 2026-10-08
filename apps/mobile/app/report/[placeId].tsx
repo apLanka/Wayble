@@ -36,6 +36,7 @@ import {
   classifyReportError,
   reportErrorMessage,
 } from "@/components/report/report-errors";
+import { uploadPhoto } from "@/components/report/upload-photo";
 import { radii, spacing } from "@/constants/theme";
 import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
@@ -61,6 +62,9 @@ export default function ReportScreen() {
   const [draft, dispatch] = useReducer(reportReducer, emptyDraft);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // A sub-phase of `isSubmitting`, only so the button can say which half of
+  // a slow submit the user is waiting on.
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const placeIdArg = placeId as Id<"places"> | undefined;
   const currentUser = useQuery(api.users.currentUser);
@@ -122,6 +126,8 @@ export default function ReportScreen() {
     );
   });
 
+  const generateUploadUrl = useMutation(api.reports.generateUploadUrl);
+
   const goTo = useCallback((step: number) => {
     // Any step change ends the previous submit attempt, so its banner must
     // not follow the user to the next step still reading as a live failure.
@@ -161,6 +167,29 @@ export default function ReportScreen() {
     setError(null);
     setIsSubmitting(true);
     try {
+      // US-09. Upload first: `submitReport` needs the storageId, and a failed
+      // upload must stop before any report exists. The reverse failure, an
+      // upload followed by a rejected submit, leaves an unreferenced file in
+      // storage; that is accepted and left for a cleanup job, because the
+      // client cannot know about the server's duplicate guard in advance.
+      // A retry uploads again rather than reusing the earlier file, which
+      // keeps this path free of state that outlives one attempt.
+      let evidence:
+        { storageId: Id<"_storage">; caption: string }[] | undefined;
+      if (draft.photo) {
+        setIsUploadingPhoto(true);
+        // The button's label stays "Submit report" for a screen reader; only
+        // its visible text changes, so the wait has to be said out loud.
+        AccessibilityInfo.announceForAccessibility("Uploading photo.");
+        try {
+          const storageId = await uploadPhoto(draft.photo, () =>
+            generateUploadUrl({}),
+          );
+          evidence = [{ storageId, caption: draft.photo.caption.trim() }];
+        } finally {
+          setIsUploadingPhoto(false);
+        }
+      }
       await submitReport({
         placeId: placeIdArg,
         attributes: selectedAttributes(draft),
@@ -169,6 +198,7 @@ export default function ReportScreen() {
         summary:
           draft.summary.trim().length > 0 ? draft.summary.trim() : undefined,
         observedAt: Date.now(),
+        evidence,
       });
       // The place screen, not `router.back()`: this route is registered in
       // the root Stack and so can be opened by deep link, where there is no
@@ -197,7 +227,14 @@ export default function ReportScreen() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [draft, isSubmitting, placeIdArg, router, submitReport]);
+  }, [
+    draft,
+    generateUploadUrl,
+    isSubmitting,
+    placeIdArg,
+    router,
+    submitReport,
+  ]);
 
   /**
    * `goToStep` bypasses the `canAdvance` gate, so a programmatic step
@@ -335,13 +372,18 @@ export default function ReportScreen() {
           ) : null}
 
           {step === 2 ? (
-            <NotesStep draft={safeDraft} dispatch={dispatch} />
+            <NotesStep
+              draft={safeDraft}
+              dispatch={dispatch}
+              placeName={place?.name}
+            />
           ) : null}
 
           {step === 3 ? (
             <ConfirmStep
               draft={safeDraft}
               isSubmitting={isSubmitting}
+              isUploadingPhoto={isUploadingPhoto}
               onSubmit={() => void handleSubmit()}
             />
           ) : null}

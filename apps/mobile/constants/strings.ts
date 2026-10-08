@@ -332,6 +332,14 @@ export const STRINGS = {
         `Keep your summary to ${max} characters or fewer.`,
       observationTime:
         "Your device clock looks wrong. Turn on automatic date and time, then try again.",
+      photoCaption: (max: number) =>
+        `Describe your photo in ${max} characters or fewer.`,
+      photoRejected:
+        "We couldn't use that photo. Go back, remove it or choose a different one, then try again.",
+      // Unlike `generic`, the cause here is known to be the transfer, so
+      // naming the connection is a real lead rather than a guess.
+      uploadFailed:
+        "We couldn't upload your photo. Check your connection and try again.",
       generic: "We couldn't submit your report. Please try again.",
     },
 
@@ -898,7 +906,7 @@ export const STRINGS = {
 
     notes: {
       title: "Anything to add?",
-      body: "One optional sentence about the whole visit. You can skip this.",
+      body: "One optional sentence and photo about the whole visit. You can skip both.",
       label: "Your summary",
       titleLabel: "Your summary (optional)",
       placeholder:
@@ -909,12 +917,50 @@ export const STRINGS = {
         `${remaining} of ${max} characters left`,
     },
 
+    /** US-09 — the optional photo on the notes step. */
+    photo: {
+      title: "Add a photo (optional)",
+      body: "A photo of the entrance, lift or bathroom helps the next person judge it for themselves.",
+      takePhoto: "Take photo",
+      takePhotoHint: "Opens the camera to photograph this place",
+      chooseFromLibrary: "Choose from library",
+      chooseFromLibraryHint: "Opens your photo library to pick a photo",
+      preparing: "Preparing photo…",
+      added: "Photo added. Describe what it shows below.",
+      removed: "Photo removed.",
+      remove: "Remove photo",
+      removeHint: "Takes the photo off this report. You can add another.",
+      noCaptionLabel: "Attached photo, no description yet",
+      captionTitle: "Describe the photo (required)",
+      captionLabel: "Describe the photo",
+      captionHint: "Required. Read aloud to people using a screen reader.",
+      captionPlaceholder:
+        "For example: ramp to the side entrance, no handrail.",
+      captionMissing: "Add a short description of the photo to continue.",
+      cameraNeeded: "Wayble needs camera access to take a photo.",
+      cameraBlocked:
+        "Camera access is turned off for Wayble. You can turn it on in Settings.",
+      loadFailed: "We couldn't load that photo. Please try again.",
+      openSettings: "Open Settings",
+      openSettingsHint:
+        "Opens Wayble's settings, where you can allow camera access",
+      unreadable: "That photo couldn't be read. Try a different one.",
+      tooLarge: (maxMb: number) =>
+        `That photo is over ${maxMb} MB. Try a different one.`,
+      unsupportedType:
+        "That file type isn't supported. Use a JPEG, PNG or WebP photo.",
+      defaultCaption: (placeName: string) => `Photo taken at ${placeName}`,
+      defaultCaptionNoPlace: "Photo taken at this place",
+      confirmTitle: "Your photo",
+    },
+
     confirm: {
       title: "Check your report",
       noteTitle: "Your note",
       noteLabel: "Your summary",
       submit: "Submit report",
       submitting: "Submitting…",
+      uploadingPhoto: "Uploading photo…",
       submitHint: "Saves your accessibility report for this place.",
       summaryLabel: (summary: string): string => `Your note: ${summary}`,
     },

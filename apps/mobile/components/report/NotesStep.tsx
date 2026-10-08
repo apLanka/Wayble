@@ -5,21 +5,25 @@ import { radii, spacing } from "@/constants/theme";
 import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { MAX_SUMMARY_LENGTH } from "@packages/backend/convex/reportLimits";
+import { PhotoEvidencePicker } from "./PhotoEvidencePicker";
 import type { DraftAction, ReportDraft } from "./report-draft";
 
 type Props = {
   draft: ReportDraft;
   dispatch: (action: DraftAction) => void;
+  /** Seeds a new photo's default caption. */
+  placeName: string | undefined;
 };
 
 /**
- * Step 3 of the report wizard: one optional sentence about the whole visit.
+ * Step 3 of the report wizard: one optional sentence about the whole visit,
+ * and an optional photo (US-09).
  *
- * The per-attribute notes were captured in step 2. This is the only free-text
- * moment in the wizard, which keeps typing to a single place for screen
- * reader and switch-control users.
+ * The per-attribute notes were captured in step 2. Apart from the photo's
+ * caption, this is the only free-text moment in the wizard, which keeps typing
+ * to a single place for screen reader and switch-control users.
  */
-export function NotesStep({ draft, dispatch }: Props) {
+export function NotesStep({ draft, dispatch, placeName }: Props) {
   const { appTheme } = useAppTheme();
   const { colors } = appTheme;
   // `onChangeText` is the writer; `maxLength` below is the clamp. Nothing
@@ -83,6 +87,12 @@ export function NotesStep({ draft, dispatch }: Props) {
           {STRINGS.report.notes.charactersLeft(remaining, MAX_SUMMARY_LENGTH)}
         </AppText>
       </View>
+
+      <PhotoEvidencePicker
+        photo={draft.photo}
+        placeName={placeName}
+        dispatch={dispatch}
+      />
     </View>
   );
 }
