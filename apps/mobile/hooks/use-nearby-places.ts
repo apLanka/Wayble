@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@packages/backend/convex/_generated/api";
+import type { AccessibilityAttribute } from "@packages/backend/convex/accessibility";
 import { useLocationPermission } from "./use-location-permission";
 import type { Category } from "@/components/map/CategoryFilter";
+import { rankPlaces } from "@/utils/rank-places";
 
 // Define the type for what nearest() actually returns based on the query.
 export type NearbyPlace = {
@@ -16,6 +18,8 @@ export type NearbyPlace = {
     "wheelchair" | "elevator" | "bathroom" | "multi"
   )[];
   distance?: number;
+  /** US-16: current attributes, aggregated server-side by `nearest`/`search`. */
+  attributes: AccessibilityAttribute[];
 };
 
 export function useNearbyPlaces() {
@@ -23,6 +27,9 @@ export function useNearbyPlaces() {
   const [searchQuery, setSearchQuery] = useState("");
   const { location, status, isLoading, requestPermission, refreshLocation } =
     useLocationPermission();
+  // US-16: the needs to rank against. Signed out or not set → no ranking.
+  const currentUser = useQuery(api.users.currentUser);
+  const needs = currentUser?.accessibilityNeeds;
 
   // 2. Fetch nearest places when we have a location
   const point = location
@@ -116,6 +123,14 @@ export function useNearbyPlaces() {
     return new Set(filtered.map((l) => l._id));
   }, [filtered]);
 
+  // US-16: ranked copies for lists. `filtered` and `locations` keep their
+  // order for the map, whose pins have none; only list views read these.
+  const ranked = useMemo(() => rankPlaces(filtered, needs), [filtered, needs]);
+  const rankedLocations = useMemo(
+    () => (locations ? rankPlaces(locations, needs) : undefined),
+    [locations, needs],
+  );
+
   return {
     location,
     status,
@@ -124,6 +139,8 @@ export function useNearbyPlaces() {
     refreshLocation,
     locations,
     filtered,
+    ranked,
+    rankedLocations,
     highlightedIds,
     activeCategories,
     setActiveCategories,

@@ -33,12 +33,22 @@ export default function HomeScreen() {
   const currentUser = useQuery(api.users.currentUser);
   const [refreshing, setRefreshing] = useState(false);
 
-  const { status, isLoading, requestPermission, refreshLocation, locations } =
-    useNearbyPlaces();
+  const {
+    status,
+    isLoading,
+    requestPermission,
+    refreshLocation,
+    locations,
+    rankedLocations,
+  } = useNearbyPlaces();
 
+  // US-16: the best matches among nearby places, not just the five closest.
+  // With no needs set, `rankedLocations` keeps distance order, so this is the
+  // five closest exactly as before.
   const nearbyPreview = useMemo(
-    () => (locations ? locations.slice(0, NEARBY_PREVIEW_LIMIT) : []),
-    [locations],
+    () =>
+      rankedLocations ? rankedLocations.slice(0, NEARBY_PREVIEW_LIMIT) : [],
+    [rankedLocations],
   );
 
   const isNearbyLoading =

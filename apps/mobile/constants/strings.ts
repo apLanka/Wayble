@@ -551,6 +551,31 @@ export const STRINGS = {
       distance: string | null,
     ): string => `${name}, ${category}${distance ? `, ${distance} away` : ""}`,
 
+    placeRowHint: "Opens this place's accessibility details",
+
+    /**
+     * US-16 — why a result ranked where it did. `short` is the chip on the
+     * row; the `lead*` sentences make up its accessibility label.
+     */
+    match: {
+      rankedByNeeds: "Ranked by your needs.",
+      leadMet: "Meets",
+      leadPartial: "Partly meets",
+      leadUnmet: "Does not have",
+      leadUnknown: "No information on",
+      leadNotApplicable: "Not applicable here",
+      sentence: (lead: string, labels: string[]): string =>
+        `${lead}: ${labels.join(", ")}.`,
+      noneApply: "Your needs don't apply here",
+      noInfo: "No info on your needs",
+      meetsOne: "Meets your need",
+      meetsAll: (n: number) => `Meets all ${n} needs`,
+      metOf: (met: number, counted: number) => `${met} of ${counted} needs met`,
+      partly: (n: number) => `, ${n} partly`,
+      missingOne: (label: string) => ` · No ${label}`,
+      missingMany: (n: number) => ` · ${n} missing`,
+    },
+
     /** The same idea for a search-dropdown row, which also lists features. */
     searchResultLabel: (
       name: string,

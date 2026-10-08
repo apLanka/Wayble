@@ -14,6 +14,7 @@ import { PlaceListItem } from "@/components/map/PlaceListItem";
 import { ViewModeToggle } from "@/components/map/ViewModeToggle";
 import { SearchBar } from "@/components/map/SearchBar";
 import { AppText } from "@/components/ui/app-text";
+import { matchExplanation } from "@/utils/rank-places";
 
 import { useNearbyPlaces, NearbyPlace } from "@/hooks/use-nearby-places";
 import { useScreenReader } from "@/hooks/use-screen-reader";
@@ -49,6 +50,7 @@ export default function MapboxTab() {
     refreshLocation,
     locations,
     filtered,
+    ranked,
     highlightedIds,
     activeCategories,
     setActiveCategories,
@@ -317,14 +319,17 @@ export default function MapboxTab() {
               </AppText>
             </View>
           ) : (
+            // `ranked`, not `filtered`: the same places, ordered by how well
+            // they meet the user's needs (US-16). The map keeps `filtered`.
             <FlatList
-              data={filtered}
+              data={ranked}
               keyExtractor={(item) => item._id}
               renderItem={({ item }) => (
                 <PlaceListItem
                   name={item.name}
                   category={item.category}
                   distance={item.distance}
+                  matchExplanation={matchExplanation(item.match)}
                   onPress={() => handlePlacePress(item)}
                 />
               )}

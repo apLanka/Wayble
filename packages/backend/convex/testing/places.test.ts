@@ -135,6 +135,115 @@ describe("places.search and places.nearest", () => {
   });
 });
 
+describe("US-16 attributes on nearest and search", () => {
+  async function seedPlaceWithReports(t: ReturnType<typeof setup>) {
+    const userId = await seedUser(t);
+    const placeId = await t
+      .withIdentity({ subject: userId })
+      .mutation(api.places.create, {
+        name: "Ranked Library",
+        category: "education",
+        address: "1 Rank St",
+        location: { latitude: 10, longitude: 10 },
+      });
+    await t.run(async (ctx) => {
+      const base = {
+        placeId,
+        authorId: userId,
+        taxonomyVersion: 1 as const,
+        evidence: [],
+        updatedAt: 1,
+      };
+      await ctx.db.insert("reports", {
+        ...base,
+        attributes: [
+          { key: "mobility.elevator", value: "no" },
+          { key: "mobility.wide_entrance", value: "yes" },
+        ],
+        observedAt: 100,
+        status: "active",
+      });
+      // Newer, so it wins for the elevator.
+      await ctx.db.insert("reports", {
+        ...base,
+        attributes: [{ key: "mobility.elevator", value: "yes" }],
+        observedAt: 200,
+        status: "active",
+      });
+      // Newest of all, but not active, so it must not count.
+      await ctx.db.insert("reports", {
+        ...base,
+        attributes: [{ key: "vision.braille_signage", value: "yes" }],
+        observedAt: 300,
+        status: "removed",
+      });
+    });
+    return placeId;
+  }
+
+  const expected = [
+    { key: "mobility.elevator", value: "yes" },
+    { key: "mobility.wide_entrance", value: "yes" },
+  ];
+
+  test("nearest returns each place's aggregated attributes", async () => {
+    const t = setup();
+    await seedPlaceWithReports(t);
+
+    const [place] = await t.query(api.places.nearest, {
+      point: { latitude: 10, longitude: 10 },
+      limit: 1,
+    });
+
+    expect(place?.attributes).toHaveLength(2);
+    expect(place?.attributes).toEqual(expect.arrayContaining(expected));
+    expect(place?.distance).toBeDefined();
+  });
+
+  test("search returns each place's aggregated attributes", async () => {
+    const t = setup();
+    await seedPlaceWithReports(t);
+
+    const [place] = await t.query(api.places.search, { query: "Ranked" });
+
+    expect(place?.attributes).toHaveLength(2);
+    expect(place?.attributes).toEqual(expect.arrayContaining(expected));
+  });
+
+  test("agrees with getPlace for the same place", async () => {
+    const t = setup();
+    const placeId = await seedPlaceWithReports(t);
+
+    const [fromNearest] = await t.query(api.places.nearest, {
+      point: { latitude: 10, longitude: 10 },
+      limit: 1,
+    });
+    const detail = await t.query(api.places.getPlace, { placeId });
+
+    expect(fromNearest?.attributes).toEqual(detail?.attributes);
+  });
+
+  test("a place with no reports gets an empty list", async () => {
+    const t = setup();
+    const userId = await seedUser(t);
+    await t.withIdentity({ subject: userId }).mutation(api.places.create, {
+      name: "Unreported Cafe",
+      category: "food_and_drink",
+      address: "2 Rank St",
+      location: { latitude: 10, longitude: 10 },
+    });
+
+    const [near] = await t.query(api.places.nearest, {
+      point: { latitude: 10, longitude: 10 },
+      limit: 1,
+    });
+    const [found] = await t.query(api.places.search, { query: "Unreported" });
+
+    expect(near?.attributes).toEqual([]);
+    expect(found?.attributes).toEqual([]);
+  });
+});
+
 describe("places.create and places.update auth & validations", () => {
   test("create rejects unauthenticated callers", async () => {
     const t = setup();
