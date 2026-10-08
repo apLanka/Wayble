@@ -4,6 +4,7 @@ import { View, StyleSheet } from "react-native";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
 import { spacing } from "@/constants/theme";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
 type Props = {
@@ -22,7 +23,7 @@ export function NoDataPrompt({ onContribute }: Props) {
       style={[styles.container, { backgroundColor: appTheme.colors.surface }]}
       accessible
       accessibilityRole="text"
-      accessibilityLabel="No accessibility data available yet. Be the first to contribute."
+      accessibilityLabel={STRINGS.place.noData.label}
     >
       {/* Illustration area */}
       <View
@@ -39,22 +40,21 @@ export function NoDataPrompt({ onContribute }: Props) {
         variant="bodyStrong"
         style={[styles.heading, { color: appTheme.colors.text }]}
       >
-        No accessibility data yet
+        {STRINGS.place.noData.title}
       </AppText>
 
       {/* Description */}
       <AppText
         style={[styles.description, { color: appTheme.colors.textMuted }]}
       >
-        Be the first to contribute! Share what you know about this place's
-        accessibility features to help others.
+        {STRINGS.place.noData.body}
       </AppText>
 
       {/* CTA button */}
       <TouchTarget
         accessibilityRole="button"
-        accessibilityLabel="Contribute accessibility info"
-        accessibilityHint="Opens the accessibility report form for this place"
+        accessibilityLabel={STRINGS.place.noData.buttonLabel}
+        accessibilityHint={STRINGS.place.noData.buttonHint}
         onPress={onContribute}
         style={[styles.ctaButton, { backgroundColor: appTheme.colors.primary }]}
       >
@@ -62,7 +62,7 @@ export function NoDataPrompt({ onContribute }: Props) {
           variant="bodyStrong"
           style={{ color: appTheme.colors.onPrimary }}
         >
-          Contribute Accessibility Info
+          {STRINGS.place.noData.button}
         </AppText>
       </TouchTarget>
     </View>

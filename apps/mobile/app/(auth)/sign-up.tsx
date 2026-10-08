@@ -14,6 +14,7 @@ import {
 import { AppText } from "@/components/ui/app-text";
 import { Screen } from "@/components/ui/screen";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -45,28 +46,28 @@ export default function SignUpScreen() {
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
-      setEmailError("Email address is required.");
+      setEmailError(STRINGS.errors.auth.emailRequired);
       isValid = false;
     } else if (!EMAIL_REGEX.test(trimmedEmail)) {
-      setEmailError("Please enter a valid email address.");
+      setEmailError(STRINGS.errors.auth.emailInvalid);
       isValid = false;
     }
 
     if (!password) {
-      setPasswordError("Password is required.");
+      setPasswordError(STRINGS.errors.auth.passwordRequired);
       isValid = false;
     } else if (password.length < MIN_PASSWORD_LENGTH) {
       setPasswordError(
-        `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+        STRINGS.errors.auth.passwordTooShort(MIN_PASSWORD_LENGTH),
       );
       isValid = false;
     }
 
     if (!confirmPassword) {
-      setConfirmPasswordError("Please confirm your password.");
+      setConfirmPasswordError(STRINGS.errors.auth.confirmPasswordRequired);
       isValid = false;
     } else if (password !== confirmPassword) {
-      setConfirmPasswordError("Passwords do not match.");
+      setConfirmPasswordError(STRINGS.errors.auth.passwordsDoNotMatch);
       isValid = false;
     }
 
@@ -96,13 +97,9 @@ export default function SignUpScreen() {
         message.toLowerCase().includes("account already exists") ||
         message.toLowerCase().includes("email already in use")
       ) {
-        setServerError(
-          "An account with this email already exists. Please sign in instead.",
-        );
+        setServerError(STRINGS.errors.auth.emailAlreadyInUse);
       } else {
-        setServerError(
-          message || "Registration could not be completed. Please try again.",
-        );
+        setServerError(message || STRINGS.errors.auth.signUpUnexpected);
       }
     } finally {
       setIsLoading(false);
@@ -122,13 +119,13 @@ export default function SignUpScreen() {
           {/* Header */}
           <View style={styles.header}>
             <AppText variant="display" style={{ color: colors.primary }}>
-              Create Account
+              {STRINGS.common.createAccountCapitalised}
             </AppText>
             <AppText
               variant="body"
               style={[styles.subtitle, { color: colors.textMuted }]}
             >
-              Join Wayble to map and verify accessibility worldwide.
+              {STRINGS.auth.signUp.subtitle}
             </AppText>
           </View>
 
@@ -159,16 +156,16 @@ export default function SignUpScreen() {
                 style={[styles.label, { color: colors.text }]}
                 nativeID="signup-email-label"
               >
-                Email
+                {STRINGS.auth.fieldLabels.email}
               </AppText>
               <TextInput
-                accessibilityLabel="Email"
+                accessibilityLabel={STRINGS.auth.fieldLabels.email}
                 accessibilityLabelledBy="signup-email-label"
                 autoCapitalize="none"
                 autoComplete="email"
                 autoCorrect={false}
                 keyboardType="email-address"
-                placeholder="name@example.com"
+                placeholder={STRINGS.auth.signIn.emailPlaceholder}
                 placeholderTextColor={colors.textMuted}
                 style={[
                   styles.input,
@@ -202,16 +199,16 @@ export default function SignUpScreen() {
                 style={[styles.label, { color: colors.text }]}
                 nativeID="signup-password-label"
               >
-                Password
+                {STRINGS.auth.fieldLabels.password}
               </AppText>
               <TextInput
-                accessibilityLabel="Password"
+                accessibilityLabel={STRINGS.auth.fieldLabels.password}
                 accessibilityLabelledBy="signup-password-label"
                 autoCapitalize="none"
                 autoComplete="new-password"
                 autoCorrect={false}
                 secureTextEntry
-                placeholder="Minimum 8 characters"
+                placeholder={STRINGS.auth.signUp.passwordPlaceholder}
                 placeholderTextColor={colors.textMuted}
                 style={[
                   styles.input,
@@ -245,16 +242,16 @@ export default function SignUpScreen() {
                 style={[styles.label, { color: colors.text }]}
                 nativeID="signup-confirm-password-label"
               >
-                Confirm Password
+                {STRINGS.auth.fieldLabels.confirmPassword}
               </AppText>
               <TextInput
-                accessibilityLabel="Confirm Password"
+                accessibilityLabel={STRINGS.auth.fieldLabels.confirmPassword}
                 accessibilityLabelledBy="signup-confirm-password-label"
                 autoCapitalize="none"
                 autoComplete="new-password"
                 autoCorrect={false}
                 secureTextEntry
-                placeholder="Re-enter your password"
+                placeholder={STRINGS.auth.signUp.confirmPasswordPlaceholder}
                 placeholderTextColor={colors.textMuted}
                 style={[
                   styles.input,
@@ -285,7 +282,7 @@ export default function SignUpScreen() {
 
             {/* Submit Button */}
             <TouchTarget
-              accessibilityLabel="Create account"
+              accessibilityLabel={STRINGS.common.createAccount}
               accessibilityRole="button"
               disabled={isLoading}
               onPress={handleSignUp}
@@ -304,7 +301,7 @@ export default function SignUpScreen() {
                   variant="bodyStrong"
                   style={{ color: colors.onPrimary }}
                 >
-                  Create Account
+                  {STRINGS.common.createAccountCapitalised}
                 </AppText>
               )}
             </TouchTarget>
@@ -313,11 +310,11 @@ export default function SignUpScreen() {
           {/* Sign In Link */}
           <View style={styles.footer}>
             <AppText variant="body" style={{ color: colors.textMuted }}>
-              Already have an account?{" "}
+              {STRINGS.auth.signUp.haveAccount}
             </AppText>
             <Link href="/sign-in" asChild>
               <TouchTarget
-                accessibilityLabel="Go to sign in screen"
+                accessibilityLabel={STRINGS.auth.signUp.toSignInLabel}
                 accessibilityRole="link"
                 style={styles.linkTouchTarget}
               >
@@ -328,7 +325,7 @@ export default function SignUpScreen() {
                     textDecorationLine: "underline",
                   }}
                 >
-                  Sign in
+                  {STRINGS.common.signInLower}
                 </AppText>
               </TouchTarget>
             </Link>

@@ -22,6 +22,7 @@ import {
   ATTRIBUTE_METADATA,
   CATEGORY_DISPLAY_ORDER,
 } from "@/constants/accessibility-metadata";
+import { STRINGS } from "@/constants/strings";
 import { radii, spacing } from "@/constants/theme";
 import { useAppTheme } from "@/hooks/use-app-theme";
 
@@ -59,7 +60,7 @@ export default function AccessibilityNeedsScreen() {
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.primary} />
           <AppText style={{ color: colors.textMuted }}>
-            Loading your needs…
+            {STRINGS.profile.needs.loading}
           </AppText>
         </View>
       </Screen>
@@ -71,11 +72,10 @@ export default function AccessibilityNeedsScreen() {
       <Screen>
         <View style={styles.centered}>
           <AppText variant="bodyStrong" accessibilityRole="header">
-            Sign in to set your needs
+            {STRINGS.profile.needs.signInToSet}
           </AppText>
           <AppText style={[styles.centeredText, { color: colors.textMuted }]}>
-            Your accessibility needs are saved to your account so the app can
-            highlight places that match them.
+            {STRINGS.profile.needs.signedInBody}
           </AppText>
         </View>
       </Screen>
@@ -95,10 +95,8 @@ export default function AccessibilityNeedsScreen() {
     try {
       await updateProfile({ accessibilityNeeds });
     } catch {
-      setError("Couldn't save that change. Check your connection.");
-      AccessibilityInfo.announceForAccessibility(
-        "Couldn't save that change. Check your connection.",
-      );
+      setError(STRINGS.errors.saveFailed);
+      AccessibilityInfo.announceForAccessibility(STRINGS.errors.saveFailed);
     }
   };
 
@@ -118,7 +116,7 @@ export default function AccessibilityNeedsScreen() {
 
   const handleClearAll = () => {
     AccessibilityInfo.announceForAccessibility(
-      "All accessibility needs cleared.",
+      STRINGS.announcements.needsCleared,
     );
     void persist(new Set());
   };
@@ -131,13 +129,12 @@ export default function AccessibilityNeedsScreen() {
       >
         <View style={styles.intro}>
           <AppText style={{ color: colors.textMuted }}>
-            Choose the features you need. We use them to highlight and rank
-            places that work for you. Changes save automatically.
+            {STRINGS.profile.needs.editorBody}
           </AppText>
           <AppText variant="bodyStrong" accessibilityRole="text">
             {selected.size === 0
-              ? "No needs selected yet"
-              : `${selected.size} need${selected.size === 1 ? "" : "s"} selected`}
+              ? STRINGS.profile.needs.noneSelected
+              : STRINGS.profile.needsCountLabel(selected.size)}
           </AppText>
         </View>
 
@@ -168,7 +165,7 @@ export default function AccessibilityNeedsScreen() {
 
         <TouchTarget
           accessibilityRole="button"
-          accessibilityLabel="Clear all accessibility needs"
+          accessibilityLabel={STRINGS.profile.needs.clearAllLabel}
           accessibilityState={{ disabled: selected.size === 0 }}
           disabled={selected.size === 0}
           onPress={handleClearAll}
@@ -186,7 +183,7 @@ export default function AccessibilityNeedsScreen() {
               color: selected.size === 0 ? colors.textMuted : colors.danger,
             }}
           >
-            Clear all
+            {STRINGS.profile.needs.clearAll}
           </AppText>
         </TouchTarget>
       </ScrollView>

@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import ConvexClientProvider from "@/components/providers/ConvexClientProvider";
+import { STRINGS } from "@/constants/strings";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { useNotificationRouter } from "@/hooks/use-notification-router";
 
@@ -43,7 +44,10 @@ export default function RootLayout() {
             <Stack.Screen name="onboarding" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="debug" options={{ title: "Debug" }} />
+            <Stack.Screen
+              name="debug"
+              options={{ title: STRINGS.navigation.titles.debug }}
+            />
             {/* Screens are keyed by route *node* name, not href, and a
                 directory route's node name keeps its `index` segment (see
                 `getReactNavigationConfig.js`). This screen moved from
@@ -52,7 +56,7 @@ export default function RootLayout() {
                 The href is still `/place/[id]`. */}
             <Stack.Screen
               name="place/[id]/index"
-              options={{ title: "Place Details" }}
+              options={{ title: STRINGS.navigation.titles.placeDetails }}
             />
             <Stack.Screen
               name="add-place"
@@ -60,7 +64,7 @@ export default function RootLayout() {
             />
             <Stack.Screen
               name="report/[placeId]"
-              options={{ title: "Report accessibility" }}
+              options={{ title: STRINGS.navigation.titles.reportAccessibility }}
             />
           </Stack>
         </ThemeProvider>

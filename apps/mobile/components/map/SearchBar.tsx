@@ -9,6 +9,7 @@ import {
   Keyboard,
 } from "react-native";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { STRINGS } from "@/constants/strings";
 import { spacing, radii } from "@/constants/theme";
 import { AppText } from "@/components/ui/app-text";
 import type { NearbyPlace } from "@/hooks/use-nearby-places";
@@ -25,7 +26,7 @@ interface SearchBarProps {
 export function SearchBar({
   value,
   onChangeText,
-  placeholder = "Search places...",
+  placeholder = STRINGS.map.searchPlaceholderShort,
   results,
   onSelectResult,
   focusOnMount = false,
@@ -64,7 +65,7 @@ export function SearchBar({
           returnKeyType="search"
           clearButtonMode="while-editing"
           accessibilityRole="search"
-          accessibilityLabel="Search nearby places"
+          accessibilityLabel={STRINGS.map.search.inputLabel}
         />
         {value.length > 0 && Platform.OS === "android" && (
           <TouchableOpacity
@@ -73,7 +74,7 @@ export function SearchBar({
               inputRef.current?.blur();
             }}
             accessibilityRole="button"
-            accessibilityLabel="Clear search"
+            accessibilityLabel={STRINGS.map.search.clearLabel}
             style={styles.clearButton}
           >
             <AppText style={styles.clearIcon}>✕</AppText>
@@ -98,14 +99,20 @@ export function SearchBar({
             renderItem={({ item }) => {
               const distanceStr =
                 item.distance !== undefined
-                  ? `${(item.distance / 1000).toFixed(1)} km away`
+                  ? STRINGS.map.search.distanceAway(
+                      (item.distance / 1000).toFixed(1),
+                    )
                   : "";
               const featuresStr =
                 item.accessibilityCategories &&
                 item.accessibilityCategories.length > 0
                   ? item.accessibilityCategories.join(", ")
                   : "";
-              const a11yLabel = `${item.name}${distanceStr ? `, ${distanceStr}` : ""}${featuresStr ? `, features: ${featuresStr}` : ""}`;
+              const a11yLabel = STRINGS.map.searchResultLabel(
+                item.name,
+                distanceStr || null,
+                featuresStr || null,
+              );
 
               return (
                 <TouchableOpacity
@@ -133,7 +140,9 @@ export function SearchBar({
                           { color: appTheme.colors.textMuted },
                         ]}
                       >
-                        {(item.distance / 1000).toFixed(1)} km
+                        {STRINGS.map.search.distanceShort(
+                          (item.distance / 1000).toFixed(1),
+                        )}
                       </AppText>
                     )}
                   </View>
@@ -145,7 +154,9 @@ export function SearchBar({
                           { color: appTheme.colors.primary },
                         ]}
                       >
-                        {item.accessibilityCategories.join(" • ")}
+                        {item.accessibilityCategories.join(
+                          STRINGS.map.search.featureSeparator,
+                        )}
                       </AppText>
                     )}
                 </TouchableOpacity>

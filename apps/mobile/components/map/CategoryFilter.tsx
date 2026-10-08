@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import { AppText } from "@/components/ui/app-text";
 import { TouchTarget } from "@/components/ui/touch-target";
+import { STRINGS } from "@/constants/strings";
 import { spacing } from "@/constants/theme";
 
 export type Category = "all" | "wheelchair" | "elevator" | "bathroom" | "multi";
@@ -12,14 +13,6 @@ export const CATEGORY_COLORS = {
   elevator: "#f59e0b", // Yellow
   bathroom: "#10b981", // Green
   multi: "#8b5cf6", // Purple
-};
-
-export const CATEGORY_LABELS = {
-  all: "All places",
-  wheelchair: "Wheelchair Accessible",
-  elevator: "Elevator",
-  bathroom: "Accessible Bathroom",
-  multi: "Multiple Features",
 };
 
 const CATEGORY_EMOJIS = {
@@ -74,7 +67,7 @@ export function CategoryFilter({
               onPress={() => onToggleCategory(cat)}
               accessibilityRole="button"
               accessibilityState={{ selected: isActive }}
-              accessibilityLabel={CATEGORY_LABELS[cat]}
+              accessibilityLabel={STRINGS.map.categoryLabels[cat]}
             >
               <AppText
                 style={[
@@ -83,7 +76,8 @@ export function CategoryFilter({
                   !isActive && { color: CATEGORY_COLORS[cat] },
                 ]}
               >
-                {CATEGORY_EMOJIS[cat]} {cat === "all" ? "All places" : cat}
+                {CATEGORY_EMOJIS[cat]}{" "}
+                {cat === "all" ? STRINGS.map.categoryLabels.all : cat}
               </AppText>
             </TouchTarget>
           );
