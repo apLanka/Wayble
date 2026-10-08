@@ -153,6 +153,7 @@ export default function PlaceReportsScreen() {
             <TouchTarget
               accessibilityRole="button"
               accessibilityLabel={STRINGS.report.account.signInLabel}
+              accessibilityHint={STRINGS.report.account.verifySignInHint}
               onPress={() => router.replace("/sign-in")}
               style={[
                 styles.primaryButton,

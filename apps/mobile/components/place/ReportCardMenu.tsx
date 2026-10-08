@@ -93,6 +93,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
       <TouchTarget
         accessibilityRole="button"
         accessibilityLabel={STRINGS.place.reportMenu.options}
+        accessibilityHint={STRINGS.place.reportMenu.optionsHint}
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={openPicker}
@@ -114,6 +115,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
             style={styles.backdrop}
             accessibilityRole="button"
             accessibilityLabel={STRINGS.place.reportMenu.closeMenu}
+            accessibilityHint={STRINGS.place.reportMenu.closeMenuHint}
             onPress={() => setPickerVisible(false)}
           />
           <View
@@ -130,6 +132,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
                 key={reason}
                 accessibilityRole="button"
                 accessibilityLabel={STRINGS.place.reportMenu.reasonLabel(label)}
+                accessibilityHint={STRINGS.place.reportMenu.reasonHint}
                 onPress={() => pickReason(reason)}
                 style={styles.reasonRow}
               >
@@ -156,6 +159,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
             style={styles.backdrop}
             accessibilityRole="button"
             accessibilityLabel={STRINGS.place.reportMenu.cancelFlagging}
+            accessibilityHint={STRINGS.place.reportMenu.cancelHint}
             onPress={cancelConfirm}
           />
           <View
@@ -180,6 +184,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
               <TouchTarget
                 accessibilityRole="button"
                 accessibilityLabel={STRINGS.place.reportMenu.cancel}
+                accessibilityHint={STRINGS.place.reportMenu.cancelHint}
                 disabled={isSubmitting}
                 onPress={cancelConfirm}
                 style={[
@@ -198,6 +203,7 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
               <TouchTarget
                 accessibilityRole="button"
                 accessibilityLabel={STRINGS.place.reportMenu.confirmFlagging}
+                accessibilityHint={STRINGS.place.reportMenu.confirmFlaggingHint}
                 accessibilityState={{ disabled: isSubmitting }}
                 disabled={isSubmitting}
                 focusColor={colors.onPrimary}
@@ -224,11 +230,13 @@ export function ReportCardMenu({ reportId, disabled }: Props) {
 }
 
 const styles = StyleSheet.create({
+  // Minimums, not fixed sizes (WCAG 1.4.4): the glyph scales with the
+  // user's text size, and a fixed 44 × 44 box would clip it at 200 %.
   kebab: {
     alignItems: "center",
     justifyContent: "center",
-    width: 44,
-    height: 44,
+    minWidth: 44,
+    minHeight: 44,
   },
   kebabText: {
     fontSize: 28,
@@ -251,9 +259,13 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   actions: { flexDirection: "row", gap: spacing.md, marginTop: spacing.sm },
+  // `minHeight`, not `height`: a fixed 44 clips the label once text is
+  // enlarged (WCAG 1.4.4); the padding keeps wrapped labels off the edges.
   button: {
     flex: 1,
-    height: 44,
+    minHeight: 44,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
     borderRadius: radii.md,
     alignItems: "center",
     justifyContent: "center",

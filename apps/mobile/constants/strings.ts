@@ -756,6 +756,8 @@ export const STRINGS = {
       disputed: "Disputed",
       confirmLabel: "Confirm this report",
       disputeLabel: "Dispute this report",
+      // Votes are upserted (`verifyReport`), so a vote can be changed.
+      voteHint: "Records your vote. You can change it later.",
       /** The separator between the two counts in a tally sentence. */
       tallySeparator: " · ",
       noVerifications: "No verifications yet",
@@ -788,10 +790,14 @@ export const STRINGS = {
     /** The per-report overflow menu that flags an inaccurate or abusive entry. */
     reportMenu: {
       options: "Report options",
+      optionsHint:
+        "Opens a menu to flag this report as inaccurate or inappropriate",
       kebab: "⋮",
       closeMenu: "Close report reason menu",
+      closeMenuHint: "Closes the menu without flagging",
       pickerTitle: "Report this report as…",
       reasonLabel: (label: string) => `Report as ${label}`,
+      reasonHint: "Asks you to confirm before the report is flagged",
       reasons: {
         inaccurate: "Inaccurate",
         spam: "Spam",
@@ -801,9 +807,11 @@ export const STRINGS = {
         other: "Other",
       },
       cancelFlagging: "Cancel flagging this report",
+      cancelHint: "Closes without flagging the report",
       confirmTitle: (reason: string) => `Flag this report as ${reason}?`,
       cancel: "Cancel",
       confirmFlagging: "Confirm flagging this report",
+      confirmFlaggingHint: "Flags this report for review",
       flag: "Flag",
       flagged: "Report flagged.",
     },
@@ -813,6 +821,7 @@ export const STRINGS = {
 
     addFirstReport: {
       label: "Add the first report",
+      hint: "Opens the accessibility report form for this place",
       button: "Be the first to report",
     },
 
@@ -879,6 +888,9 @@ export const STRINGS = {
 
     continueToLabel: (title: string): string => `Continue to ${title}`,
     backLabel: "Go back a step",
+    backHint: "Returns to the previous step. Your answers so far are kept.",
+    continueHint:
+      "Moves to the next step. You can come back to change your answers.",
     back: "Back",
     next: "Next",
     /**
@@ -893,9 +905,9 @@ export const STRINGS = {
       title: "What would you like to report?",
       body: "Pick a group. You will confirm the exact details in the next step.",
       groupLabel: "Accessibility group",
-      /** "3 attributes. Double tap to report on mobility." */
+      /** "3 attributes. Opens the mobility attributes to report on." */
       hint: (countLabel: string, category: string): string =>
-        `${countLabel}. Double tap to report on ${category.toLowerCase()}.`,
+        `${countLabel}. Opens the ${category.toLowerCase()} attributes to report on.`,
     },
 
     attributes: {
@@ -904,12 +916,16 @@ export const STRINGS = {
       valueLabel: (label: string): string => `${label} value`,
       valueAnnounce: (label: string, valueLabel: string): string =>
         `${label}: ${valueLabel}`,
-      setValueHint: "Double tap to set this value.",
-      clearValueHint: "Double tap to clear this value.",
+      // The result, not the gesture: VoiceOver and TalkBack announce how to
+      // activate on their own (WCAG audit S4-3, F6).
+      setValueHint: "Sets this value.",
+      clearValueHint: "Clears this value.",
       noteRequired: "Add a note — required for Partial",
       noteOptional: "Add a note (optional)",
       notePlaceholder: "What did you see?",
       noteLabel: (label: string): string => `Note for ${label}`,
+      noteHint: (required: boolean, max: number): string =>
+        `${required ? "Required for Partial" : "Optional"}. Up to ${max} characters.`,
 
       /**
        * The banner explaining which groups still need a note.
@@ -996,6 +1012,10 @@ export const STRINGS = {
       signedOutBody:
         "Reports are tied to your account so other people can confirm or dispute what you observed.",
       signInLabel: "Go to sign in",
+      signInHint:
+        "Opens the sign-in screen. You can report on this place once you are signed in.",
+      verifySignInHint:
+        "Opens the sign-in screen. Signing in lets you confirm or dispute reports.",
       missingPlace:
         "This report form is missing a place. Go back and try again.",
       reportingOn: (placeName: string) => `Reporting on ${placeName}`,

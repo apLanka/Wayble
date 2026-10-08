@@ -223,6 +223,10 @@ function AttributeEditor({
             maxLength={MAX_NOTE_LENGTH}
             multiline
             accessibilityLabel={STRINGS.report.attributes.noteLabel(meta.label)}
+            accessibilityHint={STRINGS.report.attributes.noteHint(
+              needsNote,
+              MAX_NOTE_LENGTH,
+            )}
             accessibilityLabelledBy={`note-label-${attributeKey}`}
             style={[
               styles.input,

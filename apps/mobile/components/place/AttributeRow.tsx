@@ -57,10 +57,9 @@ export function AttributeRow({ attributeKey, value, note }: Props) {
         </View>
 
         {/* Text label — always visible alongside icon */}
-        <AppText
-          style={[styles.label, { color: appTheme.colors.text }]}
-          numberOfLines={2}
-        >
+        {/* Label and note wrap rather than truncate (WCAG 1.4.4): at large
+            text sizes a line cap cuts the very text the user enlarged. */}
+        <AppText style={[styles.label, { color: appTheme.colors.text }]}>
           {meta.label}
         </AppText>
 
@@ -77,10 +76,7 @@ export function AttributeRow({ attributeKey, value, note }: Props) {
 
       {/* Optional note */}
       {note ? (
-        <AppText
-          style={[styles.note, { color: appTheme.colors.textMuted }]}
-          numberOfLines={3}
-        >
+        <AppText style={[styles.note, { color: appTheme.colors.textMuted }]}>
           {note}
         </AppText>
       ) : null}
@@ -97,9 +93,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.sm,
   },
+  // Minimums so the emoji, which scales with text size, is not clipped.
   iconContainer: {
-    width: 32,
-    height: 32,
+    minWidth: 32,
+    minHeight: 32,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",

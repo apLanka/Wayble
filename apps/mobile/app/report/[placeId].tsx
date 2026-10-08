@@ -283,6 +283,7 @@ export default function ReportScreen() {
             <TouchTarget
               accessibilityRole="button"
               accessibilityLabel={STRINGS.report.account.signInLabel}
+              accessibilityHint={STRINGS.report.account.signInHint}
               onPress={() => router.replace("/sign-in")}
               style={[
                 styles.primaryButton,
@@ -409,6 +410,7 @@ export default function ReportScreen() {
             <TouchTarget
               accessibilityRole="button"
               accessibilityLabel={STRINGS.report.backLabel}
+              accessibilityHint={STRINGS.report.backHint}
               disabled={isSubmitting || step === 0}
               onPress={() => goTo(step - 1)}
               style={[
@@ -429,6 +431,7 @@ export default function ReportScreen() {
                 accessibilityLabel={STRINGS.report.continueToLabel(
                   stepTitle(step + 1, STRINGS.report.nextStepFallback),
                 )}
+                accessibilityHint={STRINGS.report.continueHint}
                 accessibilityState={{ disabled: !canAdvance(safeDraft) }}
                 disabled={!canAdvance(safeDraft)}
                 onPress={() => goTo(step + 1)}

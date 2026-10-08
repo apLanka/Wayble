@@ -133,7 +133,7 @@ describe("STRINGS.report", () => {
 
   it("category.hint names the count, then what tapping does", () => {
     expect(STRINGS.report.category.hint("3 attributes", "Mobility")).toBe(
-      "3 attributes. Double tap to report on mobility.",
+      "3 attributes. Opens the mobility attributes to report on.",
     );
   });
 

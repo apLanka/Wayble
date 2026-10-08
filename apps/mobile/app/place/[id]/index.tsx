@@ -313,6 +313,7 @@ export default function PlaceDetailScreen() {
                 <TouchTarget
                   accessibilityRole="button"
                   accessibilityLabel={STRINGS.place.addFirstReport.label}
+                  accessibilityHint={STRINGS.place.addFirstReport.hint}
                   onPress={openReportForm}
                   style={[
                     styles.addReportButton,

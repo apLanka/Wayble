@@ -69,6 +69,7 @@ export function VerifyControl({
               // The label names the outcome, not the control, so a screen
               // reader user hears what tapping will do.
               accessibilityLabel={action}
+              accessibilityHint={STRINGS.place.verification.voteHint}
               accessibilityState={{ selected, disabled }}
               disabled={disabled}
               // The two states sit on different backgrounds and need different
