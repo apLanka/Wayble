@@ -6,6 +6,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import Mapbox from "@rnmapbox/maps";
 import { LocationPermissionBanner } from "@/components/map/LocationPermissionBanner";
 import { LocateButton } from "@/components/map/LocateButton";
+import { AddPlaceButton } from "@/components/map/AddPlaceButton";
 import { DetailSheet } from "@/components/map/DetailSheet";
 import { CategoryFilter } from "@/components/map/CategoryFilter";
 import type { Category } from "@/components/map/CategoryFilter";
@@ -17,6 +18,7 @@ import { AppText } from "@/components/ui/app-text";
 import { useNearbyPlaces, NearbyPlace } from "@/hooks/use-nearby-places";
 import { useScreenReader } from "@/hooks/use-screen-reader";
 import { useAppTheme } from "@/hooks/use-app-theme";
+import { DEFAULT_MAP_CENTER } from "@/constants/default-location";
 import { STRINGS } from "@/constants/strings";
 import { spacing } from "@/constants/theme";
 
@@ -328,6 +330,10 @@ export default function MapboxTab() {
               )}
             />
           )}
+          <AddPlaceButton
+            onPress={() => router.push("/add-place")}
+            bottomOffset={100}
+          />
         </View>
       ) : (
         <View style={styles.mapContainer}>
@@ -346,7 +352,7 @@ export default function MapboxTab() {
               centerCoordinate={
                 location
                   ? [location.coords.longitude, location.coords.latitude]
-                  : undefined
+                  : DEFAULT_MAP_CENTER
               }
               animationMode="flyTo"
               animationDuration={1000}
@@ -496,6 +502,10 @@ export default function MapboxTab() {
             )}
           </Mapbox.MapView>
 
+          <AddPlaceButton
+            onPress={() => router.push("/add-place")}
+            bottomOffset={170}
+          />
           <LocateButton onPress={handleLocateMe} bottomOffset={100} />
         </View>
       )}

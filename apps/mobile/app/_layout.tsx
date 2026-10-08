@@ -59,6 +59,13 @@ export default function RootLayout() {
               options={{ title: STRINGS.navigation.titles.placeDetails }}
             />
             <Stack.Screen
+              name="add-place"
+              options={{
+                title: STRINGS.navigation.titles.addPlace,
+                headerBackTitle: STRINGS.navigation.back,
+              }}
+            />
+            <Stack.Screen
               name="report/[placeId]"
               options={{ title: STRINGS.navigation.titles.reportAccessibility }}
             />
