@@ -1,0 +1,86 @@
+S3-7 and S3-8 are clear from your docs. I couldn't find a "S3-7B" anywhere in the repo, so I've assumed you mean the full moderation work I built as S4-7b. Tell me if S3-7B is something else.
+
+S3-7 — Live activity feed (US-23)
+One-line pitch: a screen that shows other people's recent verifications near you, updating live with no refresh, and announced to screen-reader users.
+
+Flow, end to end
+
+User A confirms or disputes a report. The existing verifications.verifyReport mutation writes a row to verifications.
+Convex re-runs every query that read that row. Anyone subscribed to the feed gets a new result automatically.
+The Activity screen (/feed, opened from the Home quick action) is subscribed with useQuery, so the new card appears in about a second.
+A screen reader announces it with AccessibilityInfo.announceForAccessibility.
+Architecture, file by file
+
+Layer	File	Job
+Backend	verificationFeed.ts → recentVerifications	Reads votes for a set of places, sorts newest first, adds the place's confidence
+Hook	use-verification-feed.ts	Gets the user's location, then nearby place ids, then the feed
+Pure logic	feed-announcements.ts	Decides what is "new" and what to say
+UI	FeedScreen.tsx, FeedItemRow.tsx	Shows the verifier, verdict and attribute, time, place and confidence badge
+Design decisions you must be able to defend
+
+Scoped to the map region. There's no time index on verifications, so I scan by scope: place → its active reports → each report's votes. With no place ids it returns [], never a table scan.
+New file, not verifications.ts. You said not to modify existing files, so I used verificationFeed.ts, the same way S4-7 used moderation.ts.
+Live updates cost no code. Convex queries are reactive, so there's no polling or WebSocket code of my own.
+No spam when opening the screen. The first result only seeds a "seen" set. Only later arrivals are announced.
+Changed votes count as new. The key is id:updatedAt, so editing a vote re-announces it.
+Your own votes are skipped and several arrivals collapse into one message.
+Confidence matches the place page. The feed uses the same computeConfidence as getPlace.
+Privacy: emails are never returned.
+Bounded cost: a limit of at most 50 items and at most 100 places.
+Likely viva questions
+
+How does it update without refresh? Convex reactivity. The query tracks the documents it read and re-runs when they change.
+How do you stop it announcing every card on open? The seeded "seen" set.
+Why the confidence badge? The ticket asked for it, and it shows how trustworthy the place's data is.
+What does it not do? No pagination or push notifications, only a capped feed.
+How did you test it? 6 backend tests (scope, order, limit, removed reports, confidence, privacy) and 7 unit tests for the announcement logic. The two-device demo is the manual test.
+Demo script: feed open on one device, vote from the other, and the card appears. Single-device alternative: npx convex run reports:debugAddVerification.
+
+S3-7B (assumed: S4-7b) — Full moderation (US-14)
+One-line pitch: moderators can now Remove a report, add notes, and review a history of decisions. S4-7 only let them Dismiss.
+
+Flow
+
+A user flags a report, writing a flags row with status open.
+The moderator opens Profile → Moderation queue. The report appears under Open.
+Dismiss closes the flags as unfounded and keeps the report. Remove sets the report to removed, so it disappears from the place, and resolves the flags.
+Either action opens a dialog with an optional note.
+The History tab shows each decision, who made it, and the note.
+Design decisions
+
+One new schema field only: flags.resolutionNote. It's optional, so there's no migration.
+Remove reuses what exists. reports.status already supports removed, and listForPlace and the place count already ignore non-active reports.
+Removal needs an open flag, the same rule as Dismiss, so it's a moderation decision and not a free delete.
+History is derived. A resolved flag means removed and a dismissed flag means dismissed, so no extra field is needed. One decision is one group, since all flags closed together share resolvedAt.
+Security: every function calls requireModerator, which checks the role on the server. Hiding a button in the UI isn't the protection.
+Likely questions
+
+How do you stop members removing reports? Server-side requireModerator, tested for unauthenticated and member callers.
+What if two moderators act at once? Mutations are transactions. The second one fails with "No open flags" or "already removed".
+How is it tested? 9 backend tests plus a Flow 5 e2e test: flag → remove → gone from the place → recorded in history.
+S3-8 — Sprint 3 regression testing and CI green
+One-line pitch: prove that everything built in Sprint 3 still works together, and make CI enforce it on every pull request.
+
+What the plan does
+
+Type check and lint: bun run check-types and bun run lint across the workspace.
+Backend suite: the full convex-test suite via npx vitest run.
+CI: a new test job runs the backend and script tests, since failing tests could previously still merge.
+Manual E2E: sign up → report → verify → confidence updates → feed updates live.
+Auth gates: submit, verify and flag must reject signed-out callers.
+Board hygiene: close the Sprint 3 list and move carry-overs to Sprint 4.
+Where the project stands now (verified in this session)
+
+Backend suite: 222 tests in 27 files pass. The plan's earlier figure was 124 in 16 files.
+Mobile unit tests: 93 pass, and check-types and lint pass.
+The e2e suite from the S4-8 work covers auth, discovery, contribution, verification and moderation.
+Viva points
+
+Why a CI test job? Tests existed but nothing ran them on a pull request.
+What did regression testing find? Your doc lists the gaps found: a guest fallback on verify, and flag and report-photo work that was missing from that branch. Check these are still current before the viva, because the project has moved on.
+The helpers.ts problem: a test helper inside convex/ used import.meta.glob, so Convex rejected every deploy. Moving it to test-utils/ fixed it. Regression testing caught it as a deploy blocker, not a logic bug.
+To prepare
+
+Know the data path: reports → verifications → feed, and reports → flags → moderation.
+Rehearse the live feed demo twice, with the debug command as a backup.
+Be honest about limits: the feed isn't paginated, and the two-device test was done with a debug mutation.
